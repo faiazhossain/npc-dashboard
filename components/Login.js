@@ -3,11 +3,20 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useState } from 'react';
-export default function Login() {
+
+export default function Login({ onLoginSuccess }) {
   const [showPassword, setShowPassword] = useState(false);
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Simulate login process
+    if (onLoginSuccess) {
+      onLoginSuccess();
+    }
   };
   return (
     <div className='min-h-screen flex lg:flex-row'>
@@ -127,6 +136,7 @@ export default function Login() {
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.8, ease: 'easeOut' }}
+              onSubmit={handleSubmit}
             >
               {/* Email Field */}
               <motion.div
