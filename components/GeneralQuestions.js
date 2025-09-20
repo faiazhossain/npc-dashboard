@@ -1,14 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Legend,
-  Tooltip,
-} from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import Image from 'next/image';
 
 export default function GeneralQuestions() {
@@ -85,43 +78,48 @@ export default function GeneralQuestions() {
   }
 
   const COLORS = [
-    '#006747',
-    '#00A86B',
-    '#2ECC71',
-    '#58D68D',
-    '#82E0AA',
-    '#A9DFBF',
-    '#D5F3E3',
+    '#06C584',
+    '#8C5CF0',
+    '#EC489B',
+    '#0EA7EC',
+    '#F39E0B',
+    '#f5ffc6',
+    '#003b36',
+    '#59114d',
   ];
 
   const electionData = data.electionExpectation.responses.map((item) => ({
-    name: item.option,
+    name: item.option, // Keep Bengali label as is
     value: parseFloat(
       convertBengaliToEnglish(item.percentage.replace('%', ''))
     ),
+    displayValue: item.percentage, // Keep original Bengali percentage for display
   }));
 
   const partyPreferenceData = data.partyPreference.responses.map((item) => ({
-    name: item.party,
+    name: item.party, // Keep Bengali label as is
     value: parseFloat(
       convertBengaliToEnglish(item.percentage.replace('%', ''))
     ),
+    displayValue: item.percentage, // Keep original Bengali percentage for display
   }));
 
   const partyResponsibilityData = data.partyResponsibility.responses.map(
     (item) => ({
-      name: item.party,
+      name: item.party, // Keep Bengali label as is
       value: parseFloat(
         convertBengaliToEnglish(item.percentage.replace('%', ''))
       ),
+      displayValue: item.percentage, // Keep original Bengali percentage for display
     })
   );
 
   const necessaryChangesData = data.necessaryChanges.responses.map((item) => ({
-    name: item.change,
+    name: item.change, // Keep Bengali label as is
     value: parseFloat(
       convertBengaliToEnglish(item.percentage.replace('%', ''))
     ),
+    displayValue: item.percentage, // Keep original Bengali percentage for display
   }));
 
   return (
@@ -232,10 +230,6 @@ export default function GeneralQuestions() {
                 delay: 0.2 + index * 0.08,
                 ease: 'easeOut',
               }}
-              whileHover={{
-                scale: 1.03,
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-              }}
             >
               <Image
                 src={`/images/gender/${icons[key]}`}
@@ -261,164 +255,251 @@ export default function GeneralQuestions() {
         })}
       </motion.div>
 
-      {/* Section 3: Election Expectation */}
+      {/* Sections 3-6: Charts in 2x2 Grid */}
       <motion.div
-        className='bg-white p-6 rounded-xl shadow-sm border border-gray-100'
+        className='grid grid-cols-1 lg:grid-cols-2 gap-6'
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.4, ease: 'easeOut' }}
       >
-        <h2
-          className='text-lg font-medium text-gray-900 mb-6'
-          style={{ fontFamily: 'Tiro Bangla, serif' }}
+        {/* Section 3: Election Expectation */}
+        <motion.div
+          className='bg-white p-6 rounded-xl shadow-sm border border-gray-100'
+          whileHover={{
+            scale: 1.01,
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+          }}
         >
-          {data.electionExpectation.question}
-        </h2>
-        <div className='h-80'>
-          <ResponsiveContainer width='100%' height='100%'>
-            <PieChart>
-              <Pie
-                data={electionData}
-                cx='50%'
-                cy='50%'
-                labelLine={false}
-                label={({ name, percent }) => `${name} ${percent.toFixed(1)}%`}
-                outerRadius={80}
-                fill='#8884d8'
-                dataKey='value'
-              >
-                {electionData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      </motion.div>
+          <h2
+            className='text-xl font-medium text-gray-900 mb-6'
+            style={{ fontFamily: 'Tiro Bangla, serif' }}
+          >
+            {data.electionExpectation.question}
+          </h2>
+          <div className='h-80 flex'>
+            {/* Custom Legend */}
+            <div className='w-1/2 flex flex-col justify-center space-y-3 pr-4'>
+              {electionData.map((entry, index) => (
+                <div key={entry.name} className='flex items-center'>
+                  <div
+                    className='w-4 h-4 rounded mr-2'
+                    style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                  ></div>
+                  <span
+                    className='text-sm font-medium'
+                    style={{ fontFamily: 'Tiro Bangla, serif' }}
+                  >
+                    {entry.name}: {entry.displayValue}
+                  </span>
+                </div>
+              ))}
+            </div>
+            {/* Pie Chart */}
+            <div className='w-2/3'>
+              <ResponsiveContainer width='100%' height='100%'>
+                <PieChart>
+                  <Pie
+                    data={electionData}
+                    cx='50%'
+                    cy='50%'
+                    innerRadius={55}
+                    outerRadius={100}
+                    fill='#8884d8'
+                    paddingAngle={1}
+                    dataKey='value'
+                  >
+                    {electionData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => [`${value.toFixed(1)}%`]} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </motion.div>
 
-      {/* Section 4: Party Preference */}
-      <motion.div
-        className='bg-white p-6 rounded-xl shadow-sm border border-gray-100'
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.5, ease: 'easeOut' }}
-      >
-        <h2
-          className='text-lg font-medium text-gray-900 mb-6'
-          style={{ fontFamily: 'Tiro Bangla, serif' }}
+        {/* Section 4: Party Preference */}
+        <motion.div
+          className='bg-white p-6 rounded-xl shadow-sm border border-gray-100'
+          whileHover={{
+            scale: 1.01,
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+          }}
         >
-          {data.partyPreference.question}
-        </h2>
-        <div className='h-80'>
-          <ResponsiveContainer width='100%' height='100%'>
-            <PieChart>
-              <Pie
-                data={partyPreferenceData}
-                cx='50%'
-                cy='50%'
-                labelLine={false}
-                label={({ name, percent }) => `${name} ${percent.toFixed(1)}%`}
-                outerRadius={80}
-                fill='#8884d8'
-                dataKey='value'
-              >
-                {partyPreferenceData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      </motion.div>
+          <h2
+            className='text-xl font-medium text-gray-900 mb-6'
+            style={{ fontFamily: 'Tiro Bangla, serif' }}
+          >
+            {data.partyPreference.question}
+          </h2>
+          <div className='h-80 flex'>
+            {/* Custom Legend */}
+            <div className='w-1/2 flex flex-col justify-center space-y-2 pr-4'>
+              {partyPreferenceData.map((entry, index) => (
+                <div key={entry.name} className='flex items-center'>
+                  <div
+                    className='w-4 h-4 rounded mr-2'
+                    style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                  ></div>
+                  <span
+                    className='text-sm font-medium'
+                    style={{ fontFamily: 'Tiro Bangla, serif' }}
+                  >
+                    {entry.name}: {entry.displayValue}
+                  </span>
+                </div>
+              ))}
+            </div>
+            {/* Pie Chart */}
+            <div className='w-2/3'>
+              <ResponsiveContainer width='100%' height='100%'>
+                <PieChart>
+                  <Pie
+                    data={partyPreferenceData}
+                    cx='50%'
+                    cy='50%'
+                    outerRadius={100}
+                    fill='#8884d8'
+                    label={partyPreferenceData}
+                    dataKey='value'
+                  >
+                    {partyPreferenceData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => [`${value.toFixed(1)}%`]} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </motion.div>
 
-      {/* Section 5: Party Responsibility */}
-      <motion.div
-        className='bg-white p-6 rounded-xl shadow-sm border border-gray-100'
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.6, ease: 'easeOut' }}
-      >
-        <h2
-          className='text-lg font-medium text-gray-900 mb-6'
-          style={{ fontFamily: 'Tiro Bangla, serif' }}
+        {/* Section 5: Party Responsibility */}
+        <motion.div
+          className='bg-white p-6 rounded-xl shadow-sm border border-gray-100'
+          whileHover={{
+            scale: 1.01,
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+          }}
         >
-          {data.partyResponsibility.question}
-        </h2>
-        <div className='h-80'>
-          <ResponsiveContainer width='100%' height='100%'>
-            <PieChart>
-              <Pie
-                data={partyResponsibilityData}
-                cx='50%'
-                cy='50%'
-                labelLine={false}
-                label={({ name, percent }) => `${name} ${percent.toFixed(1)}%`}
-                outerRadius={80}
-                fill='#8884d8'
-                dataKey='value'
-              >
-                {partyResponsibilityData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      </motion.div>
+          <h2
+            className='text-xl font-medium text-gray-900 mb-6'
+            style={{ fontFamily: 'Tiro Bangla, serif' }}
+          >
+            {data.partyResponsibility.question}
+          </h2>
+          <div className='h-80 flex'>
+            {/* Custom Legend */}
+            <div className='w-1/2 flex flex-col justify-center space-y-2 pr-4'>
+              {partyResponsibilityData.map((entry, index) => (
+                <div key={entry.name} className='flex items-center'>
+                  <div
+                    className='w-4 h-4 rounded mr-2'
+                    style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                  ></div>
+                  <span
+                    className='text-sm font-medium'
+                    style={{ fontFamily: 'Tiro Bangla, serif' }}
+                  >
+                    {entry.name}: {entry.displayValue}
+                  </span>
+                </div>
+              ))}
+            </div>
+            {/* Pie Chart */}
+            <div className='w-2/3'>
+              <ResponsiveContainer width='100%' height='100%'>
+                <PieChart>
+                  <Pie
+                    data={partyResponsibilityData}
+                    cx='50%'
+                    cy='50%'
+                    innerRadius={55}
+                    outerRadius={100}
+                    fill='#8884d8'
+                    paddingAngle={1}
+                    dataKey='value'
+                  >
+                    {partyResponsibilityData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => [`${value.toFixed(1)}%`]} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </motion.div>
 
-      {/* Section 6: Necessary Changes */}
-      <motion.div
-        className='bg-white p-6 rounded-xl shadow-sm border border-gray-100'
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.7, ease: 'easeOut' }}
-      >
-        <h2
-          className='text-lg font-medium text-gray-900 mb-6'
-          style={{ fontFamily: 'Tiro Bangla, serif' }}
+        {/* Section 6: Necessary Changes */}
+        <motion.div
+          className='bg-white p-6 rounded-xl shadow-sm border border-gray-100'
+          whileHover={{
+            scale: 1.01,
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+          }}
         >
-          {data.necessaryChanges.question}
-        </h2>
-        <div className='h-80'>
-          <ResponsiveContainer width='100%' height='100%'>
-            <PieChart>
-              <Pie
-                data={necessaryChangesData}
-                cx='50%'
-                cy='50%'
-                labelLine={false}
-                label={({ name, percent }) => `${name} ${percent.toFixed(1)}%`}
-                outerRadius={80}
-                fill='#8884d8'
-                dataKey='value'
-              >
-                {necessaryChangesData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
+          <h2
+            className='text-xl font-medium text-gray-900 mb-6'
+            style={{ fontFamily: 'Tiro Bangla, serif' }}
+          >
+            {data.necessaryChanges.question}
+          </h2>
+          <div className='h-80 flex'>
+            {/* Custom Legend */}
+            <div className='w-1/2 flex flex-col justify-center space-y-2 pr-4'>
+              {necessaryChangesData.map((entry, index) => (
+                <div key={entry.name} className='flex items-center'>
+                  <div
+                    className='w-4 h-4 rounded mr-2'
+                    style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                  ></div>
+                  <span
+                    className='text-sm font-medium'
+                    style={{ fontFamily: 'Tiro Bangla, serif' }}
+                  >
+                    {entry.name}: {entry.displayValue}
+                  </span>
+                </div>
+              ))}
+            </div>
+            {/* Pie Chart */}
+            <div className='w-2/3'>
+              <ResponsiveContainer width='100%' height='100%'>
+                <PieChart>
+                  <Pie
+                    data={necessaryChangesData}
+                    cx='50%'
+                    cy='50%'
+                    innerRadius={55}
+                    outerRadius={100}
+                    fill='#8884d8'
+                    paddingAngle={1}
+                    dataKey='value'
+                  >
+                    {necessaryChangesData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => [`${value.toFixed(1)}%`]} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </motion.div>
       </motion.div>
     </div>
   );

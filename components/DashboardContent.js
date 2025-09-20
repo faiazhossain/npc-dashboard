@@ -16,30 +16,9 @@ export default function DashboardContent() {
 
   return (
     <div className='p-4 lg:p-8 min-h-screen'>
-      {/* Header */}
-      <motion.div
-        className='mb-8'
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
-      >
-        <h1
-          className='text-2xl lg:text-3xl font-normal text-gray-900 mb-2'
-          style={{ fontFamily: 'Tiro Bangla, serif' }}
-        >
-          ড্যাশবোর্ড
-        </h1>
-        <p
-          className='text-gray-600'
-          style={{ fontFamily: 'Tiro Bangla, serif' }}
-        >
-          আপনার এনপিএস কার্যক্রমের সংক্ষিপ্ত বিবরণ
-        </p>
-      </motion.div>
-
       {/* Tabs */}
       <motion.div
-        className='mb-8'
+        className='mb-2'
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
@@ -51,11 +30,11 @@ export default function DashboardContent() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`
-                  py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200
+                  py-2 px-2 border-b-2 font-medium text-sm transition-colors duration-200
                   ${
                     activeTab === tab.id
-                      ? 'border-[#006747] text-[#006747]'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? 'bg-[#006747] text-white border-[#006747] rounded-t-2xl'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 rounded-t-2xl hover:border-gray-300'
                   }
                 `}
                 style={{ fontFamily: 'Tiro Bangla, serif' }}
