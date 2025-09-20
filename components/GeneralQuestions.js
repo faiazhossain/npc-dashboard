@@ -25,6 +25,24 @@ export default function GeneralQuestions() {
     age: '',
   });
 
+  // Function to convert Bengali numerals to English numerals
+  const convertBengaliToEnglish = (bengaliNumber) => {
+    const bengaliDigits = {
+      '০': '0',
+      '১': '1',
+      '২': '2',
+      '৩': '3',
+      '৪': '4',
+      '৫': '5',
+      '৬': '6',
+      '৭': '7',
+      '৮': '8',
+      '৯': '9',
+    };
+
+    return bengaliNumber.replace(/[০-৯]/g, (match) => bengaliDigits[match]);
+  };
+
   useEffect(() => {
     // Load data from JSON file
     fetch('/json/general-questions.json')
@@ -78,24 +96,32 @@ export default function GeneralQuestions() {
 
   const electionData = data.electionExpectation.responses.map((item) => ({
     name: item.option,
-    value: parseFloat(item.percentage.replace('%', '')),
+    value: parseFloat(
+      convertBengaliToEnglish(item.percentage.replace('%', ''))
+    ),
   }));
 
   const partyPreferenceData = data.partyPreference.responses.map((item) => ({
     name: item.party,
-    value: parseFloat(item.percentage.replace('%', '')),
+    value: parseFloat(
+      convertBengaliToEnglish(item.percentage.replace('%', ''))
+    ),
   }));
 
   const partyResponsibilityData = data.partyResponsibility.responses.map(
     (item) => ({
       name: item.party,
-      value: parseFloat(item.percentage.replace('%', '')),
+      value: parseFloat(
+        convertBengaliToEnglish(item.percentage.replace('%', ''))
+      ),
     })
   );
 
   const necessaryChangesData = data.necessaryChanges.responses.map((item) => ({
     name: item.change,
-    value: parseFloat(item.percentage.replace('%', '')),
+    value: parseFloat(
+      convertBengaliToEnglish(item.percentage.replace('%', ''))
+    ),
   }));
 
   return (
