@@ -1,0 +1,128 @@
+{
+  "filters": {
+    "division": "বিভাগ",
+    "district": "জেলা",
+    "constituency": "আসন"
+  },
+  "candidateCards": [
+    {
+      "id": "bnp-candidates",
+      "title": "বিএনপি প্রার্থী",
+      "candidates": ["রফিকুল ইসলাম জামাল", "গোলাম আজম সৈকত"]
+    },
+    {
+      "id": "ncp-candidates",
+      "title": "এন সি পি প্রার্থী",
+      "candidates": ["সদ্দা ইসলাম জামাল", "আদফগা আজম সৈকত"]
+    },
+    {
+      "id": "awami-candidates",
+      "title": "আওয়ামী লীগ প্রার্থী",
+      "candidates": ["আব্দুল হামিদ", "নূরুল ইসলাম"]
+    },
+    {
+      "id": "jamaat-candidates",
+      "title": "জামায়াতে ইসলামী প্রার্থী",
+      "candidates": ["মোহাম্মদ ইব্রাহিম", "আব্দুল কাদের"]
+    }
+  ],
+  "charts": [
+    {
+      "id": "bnp-candidate-preference",
+      "question": "বিএনপি প্রার্থী",
+      "chartType": "pie",
+      "hasInnerRadius": true,
+      "responses": [
+        { "label": "রফিকুল ইসলাম জামাল", "percentage": "৩৭.২%" },
+        { "label": "গোলাম আজম সৈকত", "percentage": "৬২.৮%" }
+      ]
+    },
+    {
+      "id": "ncp-candidate-preference",
+      "question": "এন সি পি প্রার্থী",
+      "chartType": "pie",
+      "hasInnerRadius": true,
+      "responses": [
+        { "label": "সদ্দা ইসলাম জামাল", "percentage": "৪৫.৩%" },
+        { "label": "আদফগা আজম সৈকত", "percentage": "৫৪.৭%" }
+      ]
+    },
+    {
+      "id": "awami-candidate-preference",
+      "question": "আওয়ামী লীগ প্রার্থী",
+      "chartType": "pie",
+      "hasInnerRadius": true,
+      "responses": [
+        { "label": "আব্দুল হামিদ", "percentage": "৪২.১%" },
+        { "label": "নূরুল ইসলাম", "percentage": "৫৭.৯%" }
+      ]
+    },
+    {
+      "id": "jamaat-candidate-preference",
+      "question": "জামায়াতে ইসলামী প্রার্থী",
+      "chartType": "pie",
+      "hasInnerRadius": false,
+      "responses": [
+        { "label": "মোহাম্মদ ইব্রাহিম", "percentage": "৫৮.৪%" },
+        { "label": "আব্দুল কাদের", "percentage": "৪১.৬%" }
+      ]
+    },
+    {
+      "id": "most-qualified-candidate",
+      "question": "এদের মধ্যে কাকে বেশি যোগ্য মনে হয়?",
+      "chartType": "pie",
+      "hasInnerRadius": false,
+      "responses": [
+        { "label": "রফিকুল ইসলাম জামাল", "percentage": "৩৭.২%" },
+        { "label": "গোলাম আজম সৈকত", "percentage": "৬২.৮%" }
+      ]
+    },
+    {
+      "id": "candidate-qualifications",
+      "question": "প্রার্থীর যোগ্যতার মাপকাঠি কি কি?",
+      "chartType": "pie",
+      "hasInnerRadius": true,
+      "responses": [
+        { "label": "আদর্শবান", "percentage": "৬৩.৬৮%" },
+        { "label": "আন্তরিক", "percentage": "৩১.২৫%" },
+        { "label": "উচ্চশিক্ষিত", "percentage": "৫৬.৯৯%" },
+        { "label": "জনপ্রিয়", "percentage": "৫১.১৪%" },
+        { "label": "দূরদর্শিতা", "percentage": "৪৩.৬১%" },
+        { "label": "দেশপ্রেমিক", "percentage": "৬৩.৫৫%" },
+        { "label": "ধর্ম পরায়ণ", "percentage": "৩৫.২৭%" },
+        { "label": "প্রভাবশালী", "percentage": "৪১.৫২%" },
+        { "label": "রুচিশীল", "percentage": "৬১.৫২%" },
+        { "label": "সত্যবাদী", "percentage": "৩৫.২৭%" },
+        { "label": "মানবিক", "percentage": "৩১.৫২%" },
+        { "label": "সততা", "percentage": "৬১.৫২%" }
+      ]
+    },
+    {
+      "id": "beneficial-party",
+      "question": "কোন দল আগামী সংসদ নির্বাচনে নির্বাচিত হলে এলাকা লাভবান হবে বলে মনে করেন?",
+      "chartType": "pie",
+      "hasInnerRadius": false,
+      "responses": [
+        { "label": "আওয়ামীলীগ", "percentage": "৮.৩১%" },
+        { "label": "বিএনপি", "percentage": "৪৮.৩১%" },
+        { "label": "জাতীয় পার্টি", "percentage": "৮.৩১%" },
+        { "label": "জামায়াতে ইসলামী", "percentage": "১৮.৩১%" }
+      ]
+    },
+    {
+      "id": "local-crisis",
+      "question": "আপনার এলাকার সবচেয়ে বড় সংকট কোনগুলো?",
+      "chartType": "pie",
+      "hasInnerRadius": true,
+      "responses": [
+        { "label": "নিরাপত্তা", "percentage": "২৮.৩১%" },
+        { "label": "পরিবেশ দূষণ", "percentage": "১৮.৩১%" },
+        { "label": "বেকারত্ব", "percentage": "২৮.৩১%" },
+        { "label": "যোগাযোগ", "percentage": "৮.৩১%" },
+        { "label": "শিক্ষা ব্যাবস্থা", "percentage": "৮.৩১%" },
+        { "label": "স্বাস্থ্যসেবা", "percentage": "২০.৩১%" },
+        { "label": "বিনোদন", "percentage": "৮.৩১%" }
+      ]
+    }
+  ]
+}

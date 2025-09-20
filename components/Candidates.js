@@ -1,275 +1,315 @@
 'use client';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MdPerson, MdLocationOn, MdGroup } from 'react-icons/md';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 export default function Candidates() {
-  const candidates = [
-    {
-      id: 1,
-      name: 'আবদুল করিম',
-      party: 'আওয়ামী লীগ',
-      constituency: 'কুমিল্লা-২',
-      votes: '৪৫,২৩৫',
-      percentage: '৪২.৫%',
-      status: 'নির্বাচিত',
-    },
-    {
-      id: 2,
-      name: 'মোহাম্মদ রহিম',
-      party: 'বিএনপি',
-      constituency: 'কুমিল্লা-২',
-      votes: '৩৮,৭৬৫',
-      percentage: '৩৬.৪%',
-      status: 'পরাজিত',
-    },
-    {
-      id: 3,
-      name: 'ফাতেমা খাতুন',
-      party: 'জাতীয় পার্টি',
-      constituency: 'কুমিল্লা-২',
-      votes: '১৫,৪৩২',
-      percentage: '১৪.৫%',
-      status: 'পরাজিত',
-    },
-    {
-      id: 4,
-      name: 'আহমদ আলী',
-      party: 'জামায়াতে ইসলামী',
-      constituency: 'কুমিল্লা-২',
-      votes: '৭,২১৮',
-      percentage: '৬.৮%',
-      status: 'পরাজিত',
-    },
-  ];
+  const [data, setData] = useState(null);
+  const [filters, setFilters] = useState({
+    division: '',
+    district: '',
+    constituency: '',
+  });
 
-  const stats = [
-    {
-      title: 'মোট প্রার্থী',
-      value: '১২',
-      icon: MdPerson,
-      color: 'bg-blue-50 text-blue-600',
-    },
-    {
-      title: 'নির্বাচিত প্রার্থী',
-      value: '১',
-      icon: MdGroup,
-      color: 'bg-green-50 text-green-600',
-    },
-    {
-      title: 'মোট ভোট',
-      value: '১,০৬,৬৫০',
-      icon: MdLocationOn,
-      color: 'bg-purple-50 text-purple-600',
-    },
-  ];
+  // Function to convert Bengali numerals to English numerals
+  const convertBengaliToEnglish = (bengaliNumber) => {
+    const bengaliDigits = {
+      '০': '0',
+      '১': '1',
+      '২': '2',
+      '৩': '3',
+      '৪': '4',
+      '৫': '5',
+      '৬': '6',
+      '৭': '7',
+      '৮': '8',
+      '৯': '9',
+    };
 
-  const getStatusColor = (status) => {
-    return status === 'নির্বাচিত'
-      ? 'bg-green-100 text-green-800'
-      : 'bg-red-100 text-red-800';
+    return bengaliNumber.replace(/[০-৯]/g, (match) => bengaliDigits[match]);
   };
+
+  useEffect(() => {
+    // Load data from JSON file
+    fetch('/json/candidates.json')
+      .then((response) => response.json())
+      .then((data) => setData(data))
+      .catch((error) => console.error('Error loading data:', error));
+  }, []);
+
+  const handleFilterChange = (key, value) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleView = () => {
+    console.log('Filters applied:', filters);
+    // Apply filters logic here
+  };
+
+  const handleReset = () => {
+    setFilters({
+      division: '',
+      district: '',
+      constituency: '',
+    });
+  };
+
+  if (!data) {
+    return (
+      <div className='flex justify-center items-center h-64'>
+        <div className='text-lg' style={{ fontFamily: 'Tiro Bangla, serif' }}>
+          ডেটা লোড করা হচ্ছে...
+        </div>
+      </div>
+    );
+  }
+
+  // Function to process chart data dynamically
+  const processChartData = (responses) => {
+    return responses.map((item) => ({
+      name: item.label, // Keep Bengali label as is
+      value: parseFloat(
+        convertBengaliToEnglish(item.percentage.replace('%', ''))
+      ),
+      displayValue: item.percentage, // Keep original Bengali percentage for display
+    }));
+  };
+
+  // Component for rendering individual pie charts
+  const PieChartComponent = ({ chart, index }) => {
+    const chartData = processChartData(chart.responses);
+
+    return (
+      <motion.div
+        className='bg-white p-6 rounded-xl shadow-sm border border-gray-100'
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{
+          duration: 0.3,
+          delay: 0.6 + index * 0.1,
+          ease: 'easeOut',
+        }}
+        whileHover={{
+          scale: 1.01,
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+        }}
+      >
+        <h2
+          className='text-xl font-medium text-gray-900 mb-6'
+          style={{ fontFamily: 'Tiro Bangla, serif' }}
+        >
+          {chart.question}
+        </h2>
+        <div className='h-80 flex'>
+          {/* Custom Legend */}
+          <div className='w-1/2 flex flex-col justify-center space-y-2 pr-4'>
+            {chartData.map((entry, entryIndex) => (
+              <div key={entry.name} className='flex items-center'>
+                <div
+                  className='w-4 h-4 rounded mr-2'
+                  style={{
+                    backgroundColor: COLORS[entryIndex % COLORS.length],
+                  }}
+                ></div>
+                <span
+                  className='text-sm font-medium'
+                  style={{ fontFamily: 'Tiro Bangla, serif' }}
+                >
+                  {entry.name}: {entry.displayValue}
+                </span>
+              </div>
+            ))}
+          </div>
+          {/* Pie Chart */}
+          <div className='w-1/2'>
+            <ResponsiveContainer width='100%' height='100%'>
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  cx='50%'
+                  cy='50%'
+                  innerRadius={chart.hasInnerRadius ? 40 : 0}
+                  outerRadius={80}
+                  fill='#8884d8'
+                  paddingAngle={1}
+                  dataKey='value'
+                >
+                  {chartData.map((entry, entryIndex) => (
+                    <Cell
+                      key={`cell-${entryIndex}`}
+                      fill={COLORS[entryIndex % COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => [`${value.toFixed(1)}%`]} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </motion.div>
+    );
+  };
+
+  // Component for rendering candidate cards
+  const CandidateCard = ({ candidateCard, index }) => {
+    return (
+      <motion.div
+        className='bg-white p-6 rounded-xl shadow-sm border border-gray-100'
+        initial={{ x: -20, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{
+          duration: 0.4,
+          delay: 0.4 + index * 0.1,
+          ease: 'easeOut',
+        }}
+        whileHover={{
+          scale: 1.01,
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+        }}
+      >
+        <h3
+          className='text-lg font-semibold text-gray-900 mb-4'
+          style={{ fontFamily: 'Tiro Bangla, serif' }}
+        >
+          {candidateCard.title}
+        </h3>
+        <ul className='space-y-2'>
+          {candidateCard.candidates.map((candidate, candidateIndex) => (
+            <li
+              key={candidateIndex}
+              className='flex items-center text-gray-700'
+              style={{ fontFamily: 'Tiro Bangla, serif' }}
+            >
+              <div className='w-2 h-2 bg-[#006747] rounded-full mr-3'></div>
+              {candidate}
+            </li>
+          ))}
+        </ul>
+      </motion.div>
+    );
+  };
+
+  const COLORS = [
+    '#06C584',
+    '#8C5CF0',
+    '#EC489B',
+    '#0EA7EC',
+    '#F39E0B',
+    '#f5ffc6',
+    '#003b36',
+    '#59114d',
+    '#FF6B35',
+    '#4ECDC4',
+    '#45B7D1',
+    '#96CEB4',
+  ];
 
   return (
     <div className='space-y-8'>
-      {/* Header */}
+      {/* Section 1: Filters */}
       <motion.div
-        initial={{ y: -20, opacity: 0 }}
+        className='bg-gradient-to-br from-white to-gray-50 p-4 rounded-xl shadow-md border border-gray-100 mx-auto'
+        initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
       >
         <h2
-          className='text-xl font-medium text-gray-900 mb-2'
+          className='text-xl font-semibold text-gray-800 mb-4'
           style={{ fontFamily: 'Tiro Bangla, serif' }}
         >
-          প্রার্থী তথ্য
+          ফিল্টার
         </h2>
-        <p
-          className='text-gray-600'
-          style={{ fontFamily: 'Tiro Bangla, serif' }}
-        >
-          কুমিল্লা-২ আসনের প্রার্থীদের বিস্তারিত তথ্য
-        </p>
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-4'>
+          {Object.entries(data.filters).map(([key, label]) => (
+            <div key={key} className='flex flex-col'>
+              <label
+                className='block text-xs font-medium text-gray-600 mb-1'
+                style={{ fontFamily: 'Tiro Bangla, serif' }}
+              >
+                {label}
+              </label>
+              <motion.select
+                value={filters[key]}
+                onChange={(e) => handleFilterChange(key, e.target.value)}
+                className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
+                style={{ fontFamily: 'Tiro Bangla, serif' }}
+                whileHover={{ scale: 1.02 }}
+              >
+                <option value=''>নির্বাচন করুন</option>
+                <option value='option1'>বিকল্প ১</option>
+                <option value='option2'>বিকল্প ২</option>
+              </motion.select>
+            </div>
+          ))}
+        </div>
+        <div className='flex justify-end space-x-2'>
+          <motion.button
+            onClick={handleReset}
+            className='bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors duration-200 text-sm'
+            style={{ fontFamily: 'Tiro Bangla, serif' }}
+            whileHover={{
+              scale: 1.05,
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+            }}
+            whileTap={{ scale: 0.95 }}
+          >
+            ফিল্টার করুন
+          </motion.button>
+          <motion.button
+            onClick={handleView}
+            className='bg-[#006747] text-white px-4 py-2 rounded-md hover:bg-[#005536] transition-colors duration-200 text-sm'
+            style={{ fontFamily: 'Tiro Bangla, serif' }}
+            whileHover={{
+              scale: 1.05,
+              boxShadow: '0 2px 8px rgba(0, 103, 71, 0.2)',
+            }}
+            whileTap={{ scale: 0.95 }}
+          >
+            দেখুন
+          </motion.button>
+        </div>
       </motion.div>
 
-      {/* Statistics Cards */}
+      {/* Section 2: Main Candidate Cards Header */}
       <motion.div
-        className='grid grid-cols-1 md:grid-cols-3 gap-6'
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
       >
-        {stats.map((stat, index) => {
-          const IconComponent = stat.icon;
-          return (
-            <motion.div
-              key={index}
-              className={`${stat.color} p-6 rounded-xl shadow-sm border border-gray-100`}
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{
-                duration: 0.4,
-                delay: 0.3 + index * 0.1,
-                ease: 'easeOut',
-              }}
-              whileHover={{ scale: 1.02 }}
-            >
-              <div className='flex items-center justify-between'>
-                <div>
-                  <p
-                    className='text-sm mb-2'
-                    style={{ fontFamily: 'Tiro Bangla, serif' }}
-                  >
-                    {stat.title}
-                  </p>
-                  <p
-                    className='text-2xl font-bold'
-                    style={{ fontFamily: 'Tiro Bangla, serif' }}
-                  >
-                    {stat.value}
-                  </p>
-                </div>
-                <IconComponent className='w-8 h-8 opacity-60' />
-              </div>
-            </motion.div>
-          );
-        })}
+        <h2
+          className='text-2xl font-semibold text-gray-800 mb-6'
+          style={{ fontFamily: 'Tiro Bangla, serif' }}
+        >
+          আপনার এলাকার সম্ভাব্য প্রার্থীদের নামসমূহ?
+        </h2>
       </motion.div>
 
-      {/* Candidates List */}
+      {/* Section 3: Candidate Cards Grid */}
       <motion.div
-        className='bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden'
+        className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.4, ease: 'easeOut' }}
+        transition={{ duration: 0.6, delay: 0.3, ease: 'easeOut' }}
       >
-        <div className='px-6 py-4 border-b border-gray-100'>
-          <h3
-            className='text-lg font-medium text-gray-900'
-            style={{ fontFamily: 'Tiro Bangla, serif' }}
-          >
-            প্রার্থী তালিকা
-          </h3>
-        </div>
+        {data.candidateCards?.map((candidateCard, index) => (
+          <CandidateCard
+            key={candidateCard.id}
+            candidateCard={candidateCard}
+            index={index}
+          />
+        ))}
+      </motion.div>
 
-        <div className='overflow-x-auto'>
-          <table className='min-w-full divide-y divide-gray-200'>
-            <thead className='bg-gray-50'>
-              <tr>
-                <th
-                  className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
-                  style={{ fontFamily: 'Tiro Bangla, serif' }}
-                >
-                  প্রার্থীর নাম
-                </th>
-                <th
-                  className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
-                  style={{ fontFamily: 'Tiro Bangla, serif' }}
-                >
-                  দল
-                </th>
-                <th
-                  className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
-                  style={{ fontFamily: 'Tiro Bangla, serif' }}
-                >
-                  আসন
-                </th>
-                <th
-                  className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
-                  style={{ fontFamily: 'Tiro Bangla, serif' }}
-                >
-                  ভোট
-                </th>
-                <th
-                  className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
-                  style={{ fontFamily: 'Tiro Bangla, serif' }}
-                >
-                  শতাংশ
-                </th>
-                <th
-                  className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
-                  style={{ fontFamily: 'Tiro Bangla, serif' }}
-                >
-                  অবস্থা
-                </th>
-              </tr>
-            </thead>
-            <tbody className='bg-white divide-y divide-gray-200'>
-              {candidates.map((candidate, index) => (
-                <motion.tr
-                  key={candidate.id}
-                  className='hover:bg-gray-50 transition-colors duration-200'
-                  initial={{ x: -20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{
-                    duration: 0.4,
-                    delay: 0.5 + index * 0.1,
-                    ease: 'easeOut',
-                  }}
-                >
-                  <td className='px-6 py-4 whitespace-nowrap'>
-                    <div className='flex items-center'>
-                      <div className='flex-shrink-0 h-10 w-10'>
-                        <div className='h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center'>
-                          <MdPerson className='w-6 h-6 text-gray-600' />
-                        </div>
-                      </div>
-                      <div className='ml-4'>
-                        <div
-                          className='text-sm font-medium text-gray-900'
-                          style={{ fontFamily: 'Tiro Bangla, serif' }}
-                        >
-                          {candidate.name}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className='px-6 py-4 whitespace-nowrap'>
-                    <div
-                      className='text-sm text-gray-900'
-                      style={{ fontFamily: 'Tiro Bangla, serif' }}
-                    >
-                      {candidate.party}
-                    </div>
-                  </td>
-                  <td className='px-6 py-4 whitespace-nowrap'>
-                    <div
-                      className='text-sm text-gray-900'
-                      style={{ fontFamily: 'Tiro Bangla, serif' }}
-                    >
-                      {candidate.constituency}
-                    </div>
-                  </td>
-                  <td className='px-6 py-4 whitespace-nowrap'>
-                    <div
-                      className='text-sm text-gray-900'
-                      style={{ fontFamily: 'Tiro Bangla, serif' }}
-                    >
-                      {candidate.votes}
-                    </div>
-                  </td>
-                  <td className='px-6 py-4 whitespace-nowrap'>
-                    <div
-                      className='text-sm text-gray-900'
-                      style={{ fontFamily: 'Tiro Bangla, serif' }}
-                    >
-                      {candidate.percentage}
-                    </div>
-                  </td>
-                  <td className='px-6 py-4 whitespace-nowrap'>
-                    <span
-                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(
-                        candidate.status
-                      )}`}
-                      style={{ fontFamily: 'Tiro Bangla, serif' }}
-                    >
-                      {candidate.status}
-                    </span>
-                  </td>
-                </motion.tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      {/* Section 4: Dynamic Charts Grid */}
+      <motion.div
+        className='grid grid-cols-1 lg:grid-cols-2 gap-6'
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.5, ease: 'easeOut' }}
+      >
+        {data.charts?.map((chart, index) => (
+          <PieChartComponent key={chart.id} chart={chart} index={index} />
+        ))}
       </motion.div>
     </div>
   );
