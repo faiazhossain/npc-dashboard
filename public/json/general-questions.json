@@ -1,8 +1,8 @@
 {
   "filters": {
-    "division": "চট্টগ্রাম",
-    "district": "কুমিল্লা",
-    "constituency": "কুমিল্লা-২",
+    "division": "বিভাগ",
+    "district": "জেলা",
+    "constituency": "আসন",
     "thana": "থানা",
     "ward": "ওয়ার্ড",
     "union": "ইউনিয়ন",

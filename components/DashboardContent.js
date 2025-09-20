@@ -1,68 +1,86 @@
 'use client';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import {
-  MdTrendingUp,
-  MdPeople,
-  MdAssessment,
-  MdNotifications,
-} from 'react-icons/md';
+import GeneralQuestions from './GeneralQuestions';
+import Candidates from './Candidates';
+import SeatDistribution from './SeatDistribution';
 
 export default function DashboardContent() {
-  const stats = [
-    {
-      title: 'মোট সার্ভে',
-      value: '২৪',
-      icon: MdAssessment,
-      color: 'bg-blue-500',
-      bgColor: 'bg-blue-50',
-      textColor: 'text-blue-600',
-    },
-    {
-      title: 'সক্রিয় ব্যবহারকারী',
-      value: '১,২৫৪',
-      icon: MdPeople,
-      color: 'bg-green-500',
-      bgColor: 'bg-green-50',
-      textColor: 'text-green-600',
-    },
-    {
-      title: 'সম্পূর্ণ জরিপ',
-      value: '১৮',
-      icon: MdTrendingUp,
-      color: 'bg-purple-500',
-      bgColor: 'bg-purple-50',
-      textColor: 'text-purple-600',
-    },
-    {
-      title: 'নতুন বিজ্ঞপ্তি',
-      value: '৭',
-      icon: MdNotifications,
-      color: 'bg-orange-500',
-      bgColor: 'bg-orange-50',
-      textColor: 'text-orange-600',
-    },
+  const [activeTab, setActiveTab] = useState('general');
+
+  const tabs = [
+    { id: 'general', label: 'সাধারণ প্রশ্নাবলি' },
+    { id: 'candidates', label: 'প্রার্থী' },
+    { id: 'seats', label: 'আসন বিন্যাস' },
   ];
 
-  const recentActivities = [
-    {
-      title: 'নতুন জরিপ তৈরি হয়েছে',
-      description: 'গ্রাহক সন্তুষ্টি জরিপ ২০২৫',
-      time: '২ ঘন্টা আগে',
-      type: 'success',
-    },
-    {
-      title: 'জরিপ সম্পন্ন হয়েছে',
-      description: 'কর্মচারী মতামত জরিপ',
-      time: '৫ ঘন্টা আগে',
-      type: 'info',
-    },
-    {
-      title: 'নতুন ব্যবহারকারী নিবন্ধিত',
-      description: '১৫ জন নতুন ব্যবহারকারী যোগ দিয়েছেন',
-      time: '১ দিন আগে',
-      type: 'warning',
-    },
-  ];
+  return (
+    <div className='p-4 lg:p-8 min-h-screen'>
+      {/* Header */}
+      <motion.div
+        className='mb-8'
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
+      >
+        <h1
+          className='text-2xl lg:text-3xl font-normal text-gray-900 mb-2'
+          style={{ fontFamily: 'Tiro Bangla, serif' }}
+        >
+          ড্যাশবোর্ড
+        </h1>
+        <p
+          className='text-gray-600'
+          style={{ fontFamily: 'Tiro Bangla, serif' }}
+        >
+          আপনার এনপিএস কার্যক্রমের সংক্ষিপ্ত বিবরণ
+        </p>
+      </motion.div>
 
-  return <div></div>;
+      {/* Tabs */}
+      <motion.div
+        className='mb-8'
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
+      >
+        <div className='border-b border-gray-200'>
+          <nav className='-mb-px flex space-x-8'>
+            {tabs.map((tab) => (
+              <motion.button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`
+                  py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200
+                  ${
+                    activeTab === tab.id
+                      ? 'border-[#006747] text-[#006747]'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }
+                `}
+                style={{ fontFamily: 'Tiro Bangla, serif' }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                {tab.label}
+              </motion.button>
+            ))}
+          </nav>
+        </div>
+      </motion.div>
+
+      {/* Tab Content */}
+      <motion.div
+        key={activeTab}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
+      >
+        {activeTab === 'general' && <GeneralQuestions />}
+        {activeTab === 'candidates' && <Candidates />}
+        {activeTab === 'seats' && <SeatDistribution />}
+      </motion.div>
+    </div>
+  );
 }
