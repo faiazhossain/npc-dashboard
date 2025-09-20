@@ -1,0 +1,59 @@
+{
+  "filters": {
+    "division": "চট্টগ্রাম",
+    "district": "কুমিল্লা",
+    "constituency": "কুমিল্লা-২",
+    "thana": "থানা",
+    "ward": "ওয়ার্ড",
+    "union": "ইউনিয়ন",
+    "gender": "লিঙ্গ",
+    "profession": "পেশা",
+    "age": "বয়স"
+  },
+  "voterStatistics": {
+    "totalVoters": "২১২,০০৮",
+    "maleVoters": "১০৭,০০৮",
+    "femaleVoters": "১০৪,২০৮",
+    "thirdGenderVoters": "৯৬২"
+  },
+  "electionExpectation": {
+    "question": "আগামী সংসদ নির্বাচন কত দিনের মধ্যে প্রত্যাশা করেন?",
+    "responses": [
+      { "option": "এক বছর", "percentage": "৩৭.২%" },
+      { "option": "দেড় বছর", "percentage": "৬২.৮%" }
+    ]
+  },
+  "partyPreference": {
+    "question": "আগামীর বাংলাদেশ পরিচালনায় কোন রাজনৈতিক দলকে যোগ্য মনে করেন?",
+    "responses": [
+      { "party": "আওয়ামীলীগ", "percentage": "১২.৮%" },
+      { "party": "বিএনপি", "percentage": "৩২.৮%" },
+      { "party": "জাতীয় পার্টি", "percentage": "২৬.৮%" },
+      { "party": "জামায়াতে ইসলামী", "percentage": "৩২.৮%" },
+      { "party": "অন্যান্য", "percentage": "৩৬.৮%" }
+    ]
+  },
+  "partyResponsibility": {
+    "question": "জনগণের মৌলিক ও রাজনৈতিক অধিকার রক্ষায় কোন দল বেশি দায়িত্বশীল ভূমিকা পালন করছে?",
+    "responses": [
+      { "party": "আওয়ামীলীগ", "percentage": "১৩.৬৮%" },
+      { "party": "বিএনপি", "percentage": "৬৬.৬৮%" },
+      { "party": "জাতীয় পার্টি", "percentage": "৮.৬৮%" },
+      { "party": "জামায়াতে ইসলামী", "percentage": "১৭.২%" },
+      { "party": "অন্যান্য", "percentage": "১.৬৮%" }
+    ]
+  },
+  "necessaryChanges": {
+    "question": "যে কোনো দলকে আগামী সংসদ নির্বাচনে জিততে হলে সবচেয়ে গুরুত্বপূর্ণ কোন পরিবর্তন জরুরী?",
+    "responses": [
+      { "change": "আইন শৃঙ্খলায় হস্তক্ষেপ", "percentage": "১১.২৫%" },
+      { "change": "অনৈতিকতা", "percentage": "১৩.৬৮%" },
+      { "change": "জনবিচ্ছিন্নতা", "percentage": "১৪.৯৯%" },
+      { "change": "দখলদারিত্ব", "percentage": "১৮.১৪%" },
+      { "change": "দুর্নীতি", "percentage": "২৩.৬১%" },
+      { "change": "পক্ষপাতিত্ব", "percentage": "১৩.৫৫%" },
+      { "change": "পেশীশক্তির ব্যাবহার", "percentage": "৫.২৭%" },
+      { "change": "উগ্র আচরণ", "percentage": "১.৫২%" }
+    ]
+  }
+}
