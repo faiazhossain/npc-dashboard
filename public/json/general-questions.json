@@ -4,11 +4,11 @@
     "district": "জেলা",
     "constituency": "আসন",
     "thana": "থানা",
-    "ward": "ওয়ার্ড",
-    "union": "ইউনিয়ন",
+    "ward": "ওয়ার্ড",
+    "union": "ইউনিয়ন",
     "gender": "লিঙ্গ",
     "profession": "পেশা",
-    "age": "বয়স"
+    "age": "বয়স"
   },
   "voterStatistics": {
     "totalVoters": "২১২,০০৮",
@@ -16,44 +16,70 @@
     "femaleVoters": "১০৪,২০৮",
     "thirdGenderVoters": "৯৬২"
   },
-  "electionExpectation": {
-    "question": "আগামী সংসদ নির্বাচন কত দিনের মধ্যে প্রত্যাশা করেন?",
-    "responses": [
-      { "option": "এক বছর", "percentage": "৩৭.২%" },
-      { "option": "দেড় বছর", "percentage": "৬২.৮%" }
-    ]
-  },
-  "partyPreference": {
-    "question": "আগামীর বাংলাদেশ পরিচালনায় কোন রাজনৈতিক দলকে যোগ্য মনে করেন?",
-    "responses": [
-      { "party": "আওয়ামীলীগ", "percentage": "১২.৮%" },
-      { "party": "বিএনপি", "percentage": "৩২.৮%" },
-      { "party": "জাতীয় পার্টি", "percentage": "২৬.৮%" },
-      { "party": "জামায়াতে ইসলামী", "percentage": "৩২.৮%" },
-      { "party": "অন্যান্য", "percentage": "৩৬.৮%" }
-    ]
-  },
-  "partyResponsibility": {
-    "question": "জনগণের মৌলিক ও রাজনৈতিক অধিকার রক্ষায় কোন দল বেশি দায়িত্বশীল ভূমিকা পালন করছে?",
-    "responses": [
-      { "party": "আওয়ামীলীগ", "percentage": "১৩.৬৮%" },
-      { "party": "বিএনপি", "percentage": "৬৬.৬৮%" },
-      { "party": "জাতীয় পার্টি", "percentage": "৮.৬৮%" },
-      { "party": "জামায়াতে ইসলামী", "percentage": "১৭.২%" },
-      { "party": "অন্যান্য", "percentage": "১.৬৮%" }
-    ]
-  },
-  "necessaryChanges": {
-    "question": "যে কোনো দলকে আগামী সংসদ নির্বাচনে জিততে হলে সবচেয়ে গুরুত্বপূর্ণ কোন পরিবর্তন জরুরী?",
-    "responses": [
-      { "change": "আইন শৃঙ্খলায় হস্তক্ষেপ", "percentage": "১১.২৫%" },
-      { "change": "অনৈতিকতা", "percentage": "১৩.৬৮%" },
-      { "change": "জনবিচ্ছিন্নতা", "percentage": "১৪.৯৯%" },
-      { "change": "দখলদারিত্ব", "percentage": "১৮.১৪%" },
-      { "change": "দুর্নীতি", "percentage": "২৩.৬১%" },
-      { "change": "পক্ষপাতিত্ব", "percentage": "১৩.৫৫%" },
-      { "change": "পেশীশক্তির ব্যাবহার", "percentage": "৫.২৭%" },
-      { "change": "উগ্র আচরণ", "percentage": "১.৫২%" }
-    ]
-  }
+  "charts": [
+    {
+      "id": "electionExpectation",
+      "question": "আগামী সংসদ নির্বাচন কত দিনের মধ্যে প্রত্যাশা করেন?",
+      "chartType": "pie",
+      "hasInnerRadius": true,
+      "responses": [
+        { "label": "এক বছর", "percentage": "৩৭.২%" },
+        { "label": "দেড় বছর", "percentage": "৬২.৮%" }
+      ]
+    },
+    {
+      "id": "partyPreference",
+      "question": "আগামীর বাংলাদেশ পরিচালনায় কোন রাজনৈতিক দলকে যোগ্য মনে করেন?",
+      "chartType": "pie",
+      "hasInnerRadius": false,
+      "responses": [
+        { "label": "আওয়ামীলীগ", "percentage": "১২.৮%" },
+        { "label": "বিএনপি", "percentage": "৩২.৮%" },
+        { "label": "জাতীয় পার্টি", "percentage": "২৬.৮%" },
+        { "label": "জামায়াতে ইসলামী", "percentage": "৩২.৮%" },
+        { "label": "অন্যান্য", "percentage": "৩৬.৮%" }
+      ]
+    },
+    {
+      "id": "partyResponsibility",
+      "question": "জনগণের মৌলিক ও রাজনৈতিক অধিকার রক্ষায় কোন দল বেশি দায়িত্বশীল ভূমিকা পালন করছে?",
+      "chartType": "pie",
+      "hasInnerRadius": true,
+      "responses": [
+        { "label": "আওয়ামীলীগ", "percentage": "১৩.৬৮%" },
+        { "label": "বিএনপি", "percentage": "৬৬.৬৮%" },
+        { "label": "জাতীয় পার্টি", "percentage": "৮.৬৮%" },
+        { "label": "জামায়াতে ইসলামী", "percentage": "১৭.২%" },
+        { "label": "অন্যান্য", "percentage": "১.৬৮%" }
+      ]
+    },
+    {
+      "id": "necessaryChanges",
+      "question": "যে কোনো দলকে আগামী সংসদ নির্বাচনে জিততে হলে সবচেয়ে গুরুত্বপূর্ণ কোন পরিবর্তন জরুরী?",
+      "chartType": "pie",
+      "hasInnerRadius": true,
+      "responses": [
+        { "label": "আইন শৃঙ্খলায় হস্তক্ষেপ", "percentage": "১১.২৫%" },
+        { "label": "অনৈতিকতা", "percentage": "১৩.৬৮%" },
+        { "label": "জনবিচ্ছিন্নতা", "percentage": "১৪.৯৯%" },
+        { "label": "দখলদারিত্ব", "percentage": "১৮.১৪%" },
+        { "label": "দুর্নীতি", "percentage": "২৩.৬১%" },
+        { "label": "পক্ষপাতিত্ব", "percentage": "১৩.৫৫%" },
+        { "label": "পেশীশক্তির ব্যাবহার", "percentage": "৫.২৭%" },
+        { "label": "উগ্র আচরণ", "percentage": "১.৫২%" }
+      ]
+    },
+    {
+      "id": "economicPriorities",
+      "question": "অর্থনৈতিক উন্নয়নে সবচেয়ে গুরুত্বপূর্ণ কোন ক্ষেত্রটি?",
+      "chartType": "pie",
+      "hasInnerRadius": false,
+      "responses": [
+        { "label": "কৃষি", "percentage": "২৮.৫%" },
+        { "label": "শিল্প", "percentage": "৩৫.২%" },
+        { "label": "সেবা", "percentage": "২০.৩%" },
+        { "label": "প্রযুক্তি", "percentage": "১৬.০%" }
+      ]
+    }
+  ]
 }
