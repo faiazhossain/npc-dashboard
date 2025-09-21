@@ -125,7 +125,6 @@ export default function SurveyTable({ data, currentPage, itemsPerPage }) {
                 </td>
                 <td className='px-6 py-4 whitespace-nowrap text-right text-sm font-medium'>
                   <motion.button
-                    onClick={() => router.push(`/dashboard/surveys/${item.id}`)}
                     className='text-[#006747] hover:text-[#005536] transition-colors duration-200'
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
