@@ -183,7 +183,7 @@ export default function SeatDistribution() {
   }));
 
   return (
-    <div className='space-y-8'>
+    <div className='p-4 lg:p-8 space-y-8'>
       {/* Section 1: Filters */}
       <motion.div
         className='bg-gradient-to-br from-white to-gray-50 p-4 rounded-xl shadow-md border border-gray-100 mx-auto'

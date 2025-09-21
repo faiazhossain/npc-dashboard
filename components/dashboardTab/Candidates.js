@@ -1,6 +1,6 @@
-'use client';
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+"use client";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import {
   PieChart,
   Pie,
@@ -10,34 +10,34 @@ import {
   RadialBarChart,
   RadialBar,
   Legend,
-} from 'recharts';
+} from "recharts";
 
 export default function Candidates() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
-    division: '',
-    district: '',
-    constituency: '',
+    division: "",
+    district: "",
+    constituency: "",
   });
 
   // API endpoint - can be easily changed to real API
-  const API_ENDPOINT = '/json/candidates.json'; // Change this to your API endpoint
+  const API_ENDPOINT = "/json/candidates.json"; // Change this to your API endpoint
 
   // Function to convert Bengali numerals to English numerals
   const convertBengaliToEnglish = (bengaliNumber) => {
     const bengaliDigits = {
-      '০': '0',
-      '১': '1',
-      '২': '2',
-      '৩': '3',
-      '৪': '4',
-      '৫': '5',
-      '৬': '6',
-      '৭': '7',
-      '৮': '8',
-      '৯': '9',
+      "০": "0",
+      "১": "1",
+      "২": "2",
+      "৩": "3",
+      "৪": "4",
+      "৫": "5",
+      "৬": "6",
+      "৭": "7",
+      "৮": "8",
+      "৯": "9",
     };
 
     return bengaliNumber.replace(/[০-৯]/g, (match) => bengaliDigits[match]);
@@ -58,7 +58,7 @@ export default function Candidates() {
         const jsonData = await response.json();
         setData(jsonData);
       } catch (error) {
-        console.error('Error loading data:', error);
+        console.error("Error loading data:", error);
         setError(error.message);
       } finally {
         setLoading(false);
@@ -73,22 +73,22 @@ export default function Candidates() {
   };
 
   const handleView = () => {
-    console.log('Filters applied:', filters);
+    console.log("Filters applied:", filters);
     // Apply filters logic here
   };
 
   const handleReset = () => {
     setFilters({
-      division: '',
-      district: '',
-      constituency: '',
+      division: "",
+      district: "",
+      constituency: "",
     });
   };
 
   if (loading) {
     return (
       <div className='flex justify-center items-center h-64'>
-        <div className='text-lg' style={{ fontFamily: 'Tiro Bangla, serif' }}>
+        <div className='text-lg' style={{ fontFamily: "Tiro Bangla, serif" }}>
           ডেটা লোড করা হচ্ছে...
         </div>
       </div>
@@ -100,7 +100,7 @@ export default function Candidates() {
       <div className='flex justify-center items-center h-64'>
         <div
           className='text-lg text-red-600'
-          style={{ fontFamily: 'Tiro Bangla, serif' }}
+          style={{ fontFamily: "Tiro Bangla, serif" }}
         >
           ডেটা লোড করতে সমস্যা হয়েছে: {error}
         </div>
@@ -111,7 +111,7 @@ export default function Candidates() {
   if (!data) {
     return (
       <div className='flex justify-center items-center h-64'>
-        <div className='text-lg' style={{ fontFamily: 'Tiro Bangla, serif' }}>
+        <div className='text-lg' style={{ fontFamily: "Tiro Bangla, serif" }}>
           কোন ডেটা পাওয়া যায়নি
         </div>
       </div>
@@ -122,7 +122,7 @@ export default function Candidates() {
   const processRadialChartData = (responses) => {
     return responses.map((item, index) => ({
       name: item.label,
-      uv: parseFloat(convertBengaliToEnglish(item.percentage.replace('%', ''))),
+      uv: parseFloat(convertBengaliToEnglish(item.percentage.replace("%", ""))),
       displayValue: item.percentage,
       fill: COLORS[index % COLORS.length],
     }));
@@ -133,11 +133,11 @@ export default function Candidates() {
     const chartData = processRadialChartData(chart.responses);
 
     const legendStyle = {
-      top: '50%',
+      top: "50%",
       right: 0,
-      transform: 'translate(0, -50%)',
-      lineHeight: '20px',
-      fontSize: '12px',
+      transform: "translate(0, -50%)",
+      lineHeight: "20px",
+      fontSize: "12px",
     };
 
     return (
@@ -148,16 +148,16 @@ export default function Candidates() {
         transition={{
           duration: 0.3,
           delay: 0.6 + index * 0.1,
-          ease: 'easeOut',
+          ease: "easeOut",
         }}
         whileHover={{
           scale: 1.01,
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
         }}
       >
         <h2
           className='text-xl font-medium text-gray-900 mb-6'
-          style={{ fontFamily: 'Tiro Bangla, serif' }}
+          style={{ fontFamily: "Tiro Bangla, serif" }}
         >
           {chart.question}
         </h2>
@@ -173,7 +173,7 @@ export default function Candidates() {
             >
               <RadialBar
                 minAngle={15}
-                label={{ position: 'insideStart', fill: '#fff', fontSize: 10 }}
+                label={{ position: "insideStart", fill: "#fff", fontSize: 10 }}
                 background
                 clockWise
                 dataKey='uv'
@@ -184,7 +184,7 @@ export default function Candidates() {
                 verticalAlign='middle'
                 wrapperStyle={{
                   ...legendStyle,
-                  fontFamily: 'Tiro Bangla, serif',
+                  fontFamily: "Tiro Bangla, serif",
                 }}
                 formatter={(value, entry) =>
                   `${value}: ${entry.payload.displayValue}`
@@ -202,7 +202,7 @@ export default function Candidates() {
     return responses.map((item) => ({
       name: item.label, // Keep Bengali label as is
       value: parseFloat(
-        convertBengaliToEnglish(item.percentage.replace('%', ''))
+        convertBengaliToEnglish(item.percentage.replace("%", ""))
       ),
       displayValue: item.percentage, // Keep original Bengali percentage for display
     }));
@@ -220,16 +220,16 @@ export default function Candidates() {
         transition={{
           duration: 0.3,
           delay: 0.6 + index * 0.1,
-          ease: 'easeOut',
+          ease: "easeOut",
         }}
         whileHover={{
           scale: 1.01,
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
         }}
       >
         <h2
           className='text-xl font-medium text-gray-900 mb-6'
-          style={{ fontFamily: 'Tiro Bangla, serif' }}
+          style={{ fontFamily: "Tiro Bangla, serif" }}
         >
           {chart.question}
         </h2>
@@ -246,7 +246,7 @@ export default function Candidates() {
                 ></div>
                 <span
                   className='text-sm font-medium'
-                  style={{ fontFamily: 'Tiro Bangla, serif' }}
+                  style={{ fontFamily: "Tiro Bangla, serif" }}
                 >
                   {entry.name}: {entry.displayValue}
                 </span>
@@ -298,7 +298,7 @@ export default function Candidates() {
         }}
         whileHover={{
           scale: 1.02,
-          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
+          boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
           transition: { duration: 0.3 },
         }}
       >
@@ -308,7 +308,7 @@ export default function Candidates() {
         {/* Card Content */}
         <h3
           className='text-xl font-bold px-4 py-2 bg-gray-200 text-gray-900 mb-5 relative z-10'
-          style={{ fontFamily: 'Tiro Bangla, serif' }}
+          style={{ fontFamily: "Tiro Bangla, serif" }}
         >
           {candidateCard.title}
         </h3>
@@ -317,13 +317,13 @@ export default function Candidates() {
             <motion.li
               key={candidateIndex}
               className='flex items-center text-gray-700 text-sm'
-              style={{ fontFamily: 'Tiro Bangla, serif' }}
+              style={{ fontFamily: "Tiro Bangla, serif" }}
               initial={{ x: -10, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{
                 duration: 0.4,
                 delay: index * 0.15 + candidateIndex * 0.05,
-                ease: 'easeOut',
+                ease: "easeOut",
               }}
             >
               <div className='w-3 h-3 bg-[#006747] rounded-full mr-3 flex-shrink-0' />
@@ -336,32 +336,32 @@ export default function Candidates() {
   };
 
   const COLORS = [
-    '#06C584',
-    '#8C5CF0',
-    '#EC489B',
-    '#0EA7EC',
-    '#F39E0B',
-    '#1ddb16',
-    '#003b36',
-    '#59114d',
-    '#FF6B35',
-    '#4ECDC4',
-    '#45B7D1',
-    '#96CEB4',
+    "#06C584",
+    "#8C5CF0",
+    "#EC489B",
+    "#0EA7EC",
+    "#F39E0B",
+    "#1ddb16",
+    "#003b36",
+    "#59114d",
+    "#FF6B35",
+    "#4ECDC4",
+    "#45B7D1",
+    "#96CEB4",
   ];
 
   return (
-    <div className='space-y-8'>
+    <div className='p-4 lg:p-8 space-y-8'>
       {/* Section 1: Filters */}
       <motion.div
         className='bg-gradient-to-br from-white to-gray-50 p-4 rounded-xl shadow-md border border-gray-100 mx-auto'
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
       >
         <h2
           className='text-xl font-semibold text-gray-800 mb-4'
-          style={{ fontFamily: 'Tiro Bangla, serif' }}
+          style={{ fontFamily: "Tiro Bangla, serif" }}
         >
           ফিল্টার
         </h2>
@@ -370,7 +370,7 @@ export default function Candidates() {
             <div key={key} className='flex flex-col'>
               <label
                 className='block text-xs font-medium text-gray-600 mb-1'
-                style={{ fontFamily: 'Tiro Bangla, serif' }}
+                style={{ fontFamily: "Tiro Bangla, serif" }}
               >
                 {label}
               </label>
@@ -378,7 +378,7 @@ export default function Candidates() {
                 value={filters[key]}
                 onChange={(e) => handleFilterChange(key, e.target.value)}
                 className='w-full px-3 py-3 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
-                style={{ fontFamily: 'Tiro Bangla, serif' }}
+                style={{ fontFamily: "Tiro Bangla, serif" }}
                 whileHover={{ scale: 1.02 }}
               >
                 <option value=''>নির্বাচন করুন</option>
@@ -392,10 +392,10 @@ export default function Candidates() {
           <motion.button
             onClick={handleReset}
             className='bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors duration-200 text-sm'
-            style={{ fontFamily: 'Tiro Bangla, serif' }}
+            style={{ fontFamily: "Tiro Bangla, serif" }}
             whileHover={{
               scale: 1.05,
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
             }}
             whileTap={{ scale: 0.95 }}
           >
@@ -404,10 +404,10 @@ export default function Candidates() {
           <motion.button
             onClick={handleView}
             className='bg-[#006747] text-white px-4 py-2 rounded-md hover:bg-[#005536] transition-colors duration-200 text-sm'
-            style={{ fontFamily: 'Tiro Bangla, serif' }}
+            style={{ fontFamily: "Tiro Bangla, serif" }}
             whileHover={{
               scale: 1.05,
-              boxShadow: '0 2px 8px rgba(0, 103, 71, 0.2)',
+              boxShadow: "0 2px 8px rgba(0, 103, 71, 0.2)",
             }}
             whileTap={{ scale: 0.95 }}
           >
@@ -420,12 +420,12 @@ export default function Candidates() {
       <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
+        transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
         className='shadow-sm rounded-2xl p-6 bg-white'
       >
         <h2
           className='text-2xl font-semibold text-gray-800 mb-6'
-          style={{ fontFamily: 'Tiro Bangla, serif' }}
+          style={{ fontFamily: "Tiro Bangla, serif" }}
         >
           আপনার এলাকার সম্ভাব্য প্রার্থীদের নামসমূহ?
         </h2>
@@ -434,7 +434,7 @@ export default function Candidates() {
           className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.3, ease: 'easeOut' }}
+          transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
         >
           {data.candidateCards?.map((candidateCard, index) => (
             <CandidateCard
@@ -449,13 +449,13 @@ export default function Candidates() {
       <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
+        transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
         className='shadow-sm rounded-2xl p-6 bg-white'
       >
-        {' '}
+        {" "}
         <h2
           className='text-2xl font-semibold text-gray-800 mb-6'
-          style={{ fontFamily: 'Tiro Bangla, serif' }}
+          style={{ fontFamily: "Tiro Bangla, serif" }}
         >
           আপনার এলাকায় কোন দলের কাকে প্রার্থী করা উচিত বলে আপনি মনে করেন?
         </h2>
@@ -464,13 +464,13 @@ export default function Candidates() {
           className='grid grid-cols-1 lg:grid-cols-2 gap-6'
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.5, ease: 'easeOut' }}
+          transition={{ duration: 0.6, delay: 0.5, ease: "easeOut" }}
         >
           {data.charts?.map((chart, index) => {
             // Determine chart type based on chart properties
             const shouldUseRadialChart =
-              chart.id === 'candidate-qualifications' ||
-              chart.chartType === 'radial' ||
+              chart.id === "candidate-qualifications" ||
+              chart.chartType === "radial" ||
               (chart.responses && chart.responses.length > 8); // Use radial for complex data with many options
 
             if (shouldUseRadialChart) {
@@ -496,13 +496,13 @@ export default function Candidates() {
         className='grid grid-cols-1 lg:grid-cols-2 gap-6'
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.5, ease: 'easeOut' }}
+        transition={{ duration: 0.6, delay: 0.5, ease: "easeOut" }}
       >
         {data.qualities?.map((chart, index) => {
           // Determine chart type based on chart properties
           const shouldUseRadialChart =
-            chart.id === 'candidate-qualifications' ||
-            chart.chartType === 'radial' ||
+            chart.id === "candidate-qualifications" ||
+            chart.chartType === "radial" ||
             (chart.responses && chart.responses.length > 8); // Use radial for complex data with many options
 
           if (shouldUseRadialChart) {
