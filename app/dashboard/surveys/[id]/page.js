@@ -1,19 +1,20 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import surveyData from "@/public/json/surveys.json";
 import { MdEdit, MdClose } from "react-icons/md";
 
 export default function SurveyDetails({ params }) {
+  const resolvedParams = use(params);
   const [survey, setSurvey] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editingData, setEditingData] = useState(null);
 
   useEffect(() => {
-    const found = surveyData.surveys.find((s) => s.id === params.id);
+    const found = surveyData.surveys.find((s) => s.id === resolvedParams.id);
     setSurvey(found);
     setEditingData(found?.details);
-  }, [params.id]);
+  }, [resolvedParams.id]);
 
   if (!survey) return null;
 
