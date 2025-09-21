@@ -111,6 +111,7 @@ export default function Dashboard({ onLogout }) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3, ease: 'easeOut' }}
+              className='bg-gray-100'
             >
               <DashboardContent />
             </motion.div>

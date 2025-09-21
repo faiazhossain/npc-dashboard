@@ -66,7 +66,9 @@
         { "label": "মোহাম্মদ ইব্রাহিম", "percentage": "৫৮.৪%" },
         { "label": "আব্দুল কাদের", "percentage": "৪১.৬%" }
       ]
-    },
+    }
+  ],
+  "qualities": [
     {
       "id": "most-qualified-candidate",
       "question": "এদের মধ্যে কাকে বেশি যোগ্য মনে হয়?",
