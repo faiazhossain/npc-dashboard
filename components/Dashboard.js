@@ -1,13 +1,13 @@
-'use client';
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Navbar from './Navbar';
-import DashboardContent from './DashboardContent';
-import SurveyContent from './SurveyContent';
-import Image from 'next/image';
+"use client";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import Navbar from "./Navbar";
+import DashboardContent from "./dashboardTab/DashboardContent";
+import SurveyContent from "./surveyTab/SurveyContent";
+import Image from "next/image";
 
 export default function Dashboard({ onLogout }) {
-  const [activeItem, setActiveItem] = useState('dashboard');
+  const [activeItem, setActiveItem] = useState("dashboard");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const toggleMobileMenu = () => {
@@ -48,7 +48,7 @@ export default function Dashboard({ onLogout }) {
         className='flex-1 lg:ml-[271px] transition-all duration-300 ease-in-out'
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
       >
         {/* Navbar */}
         <nav className='flex items-center justify-between bg-white p-4 shadow-md sticky top-0 z-10'>
@@ -104,25 +104,25 @@ export default function Dashboard({ onLogout }) {
 
         {/* Main Content */}
         <AnimatePresence mode='wait'>
-          {activeItem === 'dashboard' && (
+          {activeItem === "dashboard" && (
             <motion.div
               key='dashboard'
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
               className='bg-gray-100'
             >
               <DashboardContent />
             </motion.div>
           )}
-          {activeItem === 'survey' && (
+          {activeItem === "survey" && (
             <motion.div
               key='survey'
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
             >
               <SurveyContent />
             </motion.div>

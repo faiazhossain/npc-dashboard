@@ -1,8 +1,8 @@
-'use client';
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Login from '../components/Login';
-import Dashboard from '../components/Dashboard';
+"use client";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import Login from "../components/Login";
+import Dashboard from "../components/Dashboard";
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
