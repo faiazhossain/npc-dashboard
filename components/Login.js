@@ -1,8 +1,8 @@
-'use client';
-import Image from 'next/image';
-import { motion } from 'framer-motion';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { useState } from 'react';
+"use client";
+import Image from "next/image";
+import { motion } from "framer-motion";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useState } from "react";
 
 export default function Login({ onLoginSuccess }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -25,7 +25,7 @@ export default function Login({ onLoginSuccess }) {
         className='hidden lg:block w-full lg:w-1/2 h-64 lg:h-screen relative'
         initial={{ x: -100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
-        transition={{ duration: 0.8, ease: 'easeOut' }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
       >
         {/* Background Banner Image */}
         <Image
@@ -41,7 +41,7 @@ export default function Login({ onLoginSuccess }) {
           className='absolute inset-x-0 flex items-center justify-center'
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 1, delay: 0.3, ease: 'easeOut' }}
+          transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
         >
           <div className='relative w-32 h-32 lg:w-[380px] lg:h-[580px] opacity-90'>
             <Image
@@ -58,13 +58,13 @@ export default function Login({ onLoginSuccess }) {
           className='absolute bottom-4 lg:bottom-8 left-4 lg:left-8 right-4 lg:right-8'
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.6, ease: 'easeOut' }}
+          transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
         >
           <p
             className='text-white text-center text-sm lg:text-lg xl:text-[36px] font-normal leading-relaxed drop-shadow-lg'
             style={{
-              fontFamily: 'Tiro Bangla, serif',
-              textShadow: '2px 2px 4px rgba(0,0,0,0.7)',
+              fontFamily: "Tiro Bangla, serif",
+              textShadow: "2px 2px 4px rgba(0,0,0,0.7)",
             }}
           >
             &ldquo;দেশ গড়ে ওঠে মানুষের কথায়, মানুষের চাওয়ায়&rdquo;
@@ -77,20 +77,20 @@ export default function Login({ onLoginSuccess }) {
         className='w-full lg:w-1/2 flex items-center justify-center p-4 lg:p-8 bg-white'
         initial={{ x: 100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
-        transition={{ duration: 0.8, ease: 'easeOut' }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <motion.div
           className='w-full max-w-md space-y-6 lg:space-y-8'
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
+          transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
         >
           {/* NPS Logo */}
           <motion.div
             className='flex justify-center'
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.4, ease: 'easeOut' }}
+            transition={{ duration: 0.5, delay: 0.4, ease: "easeOut" }}
           >
             <Image
               src='/Images/nps-logo.png'
@@ -106,15 +106,15 @@ export default function Login({ onLoginSuccess }) {
             className='text-center space-y-4 lg:space-y-6'
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.5, ease: 'easeOut' }}
+            transition={{ duration: 0.6, delay: 0.5, ease: "easeOut" }}
           >
             {/* Main Heading */}
             <motion.h1
               className='text-2xl lg:text-32px font-normal text-shadow-lg text-gray-900 leading-[130%] tracking-[-0.02em] px-2'
-              style={{ fontFamily: 'Tiro Bangla, serif' }}
+              style={{ fontFamily: "Tiro Bangla, serif" }}
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.6, ease: 'easeOut' }}
+              transition={{ duration: 0.5, delay: 0.6, ease: "easeOut" }}
             >
               আপনার একাউন্টে লগইন করুন
             </motion.h1>
@@ -122,10 +122,10 @@ export default function Login({ onLoginSuccess }) {
             {/* Subtitle */}
             <motion.p
               className='text-sm lg:text-base text-gray-600 pb-4'
-              style={{ fontFamily: 'Tiro Bangla, serif' }}
+              style={{ fontFamily: "Tiro Bangla, serif" }}
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.7, ease: 'easeOut' }}
+              transition={{ duration: 0.5, delay: 0.7, ease: "easeOut" }}
             >
               ইমেইল ও পাসওয়ার্ড ব্যবহার করে আপনার একাউন্টে প্রবেশ করুন
             </motion.p>
@@ -135,7 +135,7 @@ export default function Login({ onLoginSuccess }) {
               className='space-y-4 lg:space-y-6 mt-6 lg:mt-8'
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.8, ease: 'easeOut' }}
+              transition={{ duration: 0.6, delay: 0.8, ease: "easeOut" }}
               onSubmit={handleSubmit}
             >
               {/* Email Field */}
@@ -143,14 +143,14 @@ export default function Login({ onLoginSuccess }) {
                 className='text-left'
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.9, ease: 'easeOut' }}
+                transition={{ duration: 0.5, delay: 0.9, ease: "easeOut" }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 <label
                   htmlFor='email'
                   className='block text-sm font-medium text-gray-700 mb-2'
-                  style={{ fontFamily: 'Tiro Bangla, serif' }}
+                  style={{ fontFamily: "Tiro Bangla, serif" }}
                 >
                   ইমেইল
                 </label>
@@ -163,7 +163,7 @@ export default function Login({ onLoginSuccess }) {
                   placeholder='আপনার ইমেইল প্রবেশ করুন'
                   whileFocus={{
                     scale: 1.02,
-                    boxShadow: '0 0 0 3px rgba(0, 103, 71, 0.1)',
+                    boxShadow: "0 0 0 3px rgba(0, 103, 71, 0.1)",
                   }}
                   transition={{ duration: 0.2 }}
                 />
@@ -174,14 +174,14 @@ export default function Login({ onLoginSuccess }) {
                 className='text-left'
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 1.0, ease: 'easeOut' }}
+                transition={{ duration: 0.5, delay: 1.0, ease: "easeOut" }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 <label
                   htmlFor='password'
                   className='block text-sm font-medium text-gray-700 mb-2'
-                  style={{ fontFamily: 'Tiro Bangla, serif' }}
+                  style={{ fontFamily: "Tiro Bangla, serif" }}
                 >
                   পাসওয়ার্ড
                 </label>
@@ -189,13 +189,13 @@ export default function Login({ onLoginSuccess }) {
                   <motion.input
                     id='password'
                     name='password'
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     required
                     className='w-full px-3 py-2 lg:py-3 border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] text-sm lg:text-base transition-all duration-200'
                     placeholder='আপনার পাসওয়ার্ড প্রবেশ করুন'
                     whileFocus={{
                       scale: 1.02,
-                      boxShadow: '0 0 0 3px rgba(0, 103, 71, 0.1)',
+                      boxShadow: "0 0 0 3px rgba(0, 103, 71, 0.1)",
                     }}
                     transition={{ duration: 0.2 }}
                   />
@@ -218,7 +218,7 @@ export default function Login({ onLoginSuccess }) {
                 className='flex items-center text-left'
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 1.1, ease: 'easeOut' }}
+                transition={{ duration: 0.5, delay: 1.1, ease: "easeOut" }}
                 whileHover={{ scale: 1.02 }}
               >
                 <input
@@ -230,7 +230,7 @@ export default function Login({ onLoginSuccess }) {
                 <label
                   htmlFor='remember-me'
                   className='ml-2 block text-sm text-gray-700'
-                  style={{ fontFamily: 'Tiro Bangla, serif' }}
+                  style={{ fontFamily: "Tiro Bangla, serif" }}
                 >
                   লগইন মনে রাখুন
                 </label>
@@ -240,13 +240,13 @@ export default function Login({ onLoginSuccess }) {
               <motion.button
                 type='submit'
                 className='w-full py-3 lg:py-4 px-4 bg-[#006747] text-white font-medium rounded-md hover:bg-[#005536] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#006747] transition duration-200 text-sm lg:text-base'
-                style={{ fontFamily: 'Tiro Bangla, serif' }}
+                style={{ fontFamily: "Tiro Bangla, serif" }}
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 1.2, ease: 'easeOut' }}
+                transition={{ duration: 0.5, delay: 1.2, ease: "easeOut" }}
                 whileHover={{
                   scale: 1.02,
-                  boxShadow: '0 4px 12px rgba(0, 103, 71, 0.15)',
+                  boxShadow: "0 4px 12px rgba(0, 103, 71, 0.15)",
                 }}
                 whileTap={{ scale: 0.98 }}
               >
