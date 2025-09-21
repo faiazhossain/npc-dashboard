@@ -14,7 +14,6 @@ export default function SurveyBreadcrumb({ items }) {
           <li key={index} className='flex items-center'>
             {index > 0 && <span className='mx-2 text-gray-400'>/</span>}
             <button
-              onClick={() => item.path && router.push(item.path)}
               className={`${
                 item.path
                   ? "text-[#006747] hover:text-[#005536]"
