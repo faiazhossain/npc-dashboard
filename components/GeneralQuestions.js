@@ -284,7 +284,7 @@ export default function GeneralQuestions() {
               }}
             >
               <Image
-                src={`/images/gender/${icons[key]}`}
+                src={`/Images/gender/${icons[key]}`}
                 alt={`${titles[key]} icon`}
                 width={32}
                 height={32}
