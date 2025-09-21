@@ -78,10 +78,16 @@ export default function SurveyContent() {
 
   if (loading) {
     return (
-      <div className='flex justify-center items-center h-64'>
-        <div className='text-lg' style={{ fontFamily: "Tiro Bangla, serif" }}>
+      <div className='flex justify-center items-center min-h-[400px]'>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className='text-lg text-gray-600 bg-white p-8 rounded-xl shadow-sm'
+          style={{ fontFamily: "Tiro Bangla, serif" }}
+        >
           ডেটা লোড করা হচ্ছে...
-        </div>
+        </motion.div>
       </div>
     );
   }

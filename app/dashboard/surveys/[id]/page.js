@@ -9,12 +9,30 @@ export default function SurveyDetails({ params }) {
   const [survey, setSurvey] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editingData, setEditingData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const found = surveyData.surveys.find((s) => s.id === resolvedParams.id);
     setSurvey(found);
     setEditingData(found?.details);
+    setLoading(false);
   }, [resolvedParams.id]);
+
+  if (loading) {
+    return (
+      <div className='flex justify-center items-center min-h-[400px]'>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className='text-lg text-gray-600'
+          style={{ fontFamily: "Tiro Bangla, serif" }}
+        >
+          ডেটা লোড করা হচ্ছে...
+        </motion.div>
+      </div>
+    );
+  }
 
   if (!survey) return null;
 
