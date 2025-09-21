@@ -1,221 +1,436 @@
 'use client';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Legend,
-  Tooltip,
   BarChart,
   Bar,
   XAxis,
   YAxis,
   CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  Legend,
 } from 'recharts';
 
 export default function SeatDistribution() {
-  const seatDistributionData = [
-    { name: 'আওয়ামী লীগ', seats: 152, color: '#006747' },
-    { name: 'বিএনপি', seats: 86, color: '#00A86B' },
-    { name: 'জাতীয় পার্টি', seats: 45, color: '#2ECC71' },
-    { name: 'জামায়াতে ইসলামী', seats: 28, color: '#58D68D' },
-    { name: 'স্বতন্ত্র', seats: 35, color: '#82E0AA' },
-    { name: 'অন্যান্য', seats: 4, color: '#A9DFBF' },
-  ];
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [filters, setFilters] = useState({
+    division: '',
+    district: '',
+    constituency: '',
+  });
+  const [analysisFilters, setAnalysisFilters] = useState({
+    party: '',
+    constituency: '',
+    district: '',
+  });
+  const [showAnalysisFilters, setShowAnalysisFilters] = useState(false);
+  const [filteredAnalysisData, setFilteredAnalysisData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
-  const divisionWiseSeats = [
-    { division: 'ঢাকা', awami: 25, bnp: 15, jp: 8, jamat: 5, independent: 7 },
-    {
-      division: 'চট্টগ্রাম',
-      awami: 20,
-      bnp: 18,
-      jp: 6,
-      jamat: 4,
-      independent: 2,
-    },
-    {
-      division: 'রাজশাহী',
-      awami: 22,
-      bnp: 12,
-      jp: 8,
-      jamat: 6,
-      independent: 2,
-    },
-    { division: 'খুলনা', awami: 18, bnp: 8, jp: 5, jamat: 3, independent: 6 },
-    { division: 'বরিশাল', awami: 15, bnp: 10, jp: 4, jamat: 2, independent: 3 },
-    { division: 'সিলেট', awami: 12, bnp: 8, jp: 6, jamat: 4, independent: 4 },
-    { division: 'রংপুর', awami: 20, bnp: 9, jp: 5, jamat: 2, independent: 8 },
-    {
-      division: 'ময়মনসিংহ',
-      awami: 20,
-      bnp: 6,
-      jp: 3,
-      jamat: 2,
-      independent: 3,
-    },
-  ];
+  // API endpoint - can be easily changed to real API
+  const API_ENDPOINT = '/json/seat-distribution.json';
 
-  const totalSeats = 350;
-  const majoritySeats = 176;
+  useEffect(() => {
+    // Load data from JSON file (this can be replaced with API call)
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await fetch(API_ENDPOINT);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const jsonData = await response.json();
+        setData(jsonData);
+        setFilteredAnalysisData(jsonData.analysisData);
+      } catch (error) {
+        console.error('Error loading data:', error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  const handleFilterChange = (key, value) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleAnalysisFilterChange = (key, value) => {
+    setAnalysisFilters((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleView = () => {
+    console.log('Filters applied:', filters);
+    // Apply filters logic here
+  };
+
+  const handleReset = () => {
+    setFilters({
+      division: '',
+      district: '',
+      constituency: '',
+    });
+  };
+
+  const handleAnalysisSearch = () => {
+    if (!data) return;
+
+    let filtered = data.analysisData;
+
+    if (analysisFilters.party) {
+      filtered = filtered.filter(
+        (item) => item.party === analysisFilters.party
+      );
+    }
+    if (analysisFilters.district) {
+      filtered = filtered.filter(
+        (item) => item.district === analysisFilters.district
+      );
+    }
+    if (analysisFilters.constituency) {
+      filtered = filtered.filter(
+        (item) => item.constituency === analysisFilters.constituency
+      );
+    }
+
+    setFilteredAnalysisData(filtered);
+    setCurrentPage(1);
+  };
+
+  const handleAnalysisReset = () => {
+    setAnalysisFilters({
+      party: '',
+      constituency: '',
+      district: '',
+    });
+    setFilteredAnalysisData(data?.analysisData || []);
+    setCurrentPage(1);
+  };
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredAnalysisData.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentData = filteredAnalysisData.slice(startIndex, endIndex);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  if (loading) {
+    return (
+      <div className='flex justify-center items-center h-64'>
+        <div className='text-lg' style={{ fontFamily: 'Tiro Bangla, serif' }}>
+          ডেটা লোড করা হচ্ছে...
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className='flex justify-center items-center h-64'>
+        <div
+          className='text-lg text-red-600'
+          style={{ fontFamily: 'Tiro Bangla, serif' }}
+        >
+          ডেটা লোড করতে সমস্যা হয়েছে: {error}
+        </div>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className='flex justify-center items-center h-64'>
+        <div className='text-lg' style={{ fontFamily: 'Tiro Bangla, serif' }}>
+          কোন ডেটা পাওয়া যায়নি
+        </div>
+      </div>
+    );
+  }
 
   const COLORS = [
-    '#006747',
-    '#00A86B',
-    '#2ECC71',
-    '#58D68D',
-    '#82E0AA',
-    '#A9DFBF',
+    '#06C584',
+    '#8C5CF0',
+    '#EC489B',
+    '#0EA7EC',
+    '#F39E0B',
+    '#1ddb16',
+    '#003b36',
+    '#59114d',
+    '#FF6B35',
+    '#4ECDC4',
+    '#45B7D1',
+    '#96CEB4',
   ];
 
-  const pieData = seatDistributionData.map((item) => ({
-    name: item.name,
-    value: item.seats,
-    color: item.color,
+  // Prepare bar chart data
+  const barChartData = data.seatDistribution.map((item, index) => ({
+    party: item.party,
+    seats: item.seats,
+    fill: COLORS[index % COLORS.length],
   }));
 
   return (
     <div className='space-y-8'>
-      {/* Header */}
+      {/* Section 1: Filters */}
       <motion.div
-        initial={{ y: -20, opacity: 0 }}
+        className='bg-gradient-to-br from-white to-gray-50 p-4 rounded-xl shadow-md border border-gray-100 mx-auto'
+        initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
       >
         <h2
-          className='text-xl font-medium text-gray-900 mb-2'
+          className='text-xl font-semibold text-gray-800 mb-4'
           style={{ fontFamily: 'Tiro Bangla, serif' }}
         >
-          আসন বিন্যাস
+          ফিল্টার
         </h2>
-        <p
-          className='text-gray-600'
-          style={{ fontFamily: 'Tiro Bangla, serif' }}
-        >
-          জাতীয় সংসদে দলীয় আসন বিতরণ
-        </p>
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-4'>
+          {Object.entries(data.filters).map(([key, label]) => (
+            <div key={key} className='flex flex-col'>
+              <label
+                className='block text-xs font-medium text-gray-600 mb-1'
+                style={{ fontFamily: 'Tiro Bangla, serif' }}
+              >
+                {label}
+              </label>
+              <motion.select
+                value={filters[key]}
+                onChange={(e) => handleFilterChange(key, e.target.value)}
+                className='w-full px-3 py-3 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
+                style={{ fontFamily: 'Tiro Bangla, serif' }}
+                whileHover={{ scale: 1.02 }}
+              >
+                <option value=''>নির্বাচন করুন</option>
+                <option value='option1'>বিকল্প ১</option>
+                <option value='option2'>বিকল্প ২</option>
+              </motion.select>
+            </div>
+          ))}
+        </div>
+        <div className='flex justify-end space-x-2'>
+          <motion.button
+            onClick={handleReset}
+            className='bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors duration-200 text-sm'
+            style={{ fontFamily: 'Tiro Bangla, serif' }}
+            whileHover={{
+              scale: 1.05,
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+            }}
+            whileTap={{ scale: 0.95 }}
+          >
+            রিসেট করুন
+          </motion.button>
+          <motion.button
+            onClick={handleView}
+            className='bg-[#006747] text-white px-4 py-2 rounded-md hover:bg-[#005536] transition-colors duration-200 text-sm'
+            style={{ fontFamily: 'Tiro Bangla, serif' }}
+            whileHover={{
+              scale: 1.05,
+              boxShadow: '0 2px 8px rgba(0, 103, 71, 0.2)',
+            }}
+            whileTap={{ scale: 0.95 }}
+          >
+            দেখুন
+          </motion.button>
+        </div>
       </motion.div>
 
-      {/* Summary Cards */}
+      {/* Section 2: Seat Distribution Bar Chart */}
       <motion.div
-        className='grid grid-cols-1 md:grid-cols-3 gap-6'
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
+        className='shadow-sm rounded-2xl p-6 bg-white'
       >
-        <motion.div
-          className='bg-blue-50 text-blue-600 p-6 rounded-xl shadow-sm border border-gray-100'
-          whileHover={{ scale: 1.02 }}
-        >
-          <h3
-            className='text-sm mb-2'
-            style={{ fontFamily: 'Tiro Bangla, serif' }}
-          >
-            মোট আসন
-          </h3>
-          <p
-            className='text-2xl font-bold'
-            style={{ fontFamily: 'Tiro Bangla, serif' }}
-          >
-            {totalSeats.toLocaleString('bn-BD')}
-          </p>
-        </motion.div>
-
-        <motion.div
-          className='bg-green-50 text-green-600 p-6 rounded-xl shadow-sm border border-gray-100'
-          whileHover={{ scale: 1.02 }}
-        >
-          <h3
-            className='text-sm mb-2'
-            style={{ fontFamily: 'Tiro Bangla, serif' }}
-          >
-            সংখ্যাগরিষ্ঠতার জন্য প্রয়োজন
-          </h3>
-          <p
-            className='text-2xl font-bold'
-            style={{ fontFamily: 'Tiro Bangla, serif' }}
-          >
-            {majoritySeats.toLocaleString('bn-BD')}
-          </p>
-        </motion.div>
-
-        <motion.div
-          className='bg-purple-50 text-purple-600 p-6 rounded-xl shadow-sm border border-gray-100'
-          whileHover={{ scale: 1.02 }}
-        >
-          <h3
-            className='text-sm mb-2'
-            style={{ fontFamily: 'Tiro Bangla, serif' }}
-          >
-            বিজয়ী দল
-          </h3>
-          <p
-            className='text-2xl font-bold'
-            style={{ fontFamily: 'Tiro Bangla, serif' }}
-          >
-            আওয়ামী লীগ
-          </p>
-        </motion.div>
-      </motion.div>
-
-      {/* Seat Distribution Pie Chart */}
-      <motion.div
-        className='bg-white p-6 rounded-xl shadow-sm border border-gray-100'
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.4, ease: 'easeOut' }}
-      >
-        <h3
-          className='text-lg font-medium text-gray-900 mb-6'
+        <h2
+          className='text-2xl font-semibold text-gray-800 mb-6'
           style={{ fontFamily: 'Tiro Bangla, serif' }}
         >
-          দলীয় আসন বিতরণ
-        </h3>
+          আসন বণ্টন
+        </h2>
         <div className='h-96'>
           <ResponsiveContainer width='100%' height='100%'>
-            <PieChart>
-              <Pie
-                data={pieData}
-                cx='50%'
-                cy='50%'
-                labelLine={false}
-                label={({ name, value, percent }) =>
-                  `${name}: ${value} (${percent.toFixed(1)}%)`
-                }
-                outerRadius={120}
-                fill='#8884d8'
-                dataKey='value'
-              >
-                {pieData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
+            <BarChart
+              data={barChartData}
+              margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+            >
+              <CartesianGrid strokeDasharray='3 3' />
+              <XAxis
+                dataKey='party'
+                angle={-45}
+                textAnchor='end'
+                height={100}
+                style={{ fontFamily: 'Tiro Bangla, serif' }}
+              />
+              <YAxis style={{ fontFamily: 'Tiro Bangla, serif' }} />
+              <Tooltip
+                formatter={(value, name) => [value, 'আসন সংখ্যা']}
+                labelStyle={{ fontFamily: 'Tiro Bangla, serif' }}
+                contentStyle={{ fontFamily: 'Tiro Bangla, serif' }}
+              />
+              <Bar dataKey='seats' fill='#8884d8' radius={[4, 4, 0, 0]}>
+                {barChartData.map((entry, index) => (
+                  <Bar key={`bar-${index}`} fill={entry.fill} />
                 ))}
-              </Pie>
-              <Tooltip formatter={(value) => [`${value} আসন`, 'আসন সংখ্যা']} />
-              <Legend />
-            </PieChart>
+              </Bar>
+            </BarChart>
           </ResponsiveContainer>
         </div>
       </motion.div>
 
-      {/* Detailed Seat List */}
+      {/* Section 3: Seat Distribution Analysis */}
       <motion.div
-        className='bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden'
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.5, ease: 'easeOut' }}
+        transition={{ duration: 0.6, delay: 0.4, ease: 'easeOut' }}
+        className='shadow-sm rounded-2xl p-6 bg-white'
       >
-        <div className='px-6 py-4 border-b border-gray-100'>
-          <h3
-            className='text-lg font-medium text-gray-900'
+        <div className='flex justify-between items-center mb-6'>
+          <h2
+            className='text-2xl font-semibold text-gray-800'
             style={{ fontFamily: 'Tiro Bangla, serif' }}
           >
-            বিস্তারিত আসন তালিকা
-          </h3>
+            আসন বণ্টন বিশ্লেষণ
+          </h2>
+          <motion.button
+            onClick={() => setShowAnalysisFilters(!showAnalysisFilters)}
+            className='bg-[#006747] text-white px-4 py-2 rounded-md hover:bg-[#005536] transition-colors duration-200 text-sm'
+            style={{ fontFamily: 'Tiro Bangla, serif' }}
+            whileHover={{
+              scale: 1.05,
+              boxShadow: '0 2px 8px rgba(0, 103, 71, 0.2)',
+            }}
+            whileTap={{ scale: 0.95 }}
+          >
+            ফিল্টার {showAnalysisFilters ? 'লুকান' : 'দেখান'}
+          </motion.button>
         </div>
 
+        {/* Analysis Filters */}
+        {showAnalysisFilters && (
+          <motion.div
+            className='bg-gray-50 p-4 rounded-xl mb-6 border border-gray-200'
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-4'>
+              <div className='flex flex-col'>
+                <label
+                  className='block text-xs font-medium text-gray-600 mb-1'
+                  style={{ fontFamily: 'Tiro Bangla, serif' }}
+                >
+                  {data.analysisFilters.party}
+                </label>
+                <motion.select
+                  value={analysisFilters.party}
+                  onChange={(e) =>
+                    handleAnalysisFilterChange('party', e.target.value)
+                  }
+                  className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
+                  style={{ fontFamily: 'Tiro Bangla, serif' }}
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <option value=''>সব দল</option>
+                  {data.partyOptions.map((party) => (
+                    <option key={party} value={party}>
+                      {party}
+                    </option>
+                  ))}
+                </motion.select>
+              </div>
+              <div className='flex flex-col'>
+                <label
+                  className='block text-xs font-medium text-gray-600 mb-1'
+                  style={{ fontFamily: 'Tiro Bangla, serif' }}
+                >
+                  {data.analysisFilters.district}
+                </label>
+                <motion.select
+                  value={analysisFilters.district}
+                  onChange={(e) =>
+                    handleAnalysisFilterChange('district', e.target.value)
+                  }
+                  className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
+                  style={{ fontFamily: 'Tiro Bangla, serif' }}
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <option value=''>সব জেলা</option>
+                  {data.districtOptions.map((district) => (
+                    <option key={district} value={district}>
+                      {district}
+                    </option>
+                  ))}
+                </motion.select>
+              </div>
+              <div className='flex flex-col'>
+                <label
+                  className='block text-xs font-medium text-gray-600 mb-1'
+                  style={{ fontFamily: 'Tiro Bangla, serif' }}
+                >
+                  {data.analysisFilters.constituency}
+                </label>
+                <motion.select
+                  value={analysisFilters.constituency}
+                  onChange={(e) =>
+                    handleAnalysisFilterChange('constituency', e.target.value)
+                  }
+                  className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
+                  style={{ fontFamily: 'Tiro Bangla, serif' }}
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <option value=''>সব আসন</option>
+                  {data.constituencyOptions.map((constituency) => (
+                    <option key={constituency} value={constituency}>
+                      {constituency}
+                    </option>
+                  ))}
+                </motion.select>
+              </div>
+            </div>
+            <div className='flex justify-end space-x-2'>
+              <motion.button
+                onClick={handleAnalysisReset}
+                className='bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors duration-200 text-sm'
+                style={{ fontFamily: 'Tiro Bangla, serif' }}
+                whileHover={{
+                  scale: 1.05,
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                }}
+                whileTap={{ scale: 0.95 }}
+              >
+                রিসেট করুন
+              </motion.button>
+              <motion.button
+                onClick={handleAnalysisSearch}
+                className='bg-[#006747] text-white px-4 py-2 rounded-md hover:bg-[#005536] transition-colors duration-200 text-sm'
+                style={{ fontFamily: 'Tiro Bangla, serif' }}
+                whileHover={{
+                  scale: 1.05,
+                  boxShadow: '0 2px 8px rgba(0, 103, 71, 0.2)',
+                }}
+                whileTap={{ scale: 0.95 }}
+              >
+                সার্চ করুন
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Results Table */}
         <div className='overflow-x-auto'>
           <table className='min-w-full divide-y divide-gray-200'>
             <thead className='bg-gray-50'>
@@ -224,145 +439,140 @@ export default function SeatDistribution() {
                   className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
                   style={{ fontFamily: 'Tiro Bangla, serif' }}
                 >
-                  দলের নাম
+                  বিভাগ
                 </th>
                 <th
                   className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
                   style={{ fontFamily: 'Tiro Bangla, serif' }}
                 >
-                  আসন সংখ্যা
+                  জেলা
                 </th>
                 <th
                   className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
                   style={{ fontFamily: 'Tiro Bangla, serif' }}
                 >
-                  শতাংশ
+                  আসন
                 </th>
                 <th
                   className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
                   style={{ fontFamily: 'Tiro Bangla, serif' }}
                 >
-                  অবস্থান
+                  দল
                 </th>
               </tr>
             </thead>
             <tbody className='bg-white divide-y divide-gray-200'>
-              {seatDistributionData
-                .sort((a, b) => b.seats - a.seats)
-                .map((party, index) => (
-                  <motion.tr
-                    key={party.name}
-                    className='hover:bg-gray-50 transition-colors duration-200'
-                    initial={{ x: -20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{
-                      duration: 0.4,
-                      delay: 0.6 + index * 0.1,
-                      ease: 'easeOut',
-                    }}
+              {currentData.map((item, index) => (
+                <motion.tr
+                  key={item.id}
+                  className='hover:bg-gray-50 transition-colors duration-200'
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{
+                    duration: 0.4,
+                    delay: index * 0.05,
+                    ease: 'easeOut',
+                  }}
+                >
+                  <td
+                    className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'
+                    style={{ fontFamily: 'Tiro Bangla, serif' }}
                   >
-                    <td className='px-6 py-4 whitespace-nowrap'>
-                      <div className='flex items-center'>
-                        <div
-                          className='w-4 h-4 rounded mr-3'
-                          style={{ backgroundColor: party.color }}
-                        ></div>
-                        <div
-                          className='text-sm font-medium text-gray-900'
-                          style={{ fontFamily: 'Tiro Bangla, serif' }}
-                        >
-                          {party.name}
-                        </div>
-                      </div>
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap'>
-                      <div
-                        className='text-sm text-gray-900 font-medium'
-                        style={{ fontFamily: 'Tiro Bangla, serif' }}
-                      >
-                        {party.seats.toLocaleString('bn-BD')}
-                      </div>
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap'>
-                      <div
-                        className='text-sm text-gray-900'
-                        style={{ fontFamily: 'Tiro Bangla, serif' }}
-                      >
-                        {((party.seats / totalSeats) * 100).toFixed(1)}%
-                      </div>
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap'>
-                      <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          index === 0
-                            ? 'bg-green-100 text-green-800'
-                            : party.seats >= majoritySeats
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}
-                        style={{ fontFamily: 'Tiro Bangla, serif' }}
-                      >
-                        {index === 0
-                          ? 'সরকার গঠনকারী'
-                          : party.seats >= majoritySeats
-                          ? 'সংখ্যাগরিষ্ঠ'
-                          : 'বিরোধী'}
-                      </span>
-                    </td>
-                  </motion.tr>
-                ))}
+                    {item.division}
+                  </td>
+                  <td
+                    className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'
+                    style={{ fontFamily: 'Tiro Bangla, serif' }}
+                  >
+                    {item.district}
+                  </td>
+                  <td
+                    className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'
+                    style={{ fontFamily: 'Tiro Bangla, serif' }}
+                  >
+                    {item.constituency}
+                  </td>
+                  <td
+                    className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900'
+                    style={{ fontFamily: 'Tiro Bangla, serif' }}
+                  >
+                    <span
+                      className='px-2 py-1 rounded-full text-xs'
+                      style={{
+                        backgroundColor:
+                          COLORS[
+                            data.partyOptions.indexOf(item.party) %
+                              COLORS.length
+                          ] + '20',
+                        color:
+                          COLORS[
+                            data.partyOptions.indexOf(item.party) %
+                              COLORS.length
+                          ],
+                      }}
+                    >
+                      {item.party}
+                    </span>
+                  </td>
+                </motion.tr>
+              ))}
             </tbody>
           </table>
         </div>
-      </motion.div>
 
-      {/* Division-wise Distribution */}
-      <motion.div
-        className='bg-white p-6 rounded-xl shadow-sm border border-gray-100'
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.7, ease: 'easeOut' }}
-      >
-        <h3
-          className='text-lg font-medium text-gray-900 mb-6'
-          style={{ fontFamily: 'Tiro Bangla, serif' }}
-        >
-          বিভাগ অনুযায়ী আসন বিতরণ
-        </h3>
-        <div className='h-96'>
-          <ResponsiveContainer width='100%' height='100%'>
-            <BarChart
-              data={divisionWiseSeats}
-              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className='flex justify-between items-center mt-6'>
+            <div
+              className='text-sm text-gray-700'
+              style={{ fontFamily: 'Tiro Bangla, serif' }}
             >
-              <CartesianGrid strokeDasharray='3 3' />
-              <XAxis dataKey='division' />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar
-                dataKey='awami'
-                stackId='a'
-                fill='#006747'
-                name='আওয়ামী লীগ'
-              />
-              <Bar dataKey='bnp' stackId='a' fill='#00A86B' name='বিএনপি' />
-              <Bar
-                dataKey='jp'
-                stackId='a'
-                fill='#2ECC71'
-                name='জাতীয় পার্টি'
-              />
-              <Bar dataKey='jamat' stackId='a' fill='#58D68D' name='জামায়াত' />
-              <Bar
-                dataKey='independent'
-                stackId='a'
-                fill='#82E0AA'
-                name='স্বতন্ত্র'
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+              {startIndex + 1} থেকে{' '}
+              {Math.min(endIndex, filteredAnalysisData.length)} দেখানো হচ্ছে,
+              মোট {filteredAnalysisData.length} টির মধ্যে
+            </div>
+            <div className='flex space-x-1'>
+              <motion.button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className='px-3 py-1 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed'
+                style={{ fontFamily: 'Tiro Bangla, serif' }}
+                whileHover={{ scale: currentPage === 1 ? 1 : 1.05 }}
+                whileTap={{ scale: currentPage === 1 ? 1 : 0.95 }}
+              >
+                পূর্ববর্তী
+              </motion.button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (page) => (
+                  <motion.button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    className={`px-3 py-1 rounded-md text-sm font-medium ${
+                      currentPage === page
+                        ? 'bg-[#006747] text-white'
+                        : 'border border-gray-300 bg-white text-gray-500 hover:bg-gray-50'
+                    }`}
+                    style={{ fontFamily: 'Tiro Bangla, serif' }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {page}
+                  </motion.button>
+                )
+              )}
+              <motion.button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className='px-3 py-1 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed'
+                style={{ fontFamily: 'Tiro Bangla, serif' }}
+                whileHover={{ scale: currentPage === totalPages ? 1 : 1.05 }}
+                whileTap={{ scale: currentPage === totalPages ? 1 : 0.95 }}
+              >
+                পরবর্তী
+              </motion.button>
+            </div>
+          </div>
+        )}
       </motion.div>
     </div>
   );
