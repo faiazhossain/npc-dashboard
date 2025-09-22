@@ -31,8 +31,8 @@ export default function Navbar({
       icon: MdList,
     },
     {
-      id: "candidates",
-      label: "প্রার্থী",
+      id: "administration",
+      label: "এডমিনিস্ট্রেশন",
       icon: FaAddressCard,
     },
   ];

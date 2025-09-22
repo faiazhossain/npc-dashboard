@@ -1,0 +1,31 @@
+{
+  "surveyors": [
+    {
+      "id": "1",
+      "name": "মাহমুদ হাসান তবীব",
+      "mobile": "০১৮৭৬৫৪৩২৭৬",
+      "email": "mahmud.tabib@gmail.com",
+      "totalForms": "১০২",
+      "approvedForms": "৯০",
+      "rejectedForms": "০৪",
+      "pendingForms": "০৮",
+      "imageUrl": "/Images/gender/profile.svg"
+    }
+  ],
+  "superUsers": [
+    {
+      "id": "1",
+      "name": "আব্দুল্লাহ আল মামুন",
+      "mobile": "০১৭১২৩৪৫৬৭৮",
+      "email": "mamun.abdullah@gmail.com"
+    }
+  ],
+  "admins": [
+    {
+      "id": "1",
+      "name": "তানভীর আহমেদ",
+      "mobile": "০১৮১২৩৪৫৬৭৮",
+      "email": "tanvir.ahmed@gmail.com"
+    }
+  ]
+}

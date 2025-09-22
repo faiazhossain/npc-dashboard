@@ -14,6 +14,7 @@ export default function Dashboard({ onLogout, children }) {
   const getActiveItem = (path) => {
     if (path.includes("/dashboard/general-questions")) return "dashboard";
     if (path.includes("/dashboard/surveys")) return "survey";
+    if (path.includes("/dashboard/administration")) return "administration";
     if (path.includes("/dashboard/candidates")) return "candidates";
     if (path.includes("/dashboard/seat-distribution")) return "seats";
     return "dashboard";
@@ -31,6 +32,9 @@ export default function Dashboard({ onLogout, children }) {
         break;
       case "survey":
         router.push("/dashboard/surveys");
+        break;
+      case "administration":
+        router.push("/dashboard/administration");
         break;
       case "candidates":
         router.push("/dashboard/candidates");

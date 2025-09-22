@@ -36,17 +36,6 @@ export default function SurveyDetails({ params }) {
 
   if (!survey) return null;
 
-  const detailsCards = [
-    { label: "নামঃ", value: survey.details.name },
-    { label: "বয়সঃ", value: survey.details.age },
-    { label: "লিঙ্গঃ", value: survey.details.gender },
-    { label: "পেশাঃ", value: survey.details.occupation },
-    { label: "শিক্ষাগত যোগ্যতাঃ", value: survey.details.education },
-    { label: "ঠিকানাঃ", value: survey.details.address },
-    { label: "ফোনঃ", value: survey.details.phone },
-    { label: "ইমেইলঃ", value: survey.details.email },
-  ];
-
   return (
     <div className='container mx-auto p-6 relative'>
       {/* Top Card */}
@@ -95,34 +84,130 @@ export default function SurveyDetails({ params }) {
         </div>
       </div>
 
-      {/* Details Cards Grid */}
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-        {detailsCards.map((detail, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: index * 0.1 }}
-            className='bg-white rounded-xl shadow-sm p-6 relative'
+      {/* Details Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className='bg-white rounded-xl shadow-sm p-8 relative'
+      >
+        <div className='absolute top-6 right-6'>
+          <button
+            onClick={() => setIsDrawerOpen(true)}
+            className='p-3 bg-[#006747] text-white rounded-lg hover:bg-[#005536] transition-colors flex items-center gap-2'
           >
+            <MdEdit className='w-5 h-5' />
+            <span style={{ fontFamily: "Tiro Bangla, serif" }}>
+              সম্পাদনা করুন
+            </span>
+          </button>
+        </div>
+
+        <h2
+          className='text-2xl mb-6 pb-4 border-b border-gray-200'
+          style={{ fontFamily: "Tiro Bangla, serif" }}
+        >
+          ব্যক্তিগত তথ্য
+        </h2>
+
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6'>
+          <div className='space-y-1'>
             <p
-              className='text-gray-600 mb-2'
+              className='text-gray-600'
               style={{ fontFamily: "Tiro Bangla, serif" }}
             >
-              {detail.label}
+              নামঃ
             </p>
             <p className='text-xl' style={{ fontFamily: "Tiro Bangla, serif" }}>
-              {detail.value}
+              {survey.details.name}
             </p>
-            <button
-              onClick={() => setIsDrawerOpen(true)}
-              className='absolute bottom-4 right-4 p-2 text-[#006747] hover:text-[#005536] transition-colors'
+          </div>
+
+          <div className='space-y-1'>
+            <p
+              className='text-gray-600'
+              style={{ fontFamily: "Tiro Bangla, serif" }}
             >
-              <MdEdit className='w-5 h-5' />
-            </button>
-          </motion.div>
-        ))}
-      </div>
+              বয়সঃ
+            </p>
+            <p className='text-xl' style={{ fontFamily: "Tiro Bangla, serif" }}>
+              {survey.details.age}
+            </p>
+          </div>
+
+          <div className='space-y-1'>
+            <p
+              className='text-gray-600'
+              style={{ fontFamily: "Tiro Bangla, serif" }}
+            >
+              লিঙ্গঃ
+            </p>
+            <p className='text-xl' style={{ fontFamily: "Tiro Bangla, serif" }}>
+              {survey.details.gender}
+            </p>
+          </div>
+
+          <div className='space-y-1'>
+            <p
+              className='text-gray-600'
+              style={{ fontFamily: "Tiro Bangla, serif" }}
+            >
+              পেশাঃ
+            </p>
+            <p className='text-xl' style={{ fontFamily: "Tiro Bangla, serif" }}>
+              {survey.details.occupation}
+            </p>
+          </div>
+
+          <div className='space-y-1'>
+            <p
+              className='text-gray-600'
+              style={{ fontFamily: "Tiro Bangla, serif" }}
+            >
+              শিক্ষাগত যোগ্যতাঃ
+            </p>
+            <p className='text-xl' style={{ fontFamily: "Tiro Bangla, serif" }}>
+              {survey.details.education}
+            </p>
+          </div>
+
+          <div className='space-y-1'>
+            <p
+              className='text-gray-600'
+              style={{ fontFamily: "Tiro Bangla, serif" }}
+            >
+              ফোনঃ
+            </p>
+            <p className='text-xl' style={{ fontFamily: "Tiro Bangla, serif" }}>
+              {survey.details.phone}
+            </p>
+          </div>
+
+          <div className='space-y-1'>
+            <p
+              className='text-gray-600'
+              style={{ fontFamily: "Tiro Bangla, serif" }}
+            >
+              ইমেইলঃ
+            </p>
+            <p className='text-xl' style={{ fontFamily: "Tiro Bangla, serif" }}>
+              {survey.details.email}
+            </p>
+          </div>
+
+          <div className='space-y-1 md:col-span-2'>
+            <p
+              className='text-gray-600'
+              style={{ fontFamily: "Tiro Bangla, serif" }}
+            >
+              ঠিকানাঃ
+            </p>
+            <p className='text-xl' style={{ fontFamily: "Tiro Bangla, serif" }}>
+              {survey.details.address}
+            </p>
+          </div>
+        </div>
+      </motion.div>
 
       {/* Edit Drawer */}
       <AnimatePresence>
