@@ -13,9 +13,10 @@ export default function SurveyContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [currentFilters, setCurrentFilters] = useState({});
   const [selectedSurveys, setSelectedSurveys] = useState([]);
+  console.log('🚀 ~ SurveyContent ~ selectedSurveys:', selectedSurveys);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const itemsPerPage = 20; // API page_size
+  const itemsPerPage = 30; // API page_size
 
   const breadcrumbItems = [
     { label: 'ড্যাশবোর্ড', path: '/dashboard' },
@@ -52,7 +53,6 @@ export default function SurveyContent() {
       }
 
       const jsonData = await response.json();
-      console.log('API Response:', jsonData);
 
       // Handle different response formats
       let surveysArray = [];
@@ -103,7 +103,7 @@ export default function SurveyContent() {
         status:
           survey.status === 'pending'
             ? 'অপেক্ষামান'
-            : survey.status === 'approved'
+            : survey.status === 'accepted'
             ? 'অনুমোদিত'
             : 'বাতিল',
       }));
@@ -111,14 +111,6 @@ export default function SurveyContent() {
       setSurveys(mappedSurveys);
       setTotalItems(total);
       setTotalPages(pages);
-
-      console.log(`Loaded ${mappedSurveys.length} surveys for page ${page}`);
-      console.log(`Total items: ${total}, Total pages: ${pages}`);
-      console.log('Mapped surveys:', mappedSurveys);
-      console.log(
-        'Should show pagination:',
-        pages > 1 || mappedSurveys.length === itemsPerPage
-      );
     } catch (error) {
       console.error('Error loading surveys:', error);
       setError(error.message);
@@ -152,54 +144,92 @@ export default function SurveyContent() {
     loadSurveys(1); // Reload first page without filters
   };
 
+  // Function to flatten an array (handles nested arrays)
+  const flattenArray = (arr) => {
+    return arr.reduce((flat, current) => {
+      return flat.concat(
+        Array.isArray(current) ? flattenArray(current) : current
+      );
+    }, []);
+  };
+
+  // Handle select all surveys on the current page
   const handleSelectAll = (e) => {
     if (e.target.checked) {
-      const newSelections = surveys
-        .map((survey) => survey.id)
-        .filter((id) => !selectedSurveys.includes(id));
-      setSelectedSurveys([...selectedSurveys, ...newSelections]);
+      // Get survey IDs from the current page
+      const newSelections = surveys.map((survey) => survey.id);
+      // Merge with existing selections, ensuring no duplicates and flattening
+      const updatedSelections = [
+        ...new Set([...selectedSurveys, ...newSelections]),
+      ];
+      setSelectedSurveys(updatedSelections);
+      console.log('After Select All (checked):', updatedSelections);
     } else {
+      // Remove only the survey IDs from the current page
       const currentPageIds = surveys.map((survey) => survey.id);
-      setSelectedSurveys(
-        selectedSurveys.filter((id) => !currentPageIds.includes(id))
+      const updatedSelections = selectedSurveys.filter(
+        (id) => !currentPageIds.includes(id)
       );
+      setSelectedSurveys(updatedSelections);
+      console.log('After Select All (unchecked):', updatedSelections);
     }
   };
 
+  // Handle individual survey selection
   const handleSelectSurvey = (id) => {
-    setSelectedSurveys((prev) =>
-      prev.includes(id)
+    setSelectedSurveys((prev) => {
+      const updatedSelections = prev.includes(id)
         ? prev.filter((surveyId) => surveyId !== id)
-        : [...prev, id]
-    );
+        : [...prev, id];
+      console.log('After Select Survey:', updatedSelections);
+      return updatedSelections;
+    });
   };
 
+  // Handle bulk approval of selected surveys
   const handleApproveAll = async () => {
     try {
-      const response = await fetch('/api/approve-surveys', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ surveyIds: selectedSurveys }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to approve surveys');
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        throw new Error('No access token found. Please log in again.');
       }
 
-      // Update the data to reflect approved status
-      setFilteredData((prev) =>
+      // Flatten selectedSurveys to ensure no nested arrays
+      const flatSurveyIds = flattenArray(selectedSurveys);
+      console.log('Sending to API:', flatSurveyIds);
+
+      const response = await fetch(
+        'https://npsbd.xyz/api/surveys/bulk/approve',
+        {
+          method: 'PATCH',
+          headers: {
+            accept: 'application/json',
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            survey_ids: flatSurveyIds,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to approve surveys: ${response.status}`);
+      }
+
+      // Update the surveys state to reflect approved status
+      setSurveys((prev) =>
         prev.map((survey) =>
-          selectedSurveys.includes(survey.id)
+          flatSurveyIds.includes(survey.id)
             ? { ...survey, status: 'অনুমোদিত' }
             : survey
         )
       );
       setSelectedSurveys([]); // Clear selection after approval
+      console.log('Surveys approved, selection cleared');
     } catch (error) {
       console.error('Error approving surveys:', error);
-      setError('Failed to approve surveys');
+      setError('সার্ভে অনুমোদন করতে ব্যর্থ: ' + error.message);
     }
   };
 
