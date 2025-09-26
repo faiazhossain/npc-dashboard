@@ -417,7 +417,7 @@ export default function SurveyContent() {
         filters={{
           বিভাগ: 'বিভাগ',
           আসন: 'আসন',
-          স্ট্যাটাস: 'status',
+          status: 'স্ট্যাটাস',
           'প্রশ্ন ১': 'প্রশ্ন ১',
           'প্রশ্ন ২': 'প্রশ্ন ২',
         }}
@@ -426,7 +426,7 @@ export default function SurveyContent() {
           আসনOptions: constituencies.map(
             (constituency) => constituency.bn_name
           ),
-          স্ট্যাটাসOptions: statusOptions,
+          statusOptions: statusOptions,
           'প্রশ্ন ১Options': question1Options,
           'প্রশ্ন ২Options': question2Options,
         }}
