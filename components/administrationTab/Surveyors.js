@@ -45,15 +45,16 @@ export default function Surveyors() {
         }
 
         const data = await response.json();
+        console.log('🚀 ~ fetchSurveyors ~ data:', data);
         const mappedSurveyors = data.map((surveyor) => ({
           id: surveyor.id,
           name: surveyor.name,
           mobile: surveyor.phone,
           email: surveyor.email,
-          totalForms: 0,
-          approvedForms: 0,
-          rejectedForms: 0,
-          pendingForms: 0,
+          totalForms: surveyor.total_surveys,
+          approvedForms: surveyor.accepted_surveys,
+          rejectedForms: surveyor.rejected_surveys,
+          pendingForms: surveyor.pending_surveys,
           imageUrl: '/default-profile.png',
         }));
 
@@ -105,10 +106,10 @@ export default function Surveyors() {
           name: createdSurveyor.name,
           mobile: createdSurveyor.phone,
           email: createdSurveyor.email,
-          totalForms: 0,
-          approvedForms: 0,
-          rejectedForms: 0,
-          pendingForms: 0,
+          totalForms: createdSurveyor.total_surveys,
+          approvedForms: createdSurveyor.accepted_surveys,
+          rejectedForms: createdSurveyor.rejected_surveys,
+          pendingForms: createdSurveyor.pending_surveys,
           imageUrl: '/default-profile.png',
         },
       ]);
