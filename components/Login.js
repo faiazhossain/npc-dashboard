@@ -1,8 +1,8 @@
-"use client";
-import { motion, AnimatePresence } from "framer-motion";
-import Image from "next/image";
-import { useState } from "react";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+'use client';
+import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
+import { useState } from 'react';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import {
   fadeInUp,
   fadeIn,
@@ -11,22 +11,59 @@ import {
   slideInRight,
   hoverScale,
   tapScale,
-} from "../utils/animations";
+} from '../utils/animations';
 
 export default function Login({ onLoginSuccess }) {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Simulate login process
-    if (onLoginSuccess) {
-      onLoginSuccess();
+    setError('');
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('https://npsbd.xyz/api/login', {
+        method: 'POST',
+        headers: {
+          accept: 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          grant_type: 'password',
+          username: email,
+          password: password,
+          scope: '',
+          client_id: 'string',
+          client_secret: '********',
+        }).toString(),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.access_token) {
+        // Store token (e.g., in localStorage or pass to parent component)
+        localStorage.setItem('access_token', data.access_token);
+        if (onLoginSuccess) {
+          onLoginSuccess();
+        }
+      } else {
+        setError(data.message || 'Invalid email or password');
+      }
+    } catch (err) {
+      setError('An error occurred. Please try again later.');
+    } finally {
+      setIsLoading(false);
     }
   };
+
   return (
     <div className='min-h-screen flex lg:flex-row'>
       {/* Left half - Banner Image */}
@@ -36,7 +73,6 @@ export default function Login({ onLoginSuccess }) {
         initial='initial'
         animate='animate'
       >
-        {/* Background Banner Image */}
         <Image
           src='/Images/left-banner.png'
           alt='Left Banner'
@@ -44,8 +80,6 @@ export default function Login({ onLoginSuccess }) {
           className='object-cover'
           priority
         />
-
-        {/* Bangladesh Map Overlay - Center */}
         <motion.div
           className='absolute inset-x-0 flex items-center justify-center'
           variants={scale}
@@ -62,8 +96,6 @@ export default function Login({ onLoginSuccess }) {
             />
           </div>
         </motion.div>
-
-        {/* Quote Text - Bottom */}
         <motion.div
           className='absolute bottom-4 lg:bottom-8 left-4 lg:left-8 right-4 lg:right-8'
           variants={fadeInUp}
@@ -74,8 +106,8 @@ export default function Login({ onLoginSuccess }) {
           <p
             className='text-white text-center text-sm lg:text-lg xl:text-[36px] font-normal leading-relaxed drop-shadow-lg'
             style={{
-              fontFamily: "Tiro Bangla, serif",
-              textShadow: "2px 2px 4px rgba(0,0,0,0.7)",
+              fontFamily: 'Tiro Bangla, serif',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.7)',
             }}
           >
             &ldquo;দেশ গড়ে ওঠে মানুষের কথায়, মানুষের চাওয়ায়&rdquo;
@@ -122,10 +154,9 @@ export default function Login({ onLoginSuccess }) {
             animate='animate'
             transition={{ delay: 0.5 }}
           >
-            {/* Main Heading */}
             <motion.h1
               className='text-2xl lg:text-32px font-normal text-shadow-lg text-gray-900 leading-[130%] tracking-[-0.02em] px-2'
-              style={{ fontFamily: "Tiro Bangla, serif" }}
+              style={{ fontFamily: 'Tiro Bangla, serif' }}
               variants={fadeInUp}
               initial='initial'
               animate='animate'
@@ -133,11 +164,9 @@ export default function Login({ onLoginSuccess }) {
             >
               আপনার একাউন্টে লগইন করুন
             </motion.h1>
-
-            {/* Subtitle */}
             <motion.p
               className='text-sm lg:text-base text-gray-600 pb-4'
-              style={{ fontFamily: "Tiro Bangla, serif" }}
+              style={{ fontFamily: 'Tiro Bangla, serif' }}
               variants={fadeInUp}
               initial='initial'
               animate='animate'
@@ -145,6 +174,22 @@ export default function Login({ onLoginSuccess }) {
             >
               ইমেইল ও পাসওয়ার্ড ব্যবহার করে আপনার একাউন্টে প্রবেশ করুন
             </motion.p>
+
+            {/* Error Message */}
+            <AnimatePresence>
+              {error && (
+                <motion.div
+                  className='text-red-500 text-sm'
+                  style={{ fontFamily: 'Tiro Bangla, serif' }}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {error}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Login Form */}
             <motion.form
@@ -165,7 +210,7 @@ export default function Login({ onLoginSuccess }) {
                 <label
                   htmlFor='email'
                   className='block text-sm font-medium text-gray-700 mb-2'
-                  style={{ fontFamily: "Tiro Bangla, serif" }}
+                  style={{ fontFamily: 'Tiro Bangla, serif' }}
                 >
                   ইমেইল
                 </label>
@@ -174,11 +219,13 @@ export default function Login({ onLoginSuccess }) {
                   name='email'
                   type='email'
                   required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className='w-full px-3 py-2 lg:py-3 border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] text-sm lg:text-base transition-all duration-200'
                   placeholder='আপনার ইমেইল প্রবেশ করুন'
                   whileFocus={{
                     scale: 1.02,
-                    boxShadow: "0 0 0 3px rgba(0, 103, 71, 0.1)",
+                    boxShadow: '0 0 0 3px rgba(0, 103, 71, 0.1)',
                   }}
                   transition={{ duration: 0.2 }}
                 />
@@ -194,7 +241,7 @@ export default function Login({ onLoginSuccess }) {
                 <label
                   htmlFor='password'
                   className='block text-sm font-medium text-gray-700 mb-2'
-                  style={{ fontFamily: "Tiro Bangla, serif" }}
+                  style={{ fontFamily: 'Tiro Bangla, serif' }}
                 >
                   পাসওয়ার্ড
                 </label>
@@ -202,13 +249,15 @@ export default function Login({ onLoginSuccess }) {
                   <motion.input
                     id='password'
                     name='password'
-                    type={showPassword ? "text" : "password"}
+                    type={showPassword ? 'text' : 'password'}
                     required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     className='w-full px-3 py-2 lg:py-3 border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] text-sm lg:text-base transition-all duration-200'
                     placeholder='আপনার পাসওয়ার্ড প্রবেশ করুন'
                     whileFocus={{
                       scale: 1.02,
-                      boxShadow: "0 0 0 3px rgba(0, 103, 71, 0.1)",
+                      boxShadow: '0 0 0 3px rgba(0, 103, 71, 0.1)',
                     }}
                     transition={{ duration: 0.2 }}
                   />
@@ -241,7 +290,7 @@ export default function Login({ onLoginSuccess }) {
                 <label
                   htmlFor='remember-me'
                   className='ml-2 block text-sm text-gray-700'
-                  style={{ fontFamily: "Tiro Bangla, serif" }}
+                  style={{ fontFamily: 'Tiro Bangla, serif' }}
                 >
                   লগইন মনে রাখুন
                 </label>
@@ -250,13 +299,16 @@ export default function Login({ onLoginSuccess }) {
               {/* Login Button */}
               <motion.button
                 type='submit'
-                className='w-full py-3 lg:py-4 px-4 bg-[#006747] text-white font-medium rounded-md hover:bg-[#005536] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#006747] transition duration-200 text-sm lg:text-base'
-                style={{ fontFamily: "Tiro Bangla, serif" }}
+                disabled={isLoading}
+                className={`w-full py-3 lg:py-4 px-4 bg-[#006747] text-white font-medium rounded-md hover:bg-[#005536] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#006747] transition duration-200 text-sm lg:text-base ${
+                  isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+                style={{ fontFamily: 'Tiro Bangla, serif' }}
                 variants={fadeInUp}
-                whileHover={hoverScale}
-                whileTap={tapScale}
+                whileHover={isLoading ? {} : hoverScale}
+                whileTap={isLoading ? {} : tapScale}
               >
-                লগইন করুন
+                {isLoading ? 'লগইন হচ্ছে...' : 'লগইন করুন'}
               </motion.button>
             </motion.form>
           </motion.div>

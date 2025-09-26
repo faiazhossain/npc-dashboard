@@ -1,23 +1,29 @@
-"use client";
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useRouter, usePathname } from "next/navigation";
-import Navbar from "./Navbar";
-import Image from "next/image";
-import { fadeIn, fadeInUp, slideInLeft } from "../utils/animations";
+'use client';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter, usePathname } from 'next/navigation';
+import Navbar from './Navbar';
+import Image from 'next/image';
+import { fadeIn, fadeInUp, slideInLeft } from '../utils/animations';
 
 export default function Dashboard({ onLogout, children }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState({
+    name: 'মাহমুদ হাসান তবীব',
+    email: '',
+    user_type: 'এডমিন',
+  });
+  const [error, setError] = useState('');
   const router = useRouter();
   const pathname = usePathname();
 
   const getActiveItem = (path) => {
-    if (path.includes("/dashboard/general-questions")) return "dashboard";
-    if (path.includes("/dashboard/surveys")) return "survey";
-    if (path.includes("/dashboard/administration")) return "administration";
-    if (path.includes("/dashboard/candidates")) return "candidates";
-    if (path.includes("/dashboard/seat-distribution")) return "seats";
-    return "dashboard";
+    if (path.includes('/dashboard/general-questions')) return 'dashboard';
+    if (path.includes('/dashboard/surveys')) return 'survey';
+    if (path.includes('/dashboard/administration')) return 'administration';
+    if (path.includes('/dashboard/candidates')) return 'candidates';
+    if (path.includes('/dashboard/seat-distribution')) return 'seats';
+    return 'dashboard';
   };
 
   const toggleMobileMenu = () => {
@@ -27,23 +33,64 @@ export default function Dashboard({ onLogout, children }) {
   const handleNavItemClick = (item) => {
     setIsMobileMenuOpen(false);
     switch (item) {
-      case "dashboard":
-        router.push("/dashboard/general-questions");
+      case 'dashboard':
+        router.push('/dashboard/general-questions');
         break;
-      case "survey":
-        router.push("/dashboard/surveys");
+      case 'survey':
+        router.push('/dashboard/surveys');
         break;
-      case "administration":
-        router.push("/dashboard/administration");
+      case 'administration':
+        router.push('/dashboard/administration');
         break;
-      case "candidates":
-        router.push("/dashboard/candidates");
+      case 'candidates':
+        router.push('/dashboard/candidates');
         break;
-      case "seats":
-        router.push("/dashboard/seat-distribution");
+      case 'seats':
+        router.push('/dashboard/seat-distribution');
         break;
     }
   };
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        setError('No access token found. Please log in again.');
+        router.push('/login');
+        return;
+      }
+
+      try {
+        const response = await fetch('https://npsbd.xyz/api/me', {
+          method: 'GET',
+          headers: {
+            accept: 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setUser({
+            name: data.name,
+            email: data.email,
+            user_type:
+              data.user_type === 'super_admin' ? 'সুপার এডমিন' : 'এডমিন',
+          });
+        } else {
+          setError('Failed to fetch user data. Please log in again.');
+          localStorage.removeItem('access_token');
+          router.push('/login');
+        }
+      } catch (err) {
+        setError('An error occurred while fetching user data.');
+        localStorage.removeItem('access_token');
+        router.push('/login');
+      }
+    };
+
+    fetchUserData();
+  }, [router]);
 
   return (
     <div className='min-h-screen bg-gray-50 flex'>
@@ -81,7 +128,7 @@ export default function Dashboard({ onLogout, children }) {
           variants={fadeInUp}
           initial='initial'
           animate='animate'
-          transition={{ duration: 0.5, ease: "easeOut" }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
         >
           {/* Navbar */}
           <nav className='flex items-center justify-between bg-white p-4 shadow-md sticky top-0 z-10'>
@@ -113,21 +160,24 @@ export default function Dashboard({ onLogout, children }) {
                 <div className='flex flex-col'>
                   <span
                     className='text-[12px] text-gray-800'
-                    style={{ fontFamily: "Tiro Bangla, serif" }}
+                    style={{ fontFamily: 'Tiro Bangla, serif' }}
                   >
-                    এডমিন
+                    {user.user_type}
                   </span>
                   <span
                     className='text-[16px] font-bold text-gray-600'
-                    style={{ fontFamily: "Tiro Bangla, serif" }}
+                    style={{ fontFamily: 'Tiro Bangla, serif' }}
                   >
-                    মাহমুদ হাসান তবীব
+                    {user.name}
                   </span>
                 </div>
               </div>
               <button
                 className='bg-[#FFEAEA] text-[#DB0000] px-5 py-3 rounded-2xl hover:bg-red-200 hover:text-red-600 transition flex items-center space-x-2 cursor-pointer'
-                onClick={onLogout}
+                onClick={() => {
+                  localStorage.removeItem('access_token');
+                  onLogout();
+                }}
               >
                 <Image
                   src='/Images/Logout.svg'
@@ -135,10 +185,26 @@ export default function Dashboard({ onLogout, children }) {
                   width={20}
                   height={20}
                 />
-                <span style={{ fontFamily: "Tiro Bangla, serif" }}>লগ আউট</span>
+                <span style={{ fontFamily: 'Tiro Bangla, serif' }}>লগ আউট</span>
               </button>
             </div>
           </nav>
+
+          {/* Error Message */}
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                className='text-red-500 text-sm p-4 text-center'
+                style={{ fontFamily: 'Tiro Bangla, serif' }}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+              >
+                {error}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Main Content */}
           <div className='bg-gray-50'>{children}</div>
