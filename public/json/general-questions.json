@@ -18,13 +18,25 @@
   },
   "charts": [
     {
-      "id": "electionExpectation",
-      "question": "আগামী সংসদ নির্বাচন কত দিনের মধ্যে প্রত্যাশা করেন?",
+      "id": "governmentExpectationsUpdated",
+      "question": "বাংলাদেশের আগামীর নির্বাচিত সরকারের কাছে আপনার প্রধান চাওয়া কি কি?",
       "chartType": "pie",
       "hasInnerRadius": true,
       "responses": [
-        { "label": "এক বছর", "percentage": "৩৭.২%" },
-        { "label": "দেড় বছর", "percentage": "৬২.৮%" }
+        { "label": "উন্নত শিক্ষাব্যবস্থা", "percentage": "৪৫.৩%" },
+        { "label": "পরিবেশ দূষণ রোধ", "percentage": "৫৪.৭%" },
+
+        { "label": "উন্নত স্বাস্থ্যসেবা", "percentage": "৩৮.৯%" },
+        { "label": "উন্নত যোগাযোগ", "percentage": "৬১.১%" },
+
+        { "label": "সামাজিক সুরক্ষা ও নিরাপত্তা", "percentage": "৪৯.৬%" },
+        { "label": "কর্মসংস্থান", "percentage": "৫০.৪%" },
+
+        { "label": "দ্রব্যমূল্য নিয়ন্ত্রন", "percentage": "৫৮.২%" },
+        { "label": "দূর্নীতি নিয়ন্ত্রণ", "percentage": "৪১.৮%" },
+
+        { "label": "আইনশৃঙ্খলা পরিস্থিতি নিয়ন্ত্রণ", "percentage": "৬৬.৭%" },
+        { "label": "উন্নত শিক্ষাব্যবস্থা", "percentage": "৩৩.৩%" }
       ]
     },
     {
@@ -33,11 +45,24 @@
       "chartType": "pie",
       "hasInnerRadius": false,
       "responses": [
-        { "label": "আওয়ামীলীগ", "percentage": "১২.৮%" },
-        { "label": "বিএনপি", "percentage": "৩২.৮%" },
-        { "label": "জাতীয় পার্টি", "percentage": "২৬.৮%" },
-        { "label": "জামায়াতে ইসলামী", "percentage": "৩২.৮%" },
-        { "label": "অন্যান্য", "percentage": "৩৬.৮%" }
+        { "label": "বিএনপি", "percentage": "২১.৩%" },
+        { "label": "বাংলাদেশ জামায়াতে ইসলামী", "percentage": "১১.৪%" },
+        { "label": "এনসিপি", "percentage": "৫.৯%" },
+        { "label": "আওয়ামী লীগ", "percentage": "১.৩%" },
+        { "label": "জাতীয় পার্টি", "percentage": "১২.৬%" },
+        { "label": "ওয়ার্কার্স পার্টি", "percentage": "৪.২%" },
+        { "label": "গণ অধিকার পরিষদ", "percentage": "৭.৮%" },
+        { "label": "ইসলামী শাসনতন্ত্র আন্দোলন", "percentage": "৩.৬%" },
+        { "label": "এলডিপি", "percentage": "২.৯%" },
+        { "label": "বাসদ", "percentage": "১.৮%" },
+        { "label": "জাসদ", "percentage": "২.৪%" },
+        { "label": "সিপিবি", "percentage": "১.৯%" },
+        { "label": "কল্যাণ পার্টি", "percentage": "১.৬%" },
+        { "label": "জাগপা", "percentage": "১.২%" },
+        { "label": "জেপি", "percentage": "১.৫%" },
+        { "label": "বিজেপি", "percentage": "১.১%" },
+        { "label": "জেএসডি", "percentage": "১.৭%" },
+        { "label": "জাতীয় দল", "percentage": "২.৪%" }
       ]
     },
     {

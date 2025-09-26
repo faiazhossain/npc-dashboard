@@ -1,7 +1,18 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from 'recharts';
 import Image from 'next/image';
 
 export default function GeneralQuestions() {
@@ -241,9 +252,10 @@ export default function GeneralQuestions() {
     }));
   };
 
-  // Component for rendering individual pie charts
-  const PieChartComponent = ({ chart, index }) => {
+  // Component for rendering individual charts (Pie or Bar)
+  const ChartComponent = ({ chart, index }) => {
     const chartData = processChartData(chart.responses);
+    const isPartyPreference = chart.id === 'partyPreference';
 
     return (
       <motion.div
@@ -266,8 +278,11 @@ export default function GeneralQuestions() {
         >
           {chart.question}
         </h2>
-        <div className='h-80 flex'>
-          <div className='w-1/2 flex flex-col justify-center space-y-2 pr-4'>
+        <div
+          className='flex'
+          style={{ height: isPartyPreference ? '600px' : '320px' }}
+        >
+          <div className='w-1/2 flex flex-col justify-center space-y-2 pr-4 overflow-y-auto'>
             {chartData.map((entry, entryIndex) => (
               <div key={entry.name} className='flex items-center'>
                 <div
@@ -277,7 +292,7 @@ export default function GeneralQuestions() {
                   }}
                 ></div>
                 <span
-                  className='text-sm font-medium'
+                  className='text-sm font-medium truncate'
                   style={{ fontFamily: 'Tiro Bangla, serif' }}
                 >
                   {entry.name}: {entry.displayValue}
@@ -287,26 +302,56 @@ export default function GeneralQuestions() {
           </div>
           <div className='w-1/2'>
             <ResponsiveContainer width='100%' height='100%'>
-              <PieChart>
-                <Pie
+              {isPartyPreference ? (
+                <BarChart
                   data={chartData}
-                  cx='50%'
-                  cy='50%'
-                  innerRadius={chart.hasInnerRadius ? 40 : 0}
-                  outerRadius={80}
-                  fill='#8884d8'
-                  paddingAngle={1}
-                  dataKey='value'
+                  layout='vertical'
+                  margin={{ top: 20, right: 20, left: 20, bottom: 20 }}
                 >
-                  {chartData.map((entry, entryIndex) => (
-                    <Cell
-                      key={`cell-${entryIndex}`}
-                      fill={COLORS[entryIndex % COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => [`${value.toFixed(1)}%`]} />
-              </PieChart>
+                  <CartesianGrid strokeDasharray='3 3' />
+                  <XAxis
+                    type='number'
+                    domain={[0, 100]}
+                    tickFormatter={(value) => `${value}%`}
+                  />
+                  <YAxis
+                    type='category'
+                    dataKey='name'
+                    width={100}
+                    tick={{ fontSize: 12, fontFamily: 'Tiro Bangla, serif' }}
+                  />
+                  <Tooltip formatter={(value) => [`${value.toFixed(1)}%`]} />
+                  <Bar dataKey='value' fill='#8884d8'>
+                    {chartData.map((entry, entryIndex) => (
+                      <Cell
+                        key={`cell-${entryIndex}`}
+                        fill={COLORS[entryIndex % COLORS.length]}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              ) : (
+                <PieChart>
+                  <Pie
+                    data={chartData}
+                    cx='50%'
+                    cy='50%'
+                    innerRadius={chart.hasInnerRadius ? 40 : 0}
+                    outerRadius={80}
+                    fill='#8884d8'
+                    paddingAngle={1}
+                    dataKey='value'
+                  >
+                    {chartData.map((entry, entryIndex) => (
+                      <Cell
+                        key={`cell-${entryIndex}`}
+                        fill={COLORS[entryIndex % COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => [`${value.toFixed(1)}%`]} />
+                </PieChart>
+              )}
             </ResponsiveContainer>
           </div>
         </div>
@@ -323,6 +368,16 @@ export default function GeneralQuestions() {
     '#f5ffc6',
     '#003b36',
     '#59114d',
+    '#FF6F61',
+    '#6B7280',
+    '#10B981',
+    '#FBBF24',
+    '#3B82F6',
+    '#D1D5DB',
+    '#EF4444',
+    '#8B5CF6',
+    '#F97316',
+    '#4B5563',
   ];
 
   return (
@@ -671,7 +726,7 @@ export default function GeneralQuestions() {
         transition={{ duration: 0.6, delay: 0.4, ease: 'easeOut' }}
       >
         {data.charts?.map((chart, index) => (
-          <PieChartComponent key={chart.id} chart={chart} index={index} />
+          <ChartComponent key={chart.id} chart={chart} index={index} />
         ))}
       </motion.div>
     </div>
