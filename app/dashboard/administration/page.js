@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Surveyors from '@/components/administrationTab/Surveyors';
 // import SuperUsers from "@/components/administrationTab/SuperUsers";
 import Admins from '@/components/administrationTab/Admins';
+import Users from '@/components/administrationTab/Users';
 
 export default function Administration() {
   const [activeTab, setActiveTab] = useState('surveyors');
@@ -12,6 +13,7 @@ export default function Administration() {
     { id: 'surveyors', label: 'সার্ভেয়ার' },
     // { id: "superusers", label: "সুপার ইউজার" },
     { id: 'admins', label: 'এডমিন' },
+    { id: 'users', label: 'ইউজার' },
   ];
 
   return (
@@ -70,6 +72,7 @@ export default function Administration() {
           {activeTab === 'surveyors' && <Surveyors />}
           {/* {activeTab === "superusers" && <SuperUsers />} */}
           {activeTab === 'admins' && <Admins />}
+          {activeTab === 'users' && <Users />}
         </motion.div>
       </AnimatePresence>
     </div>

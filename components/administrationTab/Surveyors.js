@@ -235,12 +235,6 @@ export default function Surveyors() {
         </h2>
         <div className='flex gap-3'>
           <button
-            className='px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors'
-            style={{ fontFamily: 'Tiro Bangla, serif' }}
-          >
-            ফিল্টার
-          </button>
-          <button
             onClick={() => setIsAddDrawerOpen(true)}
             className='px-4 py-2 bg-[#006747] text-white rounded-lg hover:bg-[#005536] transition-colors'
             style={{ fontFamily: 'Tiro Bangla, serif' }}

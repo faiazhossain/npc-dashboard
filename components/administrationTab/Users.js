@@ -6,27 +6,27 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-export default function Admins() {
+export default function Users() {
   const token = localStorage.getItem('access_token');
   const { userId } = useAuth();
-  const [admins, setAdmins] = useState([]);
+  const [users, setUsers] = useState([]);
   const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
   const [hasNextPage, setHasNextPage] = useState(true);
   const [error, setError] = useState(null);
-  const [newAdmin, setNewAdmin] = useState({
+  const [newUser, setNewUser] = useState({
     name: '',
     phone: '',
     email: '',
     password: '',
   });
 
-  const fetchAdmins = useCallback(
+  const fetchUsers = useCallback(
     async (page) => {
       try {
         const response = await fetch(
-          `https://npsbd.xyz/api/users/?user_type=admin&page=${page}&page_size=${pageSize}`,
+          `https://npsbd.xyz/api/users/?user_type=duser&page=${page}&page_size=${pageSize}`,
           {
             method: 'GET',
             headers: {
@@ -36,22 +36,22 @@ export default function Admins() {
           }
         );
         if (!response.ok) {
-          throw new Error('Failed to fetch admins');
+          throw new Error('Failed to fetch users');
         }
         const data = await response.json();
-        setAdmins(data);
+        setUsers(data);
         setHasNextPage(data.length === pageSize);
       } catch (error) {
-        console.error('Error fetching admins:', error);
-        setError('Failed to fetch admins. Please try again.');
+        console.error('Error fetching users:', error);
+        setError('Failed to fetch users. Please try again.');
       }
     },
     [pageSize]
   );
 
   useEffect(() => {
-    fetchAdmins(currentPage);
-  }, [currentPage, fetchAdmins]);
+    fetchUsers(currentPage);
+  }, [currentPage, fetchUsers]);
 
   const handleAddAdmin = async (e) => {
     e.preventDefault();
@@ -71,11 +71,11 @@ export default function Admins() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: newAdmin.email,
-          name: newAdmin.name,
-          password: newAdmin.password,
-          phone: newAdmin.phone,
-          user_type: 'admin',
+          email: newUser.email,
+          name: newUser.name,
+          password: newUser.password,
+          phone: newUser.phone,
+          user_type: 'duser',
           authorized_by: userId || 0,
         }),
       });
@@ -85,8 +85,8 @@ export default function Admins() {
       }
 
       const createdAdmin = await response.json();
-      setAdmins([
-        ...admins,
+      setUsers([
+        ...users,
         {
           id: createdAdmin.id,
           name: createdAdmin.name,
@@ -95,7 +95,7 @@ export default function Admins() {
         },
       ]);
 
-      setNewAdmin({ name: '', phone: '', email: '', password: '' });
+      setNewUser({ name: '', phone: '', email: '', password: '' });
       setIsAddDrawerOpen(false);
     } catch (error) {
       console.error('Error creating admin:', error);
@@ -107,7 +107,7 @@ export default function Admins() {
     // Show confirmation toast with Yes/No buttons
     toast(
       <div style={{ fontFamily: 'Tiro Bangla, serif' }}>
-        <p>আপনি কি নিশ্চিতভাবে এই এডমিনকে ডিলিট করতে চান?</p>
+        <p>আপনি কি নিশ্চিতভাবে এই ইউজারকে ডিলিট করতে চান?</p>
         <div className='flex gap-3 mt-3'>
           <button
             onClick={async () => {
@@ -134,9 +134,9 @@ export default function Admins() {
                   throw new Error('Failed to delete admin');
                 }
 
-                setAdmins(admins.filter((admin) => admin.id !== id));
+                setUsers(users.filter((admin) => admin.id !== id));
                 toast.dismiss();
-                toast.success('এডমিন সফলভাবে ডিলিট করা হয়েছে', {
+                toast.success('ইউজার সফলভাবে ডিলিট করা হয়েছে', {
                   style: { fontFamily: 'Tiro Bangla, serif' },
                 });
               } catch (error) {
@@ -196,14 +196,14 @@ export default function Admins() {
           className='text-xl font-semibold'
           style={{ fontFamily: 'Tiro Bangla, serif' }}
         >
-          এডমিন তালিকা
+          ইউজার তালিকা
         </h2>
         <button
           onClick={() => setIsAddDrawerOpen(true)}
           className='px-4 py-2 bg-[#006747] text-white rounded-lg hover:bg-[#005536] transition-colors'
           style={{ fontFamily: 'Tiro Bangla, serif' }}
         >
-          নতুন এডমিন যুক্ত করুন
+          নতুন ইউজার যুক্ত করুন
         </button>
       </div>
 
@@ -223,7 +223,7 @@ export default function Admins() {
             </tr>
           </thead>
           <tbody className='divide-y divide-gray-200'>
-            {admins.map((admin) => (
+            {users.map((admin) => (
               <tr key={admin.id}>
                 <td className='px-6 py-4'>
                   <span style={{ fontFamily: 'Tiro Bangla, serif' }}>
@@ -306,7 +306,7 @@ export default function Admins() {
                   className='text-xl font-semibold'
                   style={{ fontFamily: 'Tiro Bangla, serif' }}
                 >
-                  নতুন এডমিন
+                  নতুন ইউজার
                 </h3>
                 <button
                   onClick={() => setIsAddDrawerOpen(false)}
@@ -317,7 +317,7 @@ export default function Admins() {
               </div>
 
               <form className='space-y-4' onSubmit={handleAddAdmin}>
-                {Object.entries(newAdmin).map(([key, value]) => (
+                {Object.entries(newUser).map(([key, value]) => (
                   <div key={key}>
                     <label
                       className='block text-sm font-medium text-gray-700 mb-1'
@@ -341,8 +341,8 @@ export default function Admins() {
                       }
                       value={value}
                       onChange={(e) =>
-                        setNewAdmin({
-                          ...newAdmin,
+                        setNewUser({
+                          ...newUser,
                           [key]: e.target.value,
                         })
                       }
