@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MdClose, MdEdit } from 'react-icons/md';
 import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 // Adjust the path to where your useAuth hook is defined
 
 export default function Surveyors() {
@@ -137,8 +139,71 @@ export default function Surveyors() {
     setIsEditMode(false);
   };
 
-  const handleDelete = (id) => {
-    setSurveyors(surveyors.filter((s) => s.id !== id));
+  const handleDeleteSurveyor = (id) => {
+    // Show confirmation toast with Yes/No buttons
+    toast(
+      <div style={{ fontFamily: 'Tiro Bangla, serif' }}>
+        <p>আপনি কি নিশ্চিতভাবে এই সার্ভেয়ারকে ডিলিট করতে চান?</p>
+        <div className='flex gap-3 mt-3'>
+          <button
+            onClick={async () => {
+              try {
+                const token = localStorage.getItem('access_token');
+                if (!token) {
+                  throw new Error(
+                    'No access token found. Please log in again.'
+                  );
+                }
+
+                const response = await fetch(
+                  `https://npsbd.xyz/api/users/${id}`,
+                  {
+                    method: 'DELETE',
+                    headers: {
+                      accept: '*/*',
+                      Authorization: `Bearer ${token}`,
+                    },
+                  }
+                );
+
+                if (!response.ok) {
+                  throw new Error('Failed to delete surveyor');
+                }
+
+                setSurveyors(
+                  surveyors.filter((surveyor) => surveyor.id !== id)
+                );
+                toast.dismiss(); // Dismiss the confirmation toast first
+                toast.success('সার্ভেয়ার সফলভাবে ডিলিট করা হয়েছে', {
+                  style: { fontFamily: 'Tiro Bangla, serif' },
+                  autoClose: 3000, // Auto close after 3 seconds
+                });
+              } catch (error) {
+                console.error('Error deleting surveyor:', error);
+                setError('Failed to delete surveyor. Please try again.');
+              }
+            }}
+            className='px-3 py-1 bg-[#006747] text-white rounded hover:bg-[#005536]'
+          >
+            হ্যাঁ
+          </button>
+          <button
+            onClick={() => toast.dismiss()}
+            className='px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600'
+          >
+            না
+          </button>
+        </div>
+      </div>,
+      {
+        position: 'top-center',
+        autoClose: false,
+        closeOnClick: false,
+        closeButton: false,
+        draggable: false,
+        style: { fontFamily: 'Tiro Bangla, serif' },
+      }
+    );
   };
 
   const handleNextPage = () => {
@@ -149,6 +214,7 @@ export default function Surveyors() {
 
   return (
     <div>
+      <ToastContainer position='top-center' limit={1} newestOnTop={true} />
       {/* Error Message */}
       {error && (
         <div
@@ -245,7 +311,7 @@ export default function Surveyors() {
                       বিস্তারিত
                     </button>
                     <button
-                      onClick={() => handleDelete(surveyor.id)}
+                      onClick={() => handleDeleteSurveyor(surveyor.id)}
                       className='px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors'
                       style={{ fontFamily: 'Tiro Bangla, serif' }}
                     >
