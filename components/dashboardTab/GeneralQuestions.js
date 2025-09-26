@@ -257,6 +257,11 @@ export default function GeneralQuestions() {
     const chartData = processChartData(chart.responses);
     const isPartyPreference = chart.id === 'partyPreference';
 
+    // Find the maximum percentage for the partyPreference chart
+    const maxPercentage = isPartyPreference
+      ? Math.max(...chartData.map((entry) => entry.value))
+      : 100;
+
     return (
       <motion.div
         className='bg-white p-6 rounded-xl shadow-sm border border-gray-100'
@@ -311,7 +316,7 @@ export default function GeneralQuestions() {
                   <CartesianGrid strokeDasharray='3 3' />
                   <XAxis
                     type='number'
-                    domain={[0, 100]}
+                    domain={[0, maxPercentage]}
                     tickFormatter={(value) => `${value}%`}
                   />
                   <YAxis
