@@ -1,20 +1,44 @@
-"use client";
-import { motion } from "framer-motion";
-import { MdRemoveRedEye } from "react-icons/md";
-import { useRouter } from "next/navigation";
+'use client';
+import { motion } from 'framer-motion';
+import { MdRemoveRedEye } from 'react-icons/md';
+import { useRouter } from 'next/navigation';
 
-export default function SurveyTable({ data, currentPage, itemsPerPage }) {
+export default function SurveyTable({
+  data,
+  currentPage,
+  itemsPerPage,
+  selectedSurveys,
+  onSelectSurvey,
+}) {
   const router = useRouter();
   const getStatusColor = (status) => {
     switch (status) {
-      case "অনুমোদিত":
-        return "bg-green-100 text-green-800";
-      case "বাতিল":
-        return "bg-red-100 text-red-800";
-      case "অপেক্ষামান":
-        return "bg-yellow-100 text-yellow-800";
+      case 'অনুমোদিত':
+        return 'bg-green-100 text-green-800';
+      case 'বাতিল':
+        return 'bg-red-100 text-red-800';
+      case 'অপেক্ষামান':
+        return 'bg-yellow-100 text-yellow-800';
       default:
-        return "bg-gray-100 text-gray-800";
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  // Calculate if all items on the current page are selected (for header checkbox)
+  const isAllSelectedOnPage =
+    data.length > 0 && data.every((item) => selectedSurveys.includes(item.id));
+
+  const handleSelectAllOnPage = (e) => {
+    const pageIds = data.map((item) => item.id);
+    if (e.target.checked) {
+      // Add all unselected page items to selection
+      const newSelections = pageIds.filter(
+        (id) => !selectedSurveys.includes(id)
+      );
+      onSelectSurvey(newSelections); // Batch toggle for addition
+    } else {
+      // Remove all page items from selection
+      onSelectSurvey(pageIds.map((id) => id)); // Batch toggle for removal
     }
   };
 
@@ -26,37 +50,48 @@ export default function SurveyTable({ data, currentPage, itemsPerPage }) {
             <tr>
               <th
                 className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
-                style={{ fontFamily: "Tiro Bangla, serif" }}
+                style={{ fontFamily: 'Tiro Bangla, serif' }}
+              >
+                <input
+                  type='checkbox'
+                  checked={isAllSelectedOnPage}
+                  onChange={handleSelectAllOnPage}
+                  className='h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500'
+                />
+              </th>
+              <th
+                className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
+                style={{ fontFamily: 'Tiro Bangla, serif' }}
               >
                 তারিখ
               </th>
               <th
                 className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
-                style={{ fontFamily: "Tiro Bangla, serif" }}
+                style={{ fontFamily: 'Tiro Bangla, serif' }}
               >
                 এরিয়া
               </th>
               <th
                 className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
-                style={{ fontFamily: "Tiro Bangla, serif" }}
+                style={{ fontFamily: 'Tiro Bangla, serif' }}
               >
                 প্রশ্নের উত্তর-১
               </th>
               <th
                 className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
-                style={{ fontFamily: "Tiro Bangla, serif" }}
+                style={{ fontFamily: 'Tiro Bangla, serif' }}
               >
                 প্রশ্নের উত্তর-২
               </th>
               <th
                 className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
-                style={{ fontFamily: "Tiro Bangla, serif" }}
+                style={{ fontFamily: 'Tiro Bangla, serif' }}
               >
                 স্ট্যাটাস
               </th>
               <th
                 className='px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider'
-                style={{ fontFamily: "Tiro Bangla, serif" }}
+                style={{ fontFamily: 'Tiro Bangla, serif' }}
               >
                 অ্যাকশন
               </th>
@@ -73,19 +108,30 @@ export default function SurveyTable({ data, currentPage, itemsPerPage }) {
               >
                 <td
                   className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'
-                  style={{ fontFamily: "Tiro Bangla, serif" }}
+                  style={{ fontFamily: 'Tiro Bangla, serif' }}
+                >
+                  <input
+                    type='checkbox'
+                    checked={selectedSurveys.includes(item.id)}
+                    onChange={() => onSelectSurvey(item.id)}
+                    className='h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500'
+                  />
+                </td>
+                <td
+                  className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'
+                  style={{ fontFamily: 'Tiro Bangla, serif' }}
                 >
                   {item.date}
                 </td>
                 <td
                   className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'
-                  style={{ fontFamily: "Tiro Bangla, serif" }}
+                  style={{ fontFamily: 'Tiro Bangla, serif' }}
                 >
                   {item.area}
                 </td>
                 <td
                   className='px-6 py-4 text-sm text-gray-900'
-                  style={{ fontFamily: "Tiro Bangla, serif" }}
+                  style={{ fontFamily: 'Tiro Bangla, serif' }}
                 >
                   <div className='flex flex-wrap gap-1'>
                     {item.answer1.map((answer, i) => (
@@ -100,7 +146,7 @@ export default function SurveyTable({ data, currentPage, itemsPerPage }) {
                 </td>
                 <td
                   className='px-6 py-4 text-sm text-gray-900'
-                  style={{ fontFamily: "Tiro Bangla, serif" }}
+                  style={{ fontFamily: 'Tiro Bangla, serif' }}
                 >
                   <div className='flex flex-wrap gap-1'>
                     {item.answer2.map((answer, i) => (
@@ -118,7 +164,7 @@ export default function SurveyTable({ data, currentPage, itemsPerPage }) {
                     className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
                       item.status
                     )}`}
-                    style={{ fontFamily: "Tiro Bangla, serif" }}
+                    style={{ fontFamily: 'Tiro Bangla, serif' }}
                   >
                     {item.status}
                   </span>
