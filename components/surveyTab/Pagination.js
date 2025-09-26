@@ -58,8 +58,8 @@ export default function Pagination({
         style={{ fontFamily: 'Tiro Bangla, serif' }}
       >
         {hasCompletePagination
-          ? `পৃষ্ঠা ${currentPage} এর ${totalPages} টি, মোট ${totalItems} টি আইটেম`
-          : `পৃষ্ঠা ${currentPage}, প্রতি পৃষ্ঠায় ${itemsPerPage} টি আইটেম`}
+          ? `পৃষ্ঠা ${currentPage} `
+          : `পৃষ্ঠা ${currentPage}`}
       </div>
       <div className='flex items-center space-x-1'>
         {/* First page button */}

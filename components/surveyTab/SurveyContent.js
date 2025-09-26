@@ -312,7 +312,7 @@ export default function SurveyContent() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3 }}
             onClick={handleApproveAll}
-            className='bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded'
+            className='bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded'
             style={{ fontFamily: 'Tiro Bangla, serif' }}
           >
             সব অনুমোদন করুন
