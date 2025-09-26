@@ -20,6 +20,7 @@ export default function SurveyContent() {
 
   // State for API-fetched filter options
   const [divisions, setDivisions] = useState([]);
+  const [districts, setDistricts] = useState([]);
   const [constituencies, setConstituencies] = useState([]);
 
   // Static filter options
@@ -182,23 +183,71 @@ export default function SurveyContent() {
       }
     };
 
-    // Fetch all constituencies (you might want to filter by division later)
-    // const fetchConstituencies = async () => {
-    //   try {
-    //     const response = await fetch('https://npsbd.xyz/api/seats', {
-    //       method: 'GET',
-    //       headers: { accept: 'application/json' },
-    //     });
-    //     const data = await response.json();
-    //     setConstituencies(data);
-    //   } catch (error) {
-    //     console.error('Error fetching constituencies:', error);
-    //   }
-    // };
-
     fetchDivisions();
-    // fetchConstituencies();
   }, []);
+
+  // Fetch districts when division changes
+  useEffect(() => {
+    if (currentFilters.বিভাগ) {
+      const selectedDivision = divisions.find(
+        (div) => div.bn_name === currentFilters.বিভাগ
+      );
+      if (selectedDivision) {
+        fetch(
+          `https://npsbd.xyz/api/divisions/${selectedDivision.id}/districts`,
+          {
+            method: 'GET',
+            headers: { accept: 'application/json' },
+          }
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            setDistricts(data);
+            setConstituencies([]); // Reset constituencies
+            setCurrentFilters((prev) => ({
+              ...prev,
+              জেলা: '',
+              আসন: '',
+            }));
+          })
+          .catch((error) => console.error('Error fetching districts:', error));
+      }
+    } else {
+      setDistricts([]);
+      setConstituencies([]);
+      setCurrentFilters((prev) => ({
+        ...prev,
+        জেলা: '',
+        আসন: '',
+      }));
+    }
+  }, [currentFilters.বিভাগ, divisions]);
+
+  // Fetch constituencies when district changes
+  useEffect(() => {
+    if (currentFilters.জেলা) {
+      const selectedDistrict = districts.find(
+        (dist) => dist.bn_name === currentFilters.জেলা
+      );
+      if (selectedDistrict) {
+        fetch(`https://npsbd.xyz/api/districts/${selectedDistrict.id}/seats`, {
+          method: 'GET',
+          headers: { accept: 'application/json' },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            setConstituencies(data);
+            setCurrentFilters((prev) => ({ ...prev, আসন: '' }));
+          })
+          .catch((error) =>
+            console.error('Error fetching constituencies:', error)
+          );
+      }
+    } else {
+      setConstituencies([]);
+      setCurrentFilters((prev) => ({ ...prev, আসন: '' }));
+    }
+  }, [currentFilters.জেলা, districts]);
 
   useEffect(() => {
     loadSurveys(currentPage, currentFilters);
@@ -221,6 +270,8 @@ export default function SurveyContent() {
     setCurrentFilters({});
     setCurrentPage(1);
     setSelectedSurveys([]);
+    setDistricts([]);
+    setConstituencies([]);
     loadSurveys(1, {}); // Reload first page without filters
   };
 
@@ -416,6 +467,7 @@ export default function SurveyContent() {
       <SurveyFilters
         filters={{
           বিভাগ: 'বিভাগ',
+          জেলা: 'জেলা',
           আসন: 'আসন',
           status: 'স্ট্যাটাস',
           'প্রশ্ন ১': 'প্রশ্ন ১',
@@ -423,6 +475,7 @@ export default function SurveyContent() {
         }}
         filterOptions={{
           বিভাগOptions: divisions.map((div) => div.bn_name),
+          জেলাOptions: districts.map((dist) => dist.bn_name),
           আসনOptions: constituencies.map(
             (constituency) => constituency.bn_name
           ),
