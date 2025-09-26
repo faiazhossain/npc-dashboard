@@ -67,6 +67,21 @@ export default function SurveyContent() {
         throw new Error('No access token found. Please log in again.');
       }
 
+      // Call the cleanup API first to ensure we get clean survey data
+      try {
+        await fetch('https://npsbd.xyz/api/surveys/cleanup', {
+          method: 'DELETE',
+          headers: {
+            accept: '*/*',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log('Survey cleanup completed successfully');
+      } catch (cleanupError) {
+        console.error('Survey cleanup error:', cleanupError);
+        // Continue with fetching surveys even if cleanup fails
+      }
+
       console.log(
         `Loading surveys: Page ${page}, Items per page: ${itemsPerPage}`,
         'Filters:',
