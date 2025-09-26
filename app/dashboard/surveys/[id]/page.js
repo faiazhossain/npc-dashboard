@@ -13,6 +13,72 @@ export default function SurveyDetails({ params }) {
   const [error, setError] = useState('');
   const { userData } = useAuth();
 
+  // Handle Approve button click
+  const handleApprove = async () => {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      setError('No access token found. Please log in again.');
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://npsbd.xyz/api/survey/${resolvedParams.id}/approve`,
+        {
+          method: 'PATCH',
+          headers: {
+            accept: 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        setSurvey((prev) => ({ ...prev, status: 'approved' }));
+        console.log('Survey approved successfully');
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || 'Failed to approve survey.');
+      }
+    } catch (err) {
+      console.error('Error approving survey:', err);
+      setError('An error occurred while approving the survey.');
+    }
+  };
+
+  // Handle Reject button click
+  const handleReject = async () => {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      setError('No access token found. Please log in again.');
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://npsbd.xyz/api/survey/${resolvedParams.id}/reject`,
+        {
+          method: 'PATCH',
+          headers: {
+            accept: 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        setSurvey((prev) => ({ ...prev, status: 'rejected' }));
+        console.log('Survey rejected successfully');
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || 'Failed to reject survey.');
+      }
+    } catch (err) {
+      console.error('Error rejecting survey:', err);
+      setError('An error occurred while rejecting the survey.');
+    }
+  };
+
   useEffect(() => {
     const fetchSurveyDetails = async () => {
       const token = localStorage.getItem('access_token');
@@ -297,24 +363,28 @@ export default function SurveyDetails({ params }) {
             )}
           </div>
           <div className='flex gap-3'>
-            {survey.status === 'pending' && (
-              <>
-                <button
-                  className='px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2'
-                  style={{ fontFamily: 'Tiro Bangla, serif' }}
-                >
-                  <MdCheckCircle className='w-4 h-4' />
-                  অনুমোদন দিন
-                </button>
-                <button
-                  className='px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2'
-                  style={{ fontFamily: 'Tiro Bangla, serif' }}
-                >
-                  <MdCancel className='w-4 h-4' />
-                  বাতিল করুন
-                </button>
-              </>
-            )}
+            {(userData?.user_type === 'super_admin' ||
+              userData?.id === survey.user_id) &&
+              survey.status === 'pending' && (
+                <>
+                  <button
+                    onClick={handleApprove}
+                    className='px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2'
+                    style={{ fontFamily: 'Tiro Bangla, serif' }}
+                  >
+                    <MdCheckCircle className='w-4 h-4' />
+                    অনুমোদন দিন
+                  </button>
+                  <button
+                    onClick={handleReject}
+                    className='px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2'
+                    style={{ fontFamily: 'Tiro Bangla, serif' }}
+                  >
+                    <MdCancel className='w-4 h-4' />
+                    বাতিল করুন
+                  </button>
+                </>
+              )}
           </div>
         </div>
       </div>
