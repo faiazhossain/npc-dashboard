@@ -64,47 +64,6 @@
         { "label": "জেএসডি", "percentage": "১.৭%" },
         { "label": "জাতীয় দল", "percentage": "২.৪%" }
       ]
-    },
-    {
-      "id": "partyResponsibility",
-      "question": "জনগণের মৌলিক ও রাজনৈতিক অধিকার রক্ষায় কোন দল বেশি দায়িত্বশীল ভূমিকা পালন করছে?",
-      "chartType": "pie",
-      "hasInnerRadius": true,
-      "responses": [
-        { "label": "আওয়ামীলীগ", "percentage": "১৩.৬৮%" },
-        { "label": "বিএনপি", "percentage": "৬৬.৬৮%" },
-        { "label": "জাতীয় পার্টি", "percentage": "৮.৬৮%" },
-        { "label": "জামায়াতে ইসলামী", "percentage": "১৭.২%" },
-        { "label": "অন্যান্য", "percentage": "১.৬৮%" }
-      ]
-    },
-    {
-      "id": "necessaryChanges",
-      "question": "যে কোনো দলকে আগামী সংসদ নির্বাচনে জিততে হলে সবচেয়ে গুরুত্বপূর্ণ কোন পরিবর্তন জরুরী?",
-      "chartType": "pie",
-      "hasInnerRadius": true,
-      "responses": [
-        { "label": "আইন শৃঙ্খলায় হস্তক্ষেপ", "percentage": "১১.২৫%" },
-        { "label": "অনৈতিকতা", "percentage": "১৩.৬৮%" },
-        { "label": "জনবিচ্ছিন্নতা", "percentage": "১৪.৯৯%" },
-        { "label": "দখলদারিত্ব", "percentage": "১৮.১৪%" },
-        { "label": "দুর্নীতি", "percentage": "২৩.৬১%" },
-        { "label": "পক্ষপাতিত্ব", "percentage": "১৩.৫৫%" },
-        { "label": "পেশীশক্তির ব্যাবহার", "percentage": "৫.২৭%" },
-        { "label": "উগ্র আচরণ", "percentage": "১.৫২%" }
-      ]
-    },
-    {
-      "id": "economicPriorities",
-      "question": "অর্থনৈতিক উন্নয়নে সবচেয়ে গুরুত্বপূর্ণ কোন ক্ষেত্রটি?",
-      "chartType": "pie",
-      "hasInnerRadius": false,
-      "responses": [
-        { "label": "কৃষি", "percentage": "২৮.৫%" },
-        { "label": "শিল্প", "percentage": "৩৫.২%" },
-        { "label": "সেবা", "percentage": "২০.৩%" },
-        { "label": "প্রযুক্তি", "percentage": "১৬.০%" }
-      ]
     }
   ]
 }
