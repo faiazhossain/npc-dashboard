@@ -1,9 +1,9 @@
-"use client";
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
-import Login from "../components/Login";
-import Dashboard from "../components/Dashboard";
+'use client';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import Login from '../components/Login';
+import Dashboard from '../components/Dashboard';
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -11,17 +11,17 @@ export default function Home() {
 
   const handleLoginSuccess = () => {
     // Set auth cookie
-    document.cookie = "auth=true; path=/";
+    document.cookie = 'auth=true; path=/';
     setIsLoggedIn(true);
     // Redirect to general questions page
-    router.push("/dashboard/general-questions");
+    router.push('/dashboard/general-questions');
   };
 
   const handleLogout = () => {
     // Remove auth cookie
-    document.cookie = "auth=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
+    document.cookie = 'auth=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
     setIsLoggedIn(false);
-    router.push("/");
+    router.push('/');
   };
 
   return (

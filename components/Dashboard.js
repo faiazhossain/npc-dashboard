@@ -2,20 +2,32 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, usePathname } from 'next/navigation';
+import { useSelector, useDispatch } from 'react-redux';
+import {
+  setUserData,
+  clearUserData,
+  selectUser,
+  selectIsAuthenticated,
+} from '../store/slices/userSlice';
 import Navbar from './Navbar';
 import Image from 'next/image';
 import { fadeIn, fadeInUp, slideInLeft } from '../utils/animations';
 
 export default function Dashboard({ onLogout, children }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [user, setUser] = useState({
-    name: 'মাহমুদ হাসান তবীব',
-    email: '',
-    user_type: 'এডমিন',
-  });
   const [error, setError] = useState('');
   const router = useRouter();
   const pathname = usePathname();
+  const dispatch = useDispatch();
+
+  // Get user data from Redux store
+  const userData = useSelector(selectUser);
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+
+  // For display purposes, transform user_type to Bangla
+  const getDisplayUserType = (userType) => {
+    return userType === 'super_admin' ? 'সুপার এডমিন' : 'এডমিন';
+  };
 
   const getActiveItem = (path) => {
     if (path.includes('/dashboard/general-questions')) return 'dashboard';
@@ -56,7 +68,7 @@ export default function Dashboard({ onLogout, children }) {
       const token = localStorage.getItem('access_token');
       if (!token) {
         setError('No access token found. Please log in again.');
-        router.push('/login');
+        router.push('/');
         return;
       }
 
@@ -71,26 +83,35 @@ export default function Dashboard({ onLogout, children }) {
 
         if (response.ok) {
           const data = await response.json();
-          setUser({
-            name: data.name,
-            email: data.email,
-            user_type:
-              data.user_type === 'super_admin' ? 'সুপার এডমিন' : 'এডমিন',
-          });
+          // Store the complete user data in Redux (including id and user_type)
+          dispatch(setUserData(data));
+
+          console.log('Complete API Response:', data);
+          console.log('Stored in Redux - User ID:', data.id);
+          console.log('Stored in Redux - User Type:', data.user_type);
+          console.log('All user data available in Redux store');
         } else {
           setError('Failed to fetch user data. Please log in again.');
           localStorage.removeItem('access_token');
-          router.push('/login');
+          router.push('/');
         }
       } catch (err) {
         setError('An error occurred while fetching user data.');
         localStorage.removeItem('access_token');
-        router.push('/login');
+        router.push('/');
       }
     };
 
-    fetchUserData();
-  }, [router]);
+    // Only fetch if we don't have user data in Redux or if not authenticated
+    if (!userData || !isAuthenticated) {
+      fetchUserData();
+    } else {
+      // Console log existing data from Redux
+      console.log('User data loaded from Redux/localStorage:', userData);
+      console.log('User ID from Redux:', userData.id);
+      console.log('User Type from Redux:', userData.user_type);
+    }
+  }, [router, userData, isAuthenticated, dispatch]);
 
   return (
     <div className='min-h-screen bg-gray-50 flex'>
@@ -162,13 +183,15 @@ export default function Dashboard({ onLogout, children }) {
                     className='text-[12px] text-gray-800'
                     style={{ fontFamily: 'Tiro Bangla, serif' }}
                   >
-                    {user.user_type}
+                    {userData
+                      ? getDisplayUserType(userData.user_type)
+                      : 'এডমিন'}
                   </span>
                   <span
                     className='text-[16px] font-bold text-gray-600'
                     style={{ fontFamily: 'Tiro Bangla, serif' }}
                   >
-                    {user.name}
+                    {userData?.name || 'লোডিং...'}
                   </span>
                 </div>
               </div>
@@ -176,6 +199,7 @@ export default function Dashboard({ onLogout, children }) {
                 className='bg-[#FFEAEA] text-[#DB0000] px-5 py-3 rounded-2xl hover:bg-red-200 hover:text-red-600 transition flex items-center space-x-2 cursor-pointer'
                 onClick={() => {
                   localStorage.removeItem('access_token');
+                  dispatch(clearUserData()); // Clear Redux state and localStorage
                   onLogout();
                 }}
               >
