@@ -28,14 +28,18 @@ export default function Surveyors() {
   useEffect(() => {
     const fetchSurveyors = async () => {
       try {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+          throw new Error('No access token found. Please log in again.');
+        }
+
         const response = await fetch(
           `https://npsbd.xyz/api/users/?user_type=surveyer&page=${currentPage}&page_size=${pageSize}`,
           {
             method: 'GET',
             headers: {
               accept: 'application/json',
-              Authorization:
-                'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzdXBlcmFkbWluQGV4YW1wbGUuY29tIiwiZXhwIjoxNzYwMTUzMjk0fQ.QdT_7rCvOt2BqbxerRQHB2y5OcHeshDCfq9prGaOon4',
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -75,12 +79,16 @@ export default function Surveyors() {
     setError(null); // Reset error state
 
     try {
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        throw new Error('No access token found. Please log in again.');
+      }
+
       const response = await fetch('https://npsbd.xyz/api/users/surveyer', {
         method: 'POST',
         headers: {
           accept: 'application/json',
-          Authorization:
-            'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzdXBlcmFkbWluQGV4YW1wbGUuY29tIiwiZXhwIjoxNzYwMTY1Mjg4fQ.1m4KZ1ngPjRoWM7hgr8m9w8nQY2q16TmbbvqfcANFZA',
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({

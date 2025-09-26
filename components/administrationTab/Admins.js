@@ -1,18 +1,20 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MdClose } from 'react-icons/md';
 import { useAuth } from '@/hooks/useAuth';
-// Adjust the path to where your useAuth hook is defined
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function Admins() {
-  const { userId } = useAuth(); // Get userId from useAuth hook
+  const token = localStorage.getItem('access_token');
+  const { userId } = useAuth();
   const [admins, setAdmins] = useState([]);
   const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
   const [hasNextPage, setHasNextPage] = useState(true);
-  const [error, setError] = useState(null); // State for error handling
+  const [error, setError] = useState(null);
   const [newAdmin, setNewAdmin] = useState({
     name: '',
     phone: '',
@@ -20,47 +22,52 @@ export default function Admins() {
     password: '',
   });
 
-  const fetchAdmins = async (page) => {
-    try {
-      const response = await fetch(
-        `https://npsbd.xyz/api/users/?user_type=admin&page=${page}&page_size=${pageSize}`,
-        {
-          method: 'GET',
-          headers: {
-            accept: 'application/json',
-            Authorization:
-              'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzdXBlcmFkbWluQGV4YW1wbGUuY29tIiwiZXhwIjoxNzYwMTUzMjk0fQ.QdT_7rCvOt2BqbxerRQHB2y5OcHeshDCfq9prGaOon4',
-          },
+  const fetchAdmins = useCallback(
+    async (page) => {
+      try {
+        const response = await fetch(
+          `https://npsbd.xyz/api/users/?user_type=admin&page=${page}&page_size=${pageSize}`,
+          {
+            method: 'GET',
+            headers: {
+              accept: 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (!response.ok) {
+          throw new Error('Failed to fetch admins');
         }
-      );
-      if (!response.ok) {
-        throw new Error('Failed to fetch admins');
+        const data = await response.json();
+        setAdmins(data);
+        setHasNextPage(data.length === pageSize);
+      } catch (error) {
+        console.error('Error fetching admins:', error);
+        setError('Failed to fetch admins. Please try again.');
       }
-      const data = await response.json();
-      setAdmins(data);
-      setHasNextPage(data.length === pageSize);
-    } catch (error) {
-      console.error('Error fetching admins:', error);
-      setError('Failed to fetch admins. Please try again.');
-    }
-  };
+    },
+    [pageSize]
+  );
 
   useEffect(() => {
     fetchAdmins(currentPage);
-  }, [currentPage]);
+  }, [currentPage, fetchAdmins]);
 
-  // Handle form submission to create a new admin
   const handleAddAdmin = async (e) => {
     e.preventDefault();
-    setError(null); // Reset error state
+    setError(null);
 
     try {
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        throw new Error('No access token found. Please log in again.');
+      }
+
       const response = await fetch('https://npsbd.xyz/api/users/', {
         method: 'POST',
         headers: {
           accept: 'application/json',
-          Authorization:
-            'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzdXBlcmFkbWluQGV4YW1wbGUuY29tIiwiZXhwIjoxNzYwMTY1OTI3fQ.xiEzDABzBhj6iWaEngC5D16TkWy2tTicf0ouwn3eDd4',
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -69,7 +76,7 @@ export default function Admins() {
           password: newAdmin.password,
           phone: newAdmin.phone,
           user_type: 'admin',
-          authorized_by: userId || 0, // Use userId from useAuth, fallback to 0 if undefined
+          authorized_by: userId || 0,
         }),
       });
 
@@ -78,7 +85,6 @@ export default function Admins() {
       }
 
       const createdAdmin = await response.json();
-      // Add the new admin to the state
       setAdmins([
         ...admins,
         {
@@ -89,13 +95,75 @@ export default function Admins() {
         },
       ]);
 
-      // Reset form and close drawer
       setNewAdmin({ name: '', phone: '', email: '', password: '' });
       setIsAddDrawerOpen(false);
     } catch (error) {
       console.error('Error creating admin:', error);
       setError('Failed to create admin. Please try again.');
     }
+  };
+
+  const handleDeleteAdmin = (id) => {
+    // Show confirmation toast with Yes/No buttons
+    toast(
+      <div style={{ fontFamily: 'Tiro Bangla, serif' }}>
+        <p>আপনি কি নিশ্চিতভাবে এই এডমিনকে ডিলিট করতে চান?</p>
+        <div className='flex gap-3 mt-3'>
+          <button
+            onClick={async () => {
+              try {
+                const token = localStorage.getItem('access_token');
+                if (!token) {
+                  throw new Error(
+                    'No access token found. Please log in again.'
+                  );
+                }
+
+                const response = await fetch(
+                  `https://npsbd.xyz/api/users/${id}`,
+                  {
+                    method: 'DELETE',
+                    headers: {
+                      accept: '*/*',
+                      Authorization: `Bearer ${token}`,
+                    },
+                  }
+                );
+
+                if (!response.ok) {
+                  throw new Error('Failed to delete admin');
+                }
+
+                setAdmins(admins.filter((admin) => admin.id !== id));
+                toast.success('এডমিন সফলভাবে ডিলিট করা হয়েছে', {
+                  style: { fontFamily: 'Tiro Bangla, serif' },
+                });
+              } catch (error) {
+                console.error('Error deleting admin:', error);
+                setError('Failed to delete admin. Please try again.');
+              }
+            }}
+            className='px-3 py-1 bg-[#006747] text-white rounded hover:bg-[#005536]'
+          >
+            হ্যাঁ
+          </button>
+          <button
+            onClick={() => toast.dismiss()}
+            className='px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600'
+          >
+            না
+          </button>
+        </div>
+      </div>,
+      {
+        position: 'top-center',
+        autoClose: false,
+        closeOnClick: false,
+        closeButton: false,
+        draggable: false,
+        style: { fontFamily: 'Tiro Bangla, serif' },
+      }
+    );
   };
 
   const handleNextPage = () => {
@@ -112,7 +180,7 @@ export default function Admins() {
 
   return (
     <div>
-      {/* Error Message */}
+      <ToastContainer position='top-center' />
       {error && (
         <div
           className='mb-4 p-4 bg-red-100 text-red-700 rounded-lg'
@@ -122,7 +190,6 @@ export default function Admins() {
         </div>
       )}
 
-      {/* Header with button */}
       <div className='flex justify-between items-center mb-6'>
         <h2
           className='text-xl font-semibold'
@@ -139,7 +206,6 @@ export default function Admins() {
         </button>
       </div>
 
-      {/* Table */}
       <div className='bg-white rounded-xl shadow-sm overflow-hidden'>
         <table className='w-full'>
           <thead className='bg-gray-50'>
@@ -181,7 +247,7 @@ export default function Admins() {
                       সম্পাদনা
                     </button>
                     <button
-                      onClick={() => {}}
+                      onClick={() => handleDeleteAdmin(admin.id)}
                       className='px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors'
                       style={{ fontFamily: 'Tiro Bangla, serif' }}
                     >
@@ -195,7 +261,6 @@ export default function Admins() {
         </table>
       </div>
 
-      {/* Pagination Controls */}
       <div className='flex justify-between items-center mt-4'>
         <button
           onClick={handlePrevPage}
@@ -226,7 +291,6 @@ export default function Admins() {
         </button>
       </div>
 
-      {/* Add Admin Drawer */}
       <AnimatePresence>
         {isAddDrawerOpen && (
           <>
