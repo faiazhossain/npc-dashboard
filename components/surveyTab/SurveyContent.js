@@ -18,13 +18,45 @@ export default function SurveyContent() {
   const [totalPages, setTotalPages] = useState(0);
   const itemsPerPage = 30; // API page_size
 
+  // State for API-fetched filter options
+  const [divisions, setDivisions] = useState([]);
+  const [constituencies, setConstituencies] = useState([]);
+
+  // Static filter options
+  const statusOptions = [
+    { value: 'pending', label: 'অপেক্ষামান' },
+    { value: 'accepted', label: 'অনুমোদিত' },
+    { value: 'rejected', label: 'বাতিল' },
+  ];
+  const question1Options = [
+    'নিরাপত্তা',
+    'কর্মসংস্থান',
+    'উন্নত যোগায়োগ',
+    'পরিবেশ দূষণ রোধ',
+    'দারিদ্র্যমুক্তি',
+    'উন্নত স্বাস্থ্যসেবা',
+    'উন্নত শিক্ষাব্যবস্থা',
+    'দ্রব্যমূল্য নিয়ন্ত্রন',
+  ];
+  const question2Options = [
+    'সত্তা',
+    'মানবিক',
+    'রুচিশীল',
+    'আদর্শবান',
+    'জনপ্রিয়',
+    'দেশপ্রেম',
+    'সত্যবাদী',
+    'দূরদর্শিতা',
+    'উচ্চশিক্ষিত',
+  ];
+
   const breadcrumbItems = [
     { label: 'ড্যাশবোর্ড', path: '/dashboard' },
     { label: 'সার্ভে তালিকা', path: '/dashboard/surveys' },
   ];
 
-  // Function to fetch surveys from API with pagination
-  const loadSurveys = async (page = 1) => {
+  // Function to fetch surveys from API with pagination and filters
+  const loadSurveys = async (page = 1, filters = {}) => {
     try {
       setLoading(true);
       setError(null);
@@ -35,11 +67,26 @@ export default function SurveyContent() {
       }
 
       console.log(
-        `Loading surveys: Page ${page}, Items per page: ${itemsPerPage}`
+        `Loading surveys: Page ${page}, Items per page: ${itemsPerPage}`,
+        'Filters:',
+        filters
       );
 
+      // Build query parameters
+      const queryParams = new URLSearchParams({
+        page: page.toString(),
+        page_size: itemsPerPage.toString(),
+      });
+
+      // Add filter parameters directly with Bangla keys (as API expects)
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value && value.trim() !== '') {
+          queryParams.append(key, value);
+        }
+      });
+
       const response = await fetch(
-        `https://npsbd.xyz/api/surveys/?page=${page}&page_size=${itemsPerPage}`,
+        `https://npsbd.xyz/api/surveys/?${queryParams.toString()}`,
         {
           headers: {
             accept: 'application/json',
@@ -119,29 +166,62 @@ export default function SurveyContent() {
     }
   };
 
+  // Fetch filter options on component mount
   useEffect(() => {
-    loadSurveys(currentPage);
-  }, [currentPage]);
+    // Fetch divisions
+    const fetchDivisions = async () => {
+      try {
+        const response = await fetch('https://npsbd.xyz/api/divisions', {
+          method: 'GET',
+          headers: { accept: 'application/json' },
+        });
+        const data = await response.json();
+        setDivisions(data);
+      } catch (error) {
+        console.error('Error fetching divisions:', error);
+      }
+    };
+
+    // Fetch all constituencies (you might want to filter by division later)
+    // const fetchConstituencies = async () => {
+    //   try {
+    //     const response = await fetch('https://npsbd.xyz/api/seats', {
+    //       method: 'GET',
+    //       headers: { accept: 'application/json' },
+    //     });
+    //     const data = await response.json();
+    //     setConstituencies(data);
+    //   } catch (error) {
+    //     console.error('Error fetching constituencies:', error);
+    //   }
+    // };
+
+    fetchDivisions();
+    // fetchConstituencies();
+  }, []);
+
+  useEffect(() => {
+    loadSurveys(currentPage, currentFilters);
+  }, [currentPage, currentFilters]);
 
   const handleFilterChange = (key, value) => {
     setCurrentFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  // Note: For API-based filtering, you would need to implement server-side filtering
-  // This is a placeholder for future implementation
+  // Handle search with filters
   const handleSearch = () => {
-    // TODO: Implement API-based filtering with query parameters
-    console.log('Search with filters:', currentFilters);
-    // Example: loadSurveys(1, currentFilters);
+    console.log('Applying filters:', currentFilters);
     setCurrentPage(1);
     setSelectedSurveys([]);
+    // Load surveys with current filters
+    loadSurveys(1, currentFilters);
   };
 
   const handleReset = () => {
     setCurrentFilters({});
     setCurrentPage(1);
     setSelectedSurveys([]);
-    loadSurveys(1); // Reload first page without filters
+    loadSurveys(1, {}); // Reload first page without filters
   };
 
   // Function to flatten an array (handles nested arrays)
@@ -334,8 +414,22 @@ export default function SurveyContent() {
     <div className='p-4 lg:p-8 min-h-screen'>
       <SurveyBreadcrumb items={breadcrumbItems} />
       <SurveyFilters
-        filters={{}} // TODO: Get from API or define statically
-        filterOptions={{}} // TODO: Get from API or define statically
+        filters={{
+          বিভাগ: 'বিভাগ',
+          আসন: 'আসন',
+          স্ট্যাটাস: 'status',
+          'প্রশ্ন ১': 'প্রশ্ন ১',
+          'প্রশ্ন ২': 'প্রশ্ন ২',
+        }}
+        filterOptions={{
+          বিভাগOptions: divisions.map((div) => div.bn_name),
+          আসনOptions: constituencies.map(
+            (constituency) => constituency.bn_name
+          ),
+          স্ট্যাটাসOptions: statusOptions,
+          'প্রশ্ন ১Options': question1Options,
+          'প্রশ্ন ২Options': question2Options,
+        }}
         currentFilters={currentFilters}
         onFilterChange={handleFilterChange}
         onSearch={handleSearch}
@@ -363,8 +457,18 @@ export default function SurveyContent() {
               className='bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-sm transition-colors duration-200 flex items-center gap-2'
               style={{ fontFamily: 'Tiro Bangla, serif' }}
             >
-              <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M5 13l4 4L19 7' />
+              <svg
+                className='w-4 h-4'
+                fill='none'
+                stroke='currentColor'
+                viewBox='0 0 24 24'
+              >
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth={2}
+                  d='M5 13l4 4L19 7'
+                />
               </svg>
               সব অনুমোদন করুন ({selectedSurveys.length})
             </motion.button>
@@ -376,8 +480,18 @@ export default function SurveyContent() {
               className='bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow-sm transition-colors duration-200 flex items-center gap-2'
               style={{ fontFamily: 'Tiro Bangla, serif' }}
             >
-              <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' />
+              <svg
+                className='w-4 h-4'
+                fill='none'
+                stroke='currentColor'
+                viewBox='0 0 24 24'
+              >
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth={2}
+                  d='M6 18L18 6M6 6l12 12'
+                />
               </svg>
               সব বাতিল করুন ({selectedSurveys.length})
             </motion.button>
