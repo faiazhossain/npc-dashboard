@@ -68,19 +68,20 @@ export default function SurveyContent() {
       }
 
       // Call the cleanup API first to ensure we get clean survey data
-      try {
-        await fetch('https://npsbd.xyz/api/surveys/cleanup', {
-          method: 'DELETE',
-          headers: {
-            accept: '*/*',
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        console.log('Survey cleanup completed successfully');
-      } catch (cleanupError) {
-        console.error('Survey cleanup error:', cleanupError);
-        // Continue with fetching surveys even if cleanup fails
-      }
+      // Commented out for now - will be used later
+      // try {
+      //   await fetch('https://npsbd.xyz/api/surveys/cleanup', {
+      //     method: 'DELETE',
+      //     headers: {
+      //       accept: '*/*',
+      //       Authorization: `Bearer ${token}`,
+      //     },
+      //   });
+      //   console.log('Survey cleanup completed successfully');
+      // } catch (cleanupError) {
+      //   console.error('Survey cleanup error:', cleanupError);
+      //   // Continue with fetching surveys even if cleanup fails
+      // }
 
       console.log(
         `Loading surveys: Page ${page}, Items per page: ${itemsPerPage}`,
