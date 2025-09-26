@@ -196,7 +196,7 @@ export default function SurveyContent() {
 
       // Flatten selectedSurveys to ensure no nested arrays
       const flatSurveyIds = flattenArray(selectedSurveys);
-      console.log('Sending to API:', flatSurveyIds);
+      console.log('Sending approval request to API:', flatSurveyIds);
 
       const response = await fetch(
         'https://npsbd.xyz/api/surveys/bulk/approve',
@@ -226,10 +226,57 @@ export default function SurveyContent() {
         )
       );
       setSelectedSurveys([]); // Clear selection after approval
-      console.log('Surveys approved, selection cleared');
+      console.log('Surveys approved successfully, selection cleared');
     } catch (error) {
       console.error('Error approving surveys:', error);
       setError('সার্ভে অনুমোদন করতে ব্যর্থ: ' + error.message);
+    }
+  };
+
+  // Handle bulk rejection of selected surveys
+  const handleRejectAll = async () => {
+    try {
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        throw new Error('No access token found. Please log in again.');
+      }
+
+      // Flatten selectedSurveys to ensure no nested arrays
+      const flatSurveyIds = flattenArray(selectedSurveys);
+      console.log('Sending rejection request to API:', flatSurveyIds);
+
+      const response = await fetch(
+        'https://npsbd.xyz/api/surveys/bulk/reject',
+        {
+          method: 'PATCH',
+          headers: {
+            accept: 'application/json',
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            survey_ids: flatSurveyIds,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to reject surveys: ${response.status}`);
+      }
+
+      // Update the surveys state to reflect rejected status
+      setSurveys((prev) =>
+        prev.map((survey) =>
+          flatSurveyIds.includes(survey.id)
+            ? { ...survey, status: 'বাতিল' }
+            : survey
+        )
+      );
+      setSelectedSurveys([]); // Clear selection after rejection
+      console.log('Surveys rejected successfully, selection cleared');
+    } catch (error) {
+      console.error('Error rejecting surveys:', error);
+      setError('সার্ভে বাতিল করতে ব্যর্থ: ' + error.message);
     }
   };
 
@@ -307,16 +354,34 @@ export default function SurveyContent() {
           </span>
         </label>
         {selectedSurveys.length > 0 && (
-          <motion.button
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3 }}
-            onClick={handleApproveAll}
-            className='bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded'
-            style={{ fontFamily: 'Tiro Bangla, serif' }}
-          >
-            সব অনুমোদন করুন
-          </motion.button>
+          <div className='flex gap-3'>
+            <motion.button
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3 }}
+              onClick={handleApproveAll}
+              className='bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-sm transition-colors duration-200 flex items-center gap-2'
+              style={{ fontFamily: 'Tiro Bangla, serif' }}
+            >
+              <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M5 13l4 4L19 7' />
+              </svg>
+              সব অনুমোদন করুন ({selectedSurveys.length})
+            </motion.button>
+            <motion.button
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+              onClick={handleRejectAll}
+              className='bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow-sm transition-colors duration-200 flex items-center gap-2'
+              style={{ fontFamily: 'Tiro Bangla, serif' }}
+            >
+              <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' />
+              </svg>
+              সব বাতিল করুন ({selectedSurveys.length})
+            </motion.button>
+          </div>
         )}
       </div>
       <SurveyTable
