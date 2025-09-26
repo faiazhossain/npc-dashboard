@@ -3,8 +3,11 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MdClose, MdEdit } from 'react-icons/md';
 import Image from 'next/image';
+import { useAuth } from '@/hooks/useAuth';
+// Adjust the path to where your useAuth hook is defined
 
 export default function Surveyors() {
+  const { userId } = useAuth(); // Get userId from useAuth hook
   const [surveyors, setSurveyors] = useState([]);
   const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
   const [isDetailsDrawerOpen, setIsDetailsDrawerOpen] = useState(false);
@@ -18,6 +21,7 @@ export default function Surveyors() {
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(true);
+  const [error, setError] = useState(null); // State for error handling
   const pageSize = 10;
 
   // Fetch surveyors from API
@@ -41,31 +45,82 @@ export default function Surveyors() {
         }
 
         const data = await response.json();
-        // Map API response to component's expected structure
         const mappedSurveyors = data.map((surveyor) => ({
           id: surveyor.id,
           name: surveyor.name,
           mobile: surveyor.phone,
           email: surveyor.email,
-          // Mock missing fields (replace with actual data if available from another API)
           totalForms: 0,
           approvedForms: 0,
           rejectedForms: 0,
           pendingForms: 0,
-          imageUrl: '/default-profile.png', // Replace with actual image URL if available
+          imageUrl: '/default-profile.png',
         }));
 
         setSurveyors(mappedSurveyors);
-        // Disable "Next" button if fewer than pageSize surveyors are returned
         setHasNextPage(data.length === pageSize);
       } catch (error) {
         console.error('Error fetching surveyors:', error);
-        // Optionally, set an error state to display to the user
+        setError('Failed to fetch surveyors. Please try again.');
       }
     };
 
     fetchSurveyors();
   }, [currentPage]);
+
+  // Handle form submission to create a new surveyor
+  const handleAddSurveyor = async (e) => {
+    e.preventDefault();
+    setError(null); // Reset error state
+
+    try {
+      const response = await fetch('https://npsbd.xyz/api/users/surveyer', {
+        method: 'POST',
+        headers: {
+          accept: 'application/json',
+          Authorization:
+            'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzdXBlcmFkbWluQGV4YW1wbGUuY29tIiwiZXhwIjoxNzYwMTY1Mjg4fQ.1m4KZ1ngPjRoWM7hgr8m9w8nQY2q16TmbbvqfcANFZA',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: newSurveyor.email,
+          name: newSurveyor.name,
+          password: newSurveyor.password,
+          phone: newSurveyor.mobile,
+          user_type: 'surveyer',
+          authorized_by: userId || 0, // Use userId from useAuth, fallback to 0 if undefined
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create surveyor');
+      }
+
+      const createdSurveyor = await response.json();
+      // Add the new surveyor to the state
+      setSurveyors([
+        ...surveyors,
+        {
+          id: createdSurveyor.id,
+          name: createdSurveyor.name,
+          mobile: createdSurveyor.phone,
+          email: createdSurveyor.email,
+          totalForms: 0,
+          approvedForms: 0,
+          rejectedForms: 0,
+          pendingForms: 0,
+          imageUrl: '/default-profile.png',
+        },
+      ]);
+
+      // Reset form and close drawer
+      setNewSurveyor({ name: '', mobile: '', email: '', password: '' });
+      setIsAddDrawerOpen(false);
+    } catch (error) {
+      console.error('Error creating surveyor:', error);
+      setError('Failed to create surveyor. Please try again.');
+    }
+  };
 
   const handleViewDetails = (surveyor) => {
     setSelectedSurveyor(surveyor);
@@ -85,6 +140,16 @@ export default function Surveyors() {
 
   return (
     <div>
+      {/* Error Message */}
+      {error && (
+        <div
+          className='mb-4 p-4 bg-red-100 text-red-700 rounded-lg'
+          style={{ fontFamily: 'Tiro Bangla, serif' }}
+        >
+          {error}
+        </div>
+      )}
+
       {/* Header with buttons */}
       <div className='flex justify-between items-center mb-6'>
         <h2
@@ -233,7 +298,7 @@ export default function Surveyors() {
                 </button>
               </div>
 
-              <form className='space-y-4'>
+              <form className='space-y-4' onSubmit={handleAddSurveyor}>
                 {Object.entries(newSurveyor).map(([key, value]) => (
                   <div key={key}>
                     <label
@@ -325,7 +390,6 @@ export default function Surveyors() {
 
               {!isEditMode ? (
                 <div className='space-y-6'>
-                  {/* Profile Info */}
                   <div className='text-center'>
                     <div className='mb-4'>
                       <Image
@@ -356,7 +420,6 @@ export default function Surveyors() {
                     </p>
                   </div>
 
-                  {/* Stats Grid */}
                   <div className='grid grid-cols-2 gap-4'>
                     <div className='bg-gray-50 p-4 rounded-lg'>
                       <p
@@ -416,7 +479,6 @@ export default function Surveyors() {
                     </div>
                   </div>
 
-                  {/* Actions */}
                   <div className='flex gap-3'>
                     <button
                       onClick={() => setIsEditMode(true)}
