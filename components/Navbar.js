@@ -1,8 +1,8 @@
-"use client";
-import Image from "next/image";
-import { motion } from "framer-motion";
-import { MdDashboard, MdList, MdMenu, MdClose, MdLogout } from "react-icons/md";
-import { FaAddressCard } from "react-icons/fa";
+'use client';
+import Image from 'next/image';
+import { motion } from 'framer-motion';
+import { MdDashboard, MdList, MdMenu, MdClose, MdLogout } from 'react-icons/md';
+import { FaAddressCard } from 'react-icons/fa';
 import {
   fadeIn,
   fadeInUp,
@@ -10,7 +10,7 @@ import {
   hoverScale,
   tapScale,
   staggerChildren,
-} from "../utils/animations";
+} from '../utils/animations';
 
 export default function Navbar({
   activeItem,
@@ -21,18 +21,18 @@ export default function Navbar({
 }) {
   const navItems = [
     {
-      id: "dashboard",
-      label: "সাধারণ প্রশ্নসমূহ",
+      id: 'dashboard',
+      label: 'ড্যাশবোর্ড',
       icon: MdDashboard,
     },
     {
-      id: "survey",
-      label: "সার্ভে সমূহ",
+      id: 'survey',
+      label: 'সার্ভে সমূহ',
       icon: MdList,
     },
     {
-      id: "administration",
-      label: "এডমিনিস্ট্রেশন",
+      id: 'administration',
+      label: 'এডমিনিস্ট্রেশন',
       icon: FaAddressCard,
     },
   ];
@@ -61,7 +61,7 @@ export default function Navbar({
         className={`
           fixed top-0 left-0 h-full w-[271px] bg-white shadow-lg z-40
           transform transition-transform duration-300 ease-in-out
-          ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
+          ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:translate-x-0
         `}
         variants={slideInLeft}
@@ -106,8 +106,8 @@ export default function Navbar({
                       w-full flex items-center px-6 py-3 text-left transition-all duration-200 cursor-pointer
                       ${
                         isActive
-                          ? " text-[#006747] border-r-4 border-[#006747] bg-green-100 hover:bg-green-200"
-                          : "text-gray-700 hover:bg-green-50"
+                          ? ' text-[#006747] border-r-4 border-[#006747] bg-green-100 hover:bg-green-200'
+                          : 'text-gray-700 hover:bg-green-50'
                       }
                     `}
                     onClick={() => onNavItemClick(item.id)}
@@ -117,7 +117,7 @@ export default function Navbar({
                     <IconComponent
                       className={`
                         w-5 h-5 mr-3 transition-colors duration-200
-                        ${isActive ? "text-[#006747]" : "text-gray-500"}
+                        ${isActive ? 'text-[#006747]' : 'text-gray-500'}
                       `}
                     />
                     <span
@@ -125,11 +125,11 @@ export default function Navbar({
                          caret-transparent text-sm font-normal transition-colors duration-200
                         ${
                           isActive
-                            ? "text-[#006747] font-medium"
-                            : "text-gray-700"
+                            ? 'text-[#006747] font-medium'
+                            : 'text-gray-700'
                         }
                       `}
-                      style={{ fontFamily: "Tiro Bangla, serif" }}
+                      style={{ fontFamily: 'Tiro Bangla, serif' }}
                     >
                       {item.label}
                     </span>
@@ -157,7 +157,7 @@ export default function Navbar({
               <MdLogout className='w-5 h-5 mr-3' />
               <span
                 className='text-sm'
-                style={{ fontFamily: "Tiro Bangla, serif" }}
+                style={{ fontFamily: 'Tiro Bangla, serif' }}
               >
                 লগআউট
               </span>
@@ -165,7 +165,7 @@ export default function Navbar({
 
             <div
               className='text-xs text-gray-500 text-center'
-              style={{ fontFamily: "Tiro Bangla, serif" }}
+              style={{ fontFamily: 'Tiro Bangla, serif' }}
             >
               এনপিএস ড্যাশবোর্ড
             </div>
