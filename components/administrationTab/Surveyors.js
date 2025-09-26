@@ -51,7 +51,7 @@ export default function Surveyors() {
         }
 
         const data = await response.json();
-        console.log('🚀 ~ fetchSurveyors ~ data:', data);
+
         const mappedSurveyors = data.map((surveyor) => ({
           id: surveyor.id,
           name: surveyor.name,

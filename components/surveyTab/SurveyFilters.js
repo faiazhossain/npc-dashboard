@@ -9,8 +9,6 @@ export default function SurveyFilters({
   onSearch,
   onReset,
 }) {
-  console.log('🚀 ~ SurveyFilters ~ filterOptions:', filterOptions);
-  console.log('🚀 ~ SurveyFilters ~ filters:', filters);
   return (
     <motion.div
       className='bg-gradient-to-br from-white to-gray-50 p-4 rounded-xl shadow-md border border-gray-100 mb-6'

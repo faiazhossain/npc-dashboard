@@ -13,7 +13,7 @@ export default function SurveyContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [currentFilters, setCurrentFilters] = useState({});
   const [selectedSurveys, setSelectedSurveys] = useState([]);
-  console.log('🚀 ~ SurveyContent ~ selectedSurveys:', selectedSurveys);
+
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const itemsPerPage = 30; // API page_size
@@ -117,6 +117,7 @@ export default function SurveyContent() {
       }
 
       const jsonData = await response.json();
+      console.log('🚀 ~ loadSurveys ~ jsonData:', jsonData);
 
       // Handle different response formats
       let surveysArray = [];
@@ -125,22 +126,57 @@ export default function SurveyContent() {
 
       if (Array.isArray(jsonData)) {
         // If response is direct array - this means we got current page data
-        surveysArray = jsonData;
+        // Filter out surveys where candidate_work_details.আপনার মতে, রাজনৈতিক দল হিসেবে কোন দল আপনার এলাকায় সবচেয়ে জনপ্রিয়? is missing or N/A
+        surveysArray = jsonData.filter((survey) => {
+          const politicalParty =
+            survey.candidate_work_details?.[
+              'আপনার মতে, রাজনৈতিক দল হিসেবে কোন দল আপনার এলাকায় সবচেয়ে জনপ্রিয়?'
+            ];
+          return politicalParty && politicalParty !== 'N/A';
+        });
+
+        // Calculate total and pages based on filtered data
+        if (surveysArray.length < jsonData.length) {
+          console.log(
+            `Filtered out ${
+              jsonData.length - surveysArray.length
+            } surveys with missing or N/A political party data`
+          );
+        }
+
         // For array response, we don't know the total, so estimate
         if (jsonData.length === itemsPerPage) {
           // If we got exactly itemsPerPage, there might be more pages
-          total = page * itemsPerPage + 1; // At least one more item exists
+          total = surveysArray.length; // Use filtered count
           pages = page + 1; // At least one more page
         } else {
           // If we got less than itemsPerPage, this is likely the last page
-          total = (page - 1) * itemsPerPage + jsonData.length;
+          total = (page - 1) * itemsPerPage + surveysArray.length; // Use filtered count
           pages = page;
         }
       } else if (jsonData.data && Array.isArray(jsonData.data)) {
         // If response has data property with pagination info
-        surveysArray = jsonData.data;
-        total = jsonData.total || jsonData.count || surveysArray.length;
-        pages = jsonData.total_pages || Math.ceil(total / itemsPerPage);
+        // Filter out surveys where candidate_work_details.আপনার মতে, রাজনৈতিক দল হিসেবে কোন দল আপনার এলাকায় সবচেয়ে জনপ্রিয়? is missing or N/A
+        surveysArray = jsonData.data.filter((survey) => {
+          const politicalParty =
+            survey.candidate_work_details?.[
+              'আপনার মতে, রাজনৈতিক দল হিসেবে কোন দল আপনার এলাকায় সবচেয়ে জনপ্রিয়?'
+            ];
+          return politicalParty && politicalParty !== 'N/A';
+        });
+
+        // Log filtered surveys count
+        if (surveysArray.length < jsonData.data.length) {
+          console.log(
+            `Filtered out ${
+              jsonData.data.length - surveysArray.length
+            } surveys with missing or N/A political party data`
+          );
+        }
+
+        // Adjust total and pages to reflect filtered data
+        total = surveysArray.length;
+        pages = Math.ceil(total / itemsPerPage);
       } else {
         throw new Error('Invalid response format');
       }
