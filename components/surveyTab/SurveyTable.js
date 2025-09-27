@@ -9,6 +9,8 @@ export default function SurveyTable({
   itemsPerPage,
   selectedSurveys,
   onSelectSurvey,
+  isAllSelected,
+  onSelectAll,
 }) {
   console.log('🚀 ~ SurveyTable ~ data:', data);
   const router = useRouter();
@@ -29,17 +31,30 @@ export default function SurveyTable({
   const isAllSelectedOnPage =
     data.length > 0 && data.every((item) => selectedSurveys.includes(item.id));
 
+  // Handle the header checkbox click, but also sync with the parent's "সব নির্বাচন করুন" checkbox
   const handleSelectAllOnPage = (e) => {
+    // First, handle the page-specific selection logic
     const pageIds = data.map((item) => item.id);
+
     if (e.target.checked) {
       // Add all unselected page items to selection
       const newSelections = pageIds.filter(
         (id) => !selectedSurveys.includes(id)
       );
       onSelectSurvey(newSelections); // Batch toggle for addition
+
+      // If all items are now selected after this operation, also update the parent "সব নির্বাচন করুন" checkbox
+      if (onSelectAll && e.target.checked) {
+        onSelectAll({ target: { checked: true } });
+      }
     } else {
       // Remove all page items from selection
       onSelectSurvey(pageIds.map((id) => id)); // Batch toggle for removal
+
+      // If we're deselecting items on this page, the "সব নির্বাচন করুন" checkbox should be unchecked
+      if (onSelectAll) {
+        onSelectAll({ target: { checked: false } });
+      }
     }
   };
 
@@ -55,7 +70,7 @@ export default function SurveyTable({
               >
                 <input
                   type='checkbox'
-                  checked={isAllSelectedOnPage}
+                  checked={isAllSelected || isAllSelectedOnPage}
                   onChange={handleSelectAllOnPage}
                   className='h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500'
                 />

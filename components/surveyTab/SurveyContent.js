@@ -532,6 +532,7 @@ export default function SurveyContent() {
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
+      // Select all surveys across all pages
       const newSelections = surveys.map((survey) => survey.id);
       const updatedSelections = [
         ...new Set([...selectedSurveys, ...newSelections]),
@@ -539,6 +540,7 @@ export default function SurveyContent() {
       setSelectedSurveys(updatedSelections);
       console.log('After Select All (checked):', updatedSelections);
     } else {
+      // Deselect all surveys on the current page
       const currentPageIds = surveys.map((survey) => survey.id);
       const updatedSelections = selectedSurveys.filter(
         (id) => !currentPageIds.includes(id)
@@ -792,6 +794,8 @@ export default function SurveyContent() {
         itemsPerPage={itemsPerPage}
         selectedSurveys={selectedSurveys}
         onSelectSurvey={handleSelectSurvey}
+        isAllSelected={isAllSelected}
+        onSelectAll={handleSelectAll}
       />
       {surveys.length > 0 && (
         <Pagination
