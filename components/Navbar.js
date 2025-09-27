@@ -18,24 +18,34 @@ export default function Navbar({
   isMobileMenuOpen,
   toggleMobileMenu,
   onLogout,
+  userType,
 }) {
-  const navItems = [
+  // Define all possible nav items
+  const allNavItems = [
     {
       id: 'dashboard',
       label: 'ড্যাশবোর্ড',
       icon: MdDashboard,
+      allowedUserTypes: ['duser', 'admin', 'super_admin'], // All users can access dashboard
     },
     {
       id: 'survey',
       label: 'সার্ভে সমূহ',
       icon: MdList,
+      allowedUserTypes: ['admin', 'super_admin'], // Only admin and super_admin can access surveys
     },
     {
       id: 'administration',
       label: 'এডমিনিস্ট্রেশন',
       icon: FaAddressCard,
+      allowedUserTypes: ['admin', 'super_admin'], // Only admin and super_admin can access administration
     },
   ];
+
+  // Filter nav items based on user type
+  const navItems = allNavItems.filter((item) =>
+    item.allowedUserTypes.includes(userType || 'unknown')
+  );
 
   return (
     <>

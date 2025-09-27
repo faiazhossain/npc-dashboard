@@ -44,6 +44,18 @@ export default function Dashboard({ onLogout, children }) {
 
   const handleNavItemClick = (item) => {
     setIsMobileMenuOpen(false);
+
+    // Check if user is 'duser' and trying to access restricted areas
+    if (
+      userData?.user_type === 'duser' &&
+      (item === 'survey' || item === 'administration')
+    ) {
+      // Show error or redirect to dashboard
+      setError('আপনার এই পেজে প্রবেশের অনুমতি নেই।');
+      router.push('/dashboard/general-questions');
+      return;
+    }
+
     switch (item) {
       case 'dashboard':
         router.push('/dashboard/general-questions');
@@ -90,6 +102,17 @@ export default function Dashboard({ onLogout, children }) {
           console.log('Stored in Redux - User ID:', data.id);
           console.log('Stored in Redux - User Type:', data.user_type);
           console.log('All user data available in Redux store');
+
+          // Check if duser is trying to access restricted pages
+          if (data.user_type === 'duser') {
+            if (
+              pathname.includes('/dashboard/surveys') ||
+              pathname.includes('/dashboard/administration')
+            ) {
+              setError('আপনার এই পেজে প্রবেশের অনুমতি নেই।');
+              router.push('/dashboard/general-questions');
+            }
+          }
         } else {
           setError('Failed to fetch user data. Please log in again.');
           localStorage.removeItem('access_token');
@@ -106,12 +129,23 @@ export default function Dashboard({ onLogout, children }) {
     if (!userData || !isAuthenticated) {
       fetchUserData();
     } else {
+      // Check if duser is trying to access restricted pages
+      if (userData.user_type === 'duser') {
+        if (
+          pathname.includes('/dashboard/surveys') ||
+          pathname.includes('/dashboard/administration')
+        ) {
+          setError('আপনার এই পেজে প্রবেশের অনুমতি নেই।');
+          router.push('/dashboard/general-questions');
+        }
+      }
+
       // Console log existing data from Redux
       console.log('User data loaded from Redux/localStorage:', userData);
       console.log('User ID from Redux:', userData.id);
       console.log('User Type from Redux:', userData.user_type);
     }
-  }, [router, userData, isAuthenticated, dispatch]);
+  }, [router, userData, isAuthenticated, dispatch, pathname]);
 
   return (
     <div className='min-h-screen bg-gray-50 flex'>
@@ -136,6 +170,7 @@ export default function Dashboard({ onLogout, children }) {
         isMobileMenuOpen={isMobileMenuOpen}
         toggleMobileMenu={toggleMobileMenu}
         onLogout={onLogout}
+        userType={userData?.user_type}
       />
 
       {/* Right Content Panel */}

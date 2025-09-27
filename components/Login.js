@@ -50,7 +50,7 @@ export default function Login({ onLoginSuccess }) {
 
       if (response.ok && data.access_token) {
         // Check if user_type is one of the allowed types
-        const allowedUserTypes = ['mpuser', 'admin', 'super_admin'];
+        const allowedUserTypes = ['duser', 'admin', 'super_admin'];
         if (allowedUserTypes.includes(data.user_type)) {
           // Store token and proceed with login
           localStorage.setItem('access_token', data.access_token);
