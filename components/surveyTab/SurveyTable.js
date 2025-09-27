@@ -10,6 +10,7 @@ export default function SurveyTable({
   selectedSurveys,
   onSelectSurvey,
 }) {
+  console.log('🚀 ~ SurveyTable ~ data:', data);
   const router = useRouter();
   const getStatusColor = (status) => {
     switch (status) {
