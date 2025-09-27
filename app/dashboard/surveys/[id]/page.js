@@ -1,17 +1,139 @@
 'use client';
 import { useState, useEffect, use } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MdEdit, MdClose, MdCheckCircle, MdCancel } from 'react-icons/md';
+import {
+  MdEdit,
+  MdClose,
+  MdCheckCircle,
+  MdCancel,
+  MdSave,
+} from 'react-icons/md';
 import { useAuth } from '@/hooks/useAuth';
+import { useSearchParams } from 'next/navigation';
 
 export default function SurveyDetails({ params }) {
   const resolvedParams = use(params);
+  const searchParams = useSearchParams();
+  const shouldOpenEdit = searchParams.get('edit') === 'true';
+
   const [survey, setSurvey] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editingData, setEditingData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { userData } = useAuth();
+
+  // Helper function to clean and prepare survey data for editing
+  const prepareDataForEditing = (surveyData) => {
+    // Create deep copy of the survey
+    const cleanData = JSON.parse(JSON.stringify(surveyData));
+
+    // Ensure all expected objects exist
+    if (!cleanData.person_details) cleanData.person_details = {};
+    if (!cleanData.location_details) cleanData.location_details = {};
+    if (!cleanData.demand_details) cleanData.demand_details = {};
+    if (!cleanData.avail_party_details)
+      cleanData.avail_party_details = { দল: [] };
+    if (!cleanData.candidate_details) cleanData.candidate_details = { দল: [] };
+    if (!cleanData.selected_candidate_details)
+      cleanData.selected_candidate_details = {};
+    if (!cleanData.candidate_work_details)
+      cleanData.candidate_work_details = {};
+
+    return cleanData;
+  };
+
+  // Handle Edit button click
+  const handleEdit = () => {
+    const preparedData = prepareDataForEditing(survey);
+    setEditingData(preparedData);
+    setIsDrawerOpen(true);
+  };
+
+  // Handle Save button click
+  const handleSave = async () => {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      setError('No access token found. Please log in again.');
+      return;
+    }
+
+    try {
+      // Process person_details to ensure numeric values are properly formatted
+      const personDetails = { ...editingData.person_details };
+      if (personDetails.বয়স) {
+        personDetails.বয়স = parseInt(personDetails.বয়স) || 0;
+      }
+
+      // Process location_details to ensure numeric values are properly formatted
+      const locationDetails = { ...editingData.location_details };
+      if (locationDetails.ওয়ার্ড) {
+        locationDetails.ওয়ার্ড = String(locationDetails.ওয়ার্ড);
+      }
+
+      // Create a formatted payload with only the required fields
+      const formattedData = {
+        person_details: personDetails,
+        location_details: locationDetails,
+        demand_details: editingData.demand_details,
+        worthful_party_name: editingData.worthful_party_name,
+        avail_party_details: editingData.avail_party_details,
+        candidate_details: editingData.candidate_details,
+        selected_candidate_details: editingData.selected_candidate_details,
+        candidate_work_details: editingData.candidate_work_details,
+      };
+
+      console.log('Sending update with formatted data:', formattedData);
+
+      // Make sure we're using the correct API endpoint (survey vs surveys)
+      const surveyId = resolvedParams.id;
+      const apiUrl = `https://npsbd.xyz/api/surveys/${surveyId}`;
+      console.log('Sending PATCH request to:', apiUrl);
+
+      const response = await fetch(apiUrl, {
+        method: 'PATCH',
+        headers: {
+          accept: 'application/json',
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formattedData),
+      });
+
+      if (response.ok) {
+        const updatedSurvey = await response.json();
+        setSurvey(updatedSurvey);
+        setIsDrawerOpen(false);
+        console.log('Survey updated successfully');
+
+        // Show success message (you could add a toast notification here)
+        const successMessage = 'সার্ভে সফলভাবে আপডেট করা হয়েছে!';
+        alert(successMessage);
+      } else {
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+        console.error('Response status:', response.status);
+
+        let errorMessage = 'Failed to update survey.';
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch (e) {
+          // If parsing fails, use the raw text
+          errorMessage = errorText || errorMessage;
+        }
+
+        if (response.status === 422) {
+          errorMessage = 'অবৈধ ডেটা ফরম্যাট। দয়া করে আবার চেষ্টা করুন।';
+        }
+
+        setError(errorMessage);
+      }
+    } catch (err) {
+      console.error('Error updating survey:', err);
+      setError('An error occurred while updating the survey.');
+    }
+  };
 
   // Handle Approve button click
   const handleApprove = async () => {
@@ -115,6 +237,17 @@ export default function SurveyDetails({ params }) {
               userData?.id === data.user_id
           );
           console.log('=== End Survey Info ===');
+
+          // If edit=true is in the URL and user has permission, open edit drawer
+          if (
+            shouldOpenEdit &&
+            (userData?.user_type === 'super_admin' ||
+              userData?.id === data.user_id)
+          ) {
+            const preparedData = prepareDataForEditing(data);
+            setEditingData(preparedData);
+            setIsDrawerOpen(true);
+          }
         } else {
           setError('Failed to fetch survey details.');
         }
@@ -127,7 +260,7 @@ export default function SurveyDetails({ params }) {
     };
 
     fetchSurveyDetails();
-  }, [resolvedParams.id, userData?.id, userData?.user_type]);
+  }, [resolvedParams.id, userData?.id, userData?.user_type, shouldOpenEdit]);
 
   if (loading) {
     return (
@@ -178,7 +311,7 @@ export default function SurveyDetails({ params }) {
   };
 
   // Helper function to render key-value pairs
-  const renderKeyValuePairs = (obj, title) => {
+  const renderKeyValuePairs = (obj, title, sectionKey) => {
     if (!obj || typeof obj !== 'object') return null;
 
     return (
@@ -198,14 +331,32 @@ export default function SurveyDetails({ params }) {
               >
                 {key}:
               </p>
-              <p
-                className='text-gray-900'
-                style={{ fontFamily: 'Tiro Bangla, serif' }}
-              >
-                {typeof value === 'object'
-                  ? JSON.stringify(value, null, 2)
-                  : value || 'N/A'}
-              </p>
+              {isDrawerOpen ? (
+                <input
+                  type='text'
+                  value={editingData[sectionKey]?.[key] || ''}
+                  onChange={(e) => {
+                    setEditingData((prev) => ({
+                      ...prev,
+                      [sectionKey]: {
+                        ...prev[sectionKey],
+                        [key]: e.target.value,
+                      },
+                    }));
+                  }}
+                  className='w-full p-2 border rounded-lg'
+                  style={{ fontFamily: 'Tiro Bangla, serif' }}
+                />
+              ) : (
+                <p
+                  className='text-gray-900'
+                  style={{ fontFamily: 'Tiro Bangla, serif' }}
+                >
+                  {typeof value === 'object'
+                    ? JSON.stringify(value, null, 2)
+                    : value || 'N/A'}
+                </p>
+              )}
             </div>
           ))}
         </div>
@@ -250,7 +401,26 @@ export default function SurveyDetails({ params }) {
                     >
                       {option}
                     </span>
-                    {value === 1 ? (
+                    {isDrawerOpen ? (
+                      <input
+                        type='checkbox'
+                        checked={
+                          editingData.demand_details?.[question]?.[option] === 1
+                        }
+                        onChange={(e) => {
+                          setEditingData((prev) => ({
+                            ...prev,
+                            demand_details: {
+                              ...prev.demand_details,
+                              [question]: {
+                                ...prev.demand_details[question],
+                                [option]: e.target.checked ? 1 : 0,
+                              },
+                            },
+                          }));
+                        }}
+                      />
+                    ) : value === 1 ? (
                       <MdCheckCircle className='w-5 h-5 text-green-600' />
                     ) : (
                       <div className='w-5 h-5 rounded-full border-2 border-gray-300'></div>
@@ -266,7 +436,7 @@ export default function SurveyDetails({ params }) {
   };
 
   // Helper function to render party details
-  const renderPartyDetails = (partyDetails, title) => {
+  const renderPartyDetails = (partyDetails, title, sectionKey) => {
     if (!partyDetails?.দল || !Array.isArray(partyDetails.দল)) return null;
 
     return (
@@ -288,28 +458,190 @@ export default function SurveyDetails({ params }) {
                   >
                     {partyName}
                   </h4>
-                  <div className='space-y-1'>
-                    {Array.isArray(candidates) ? (
-                      candidates.map((candidate, idx) => (
+                  {isDrawerOpen ? (
+                    <div className='space-y-2'>
+                      {Array.isArray(candidates) ? (
+                        candidates.map((candidate, idx) => (
+                          <input
+                            key={idx}
+                            type='text'
+                            value={
+                              editingData[sectionKey]?.দল?.[index]?.[
+                                partyName
+                              ]?.[idx] || ''
+                            }
+                            onChange={(e) => {
+                              const newCandidates = [
+                                ...(editingData[sectionKey]?.দল?.[index]?.[
+                                  partyName
+                                ] || []),
+                              ];
+                              newCandidates[idx] = e.target.value;
+                              setEditingData((prev) => ({
+                                ...prev,
+                                [sectionKey]: {
+                                  ...prev[sectionKey],
+                                  দল: [
+                                    ...prev[sectionKey].দল.slice(0, index),
+                                    { [partyName]: newCandidates },
+                                    ...prev[sectionKey].দল.slice(index + 1),
+                                  ],
+                                },
+                              }));
+                            }}
+                            className='w-full p-2 border rounded-lg'
+                            style={{ fontFamily: 'Tiro Bangla, serif' }}
+                          />
+                        ))
+                      ) : (
+                        <input
+                          type='text'
+                          value={
+                            editingData[sectionKey]?.দল?.[index]?.[partyName] ||
+                            ''
+                          }
+                          onChange={(e) => {
+                            setEditingData((prev) => ({
+                              ...prev,
+                              [sectionKey]: {
+                                ...prev[sectionKey],
+                                দল: [
+                                  ...prev[sectionKey].দল.slice(0, index),
+                                  { [partyName]: e.target.value },
+                                  ...prev[sectionKey].দল.slice(index + 1),
+                                ],
+                              },
+                            }));
+                          }}
+                          className='w-full p-2 border rounded-lg'
+                          style={{ fontFamily: 'Tiro Bangla, serif' }}
+                        />
+                      )}
+                    </div>
+                  ) : (
+                    <div className='space-y-1'>
+                      {Array.isArray(candidates) ? (
+                        candidates.map((candidate, idx) => (
+                          <p
+                            key={idx}
+                            className='text-gray-600 ml-4'
+                            style={{ fontFamily: 'Tiro Bangla, serif' }}
+                          >
+                            • {candidate}
+                          </p>
+                        ))
+                      ) : (
                         <p
-                          key={idx}
                           className='text-gray-600 ml-4'
                           style={{ fontFamily: 'Tiro Bangla, serif' }}
                         >
-                          • {candidate}
+                          • {candidates}
                         </p>
-                      ))
-                    ) : (
-                      <p
-                        className='text-gray-600 ml-4'
-                        style={{ fontFamily: 'Tiro Bangla, serif' }}
-                      >
-                        • {candidates}
-                      </p>
-                    )}
-                  </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  // Helper function to render selected candidate details
+  const renderSelectedCandidateDetails = (selectedDetails) => {
+    if (!selectedDetails) return null;
+
+    return (
+      <div className='mb-8'>
+        <h3
+          className='text-xl font-semibold mb-4 text-gray-800 border-b border-gray-200 pb-2'
+          style={{ fontFamily: 'Tiro Bangla, serif' }}
+        >
+          নির্বাচিত প্রার্থীর বিবরণ
+        </h3>
+        <div className='space-y-6'>
+          {Object.entries(selectedDetails).map(([key, value]) => (
+            <div key={key}>
+              <h4
+                className='font-semibold text-gray-700 mb-3'
+                style={{ fontFamily: 'Tiro Bangla, serif' }}
+              >
+                {key}
+              </h4>
+              {typeof value === 'object' && value !== null ? (
+                <div className='grid grid-cols-2 md:grid-cols-3 gap-3'>
+                  {Object.entries(value).map(([option, val]) => (
+                    <div
+                      key={option}
+                      className={`p-3 rounded-lg border-2 ${
+                        val === 1
+                          ? 'bg-green-50 border-green-300'
+                          : 'bg-gray-50 border-gray-200'
+                      }`}
+                    >
+                      <div className='flex items-center justify-between'>
+                        <span
+                          className='text-sm'
+                          style={{ fontFamily: 'Tiro Bangla, serif' }}
+                        >
+                          {option}
+                        </span>
+                        {isDrawerOpen ? (
+                          <input
+                            type='checkbox'
+                            checked={
+                              editingData.selected_candidate_details?.[key]?.[
+                                option
+                              ] === 1
+                            }
+                            onChange={(e) => {
+                              setEditingData((prev) => ({
+                                ...prev,
+                                selected_candidate_details: {
+                                  ...prev.selected_candidate_details,
+                                  [key]: {
+                                    ...prev.selected_candidate_details[key],
+                                    [option]: e.target.checked ? 1 : 0,
+                                  },
+                                },
+                              }));
+                            }}
+                          />
+                        ) : val === 1 ? (
+                          <MdCheckCircle className='w-5 h-5 text-green-600' />
+                        ) : (
+                          <div className='w-5 h-5 rounded-full border-2 border-gray-300'></div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : isDrawerOpen ? (
+                <input
+                  type='text'
+                  value={editingData.selected_candidate_details?.[key] || ''}
+                  onChange={(e) => {
+                    setEditingData((prev) => ({
+                      ...prev,
+                      selected_candidate_details: {
+                        ...prev.selected_candidate_details,
+                        [key]: e.target.value,
+                      },
+                    }));
+                  }}
+                  className='w-full p-2 border rounded-lg'
+                  style={{ fontFamily: 'Tiro Bangla, serif' }}
+                />
+              ) : (
+                <p
+                  className='text-gray-700 bg-gray-50 p-3 rounded-lg'
+                  style={{ fontFamily: 'Tiro Bangla, serif' }}
+                >
+                  {value}
+                </p>
+              )}
             </div>
           ))}
         </div>
@@ -362,32 +694,144 @@ export default function SurveyDetails({ params }) {
               </p>
             )}
           </div>
+
           <div className='flex gap-3'>
             {(userData?.user_type === 'super_admin' ||
-              userData?.id === survey.user_id) &&
-              survey.status === 'pending' && (
-                <>
-                  <button
-                    onClick={handleApprove}
-                    className='px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2'
-                    style={{ fontFamily: 'Tiro Bangla, serif' }}
-                  >
-                    <MdCheckCircle className='w-4 h-4' />
-                    অনুমোদন দিন
-                  </button>
-                  <button
-                    onClick={handleReject}
-                    className='px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2'
-                    style={{ fontFamily: 'Tiro Bangla, serif' }}
-                  >
-                    <MdCancel className='w-4 h-4' />
-                    বাতিল করুন
-                  </button>
-                </>
-              )}
+              userData?.id === survey.user_id) && (
+              <>
+                <motion.button
+                  onClick={handleEdit}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className='px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2'
+                  style={{ fontFamily: 'Tiro Bangla, serif' }}
+                >
+                  <MdEdit className='w-5 h-5' />
+                  সংশোধন করুন
+                </motion.button>
+                {survey.status === 'pending' && (
+                  <>
+                    <button
+                      onClick={handleApprove}
+                      className='px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2'
+                      style={{ fontFamily: 'Tiro Bangla, serif' }}
+                    >
+                      <MdCheckCircle className='w-4 h-4' />
+                      অনুমোদন দিন
+                    </button>
+                    <button
+                      onClick={handleReject}
+                      className='px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2'
+                      style={{ fontFamily: 'Tiro Bangla, serif' }}
+                    >
+                      <MdCancel className='w-4 h-4' />
+                      বাতিল করুন
+                    </button>
+                  </>
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Drawer for Editing */}
+      <AnimatePresence>
+        {isDrawerOpen && (
+          <motion.div
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            className='fixed top-0 right-0 w-full md:w-1/2 h-full bg-white shadow-xl z-50 p-6 overflow-y-auto'
+          >
+            <div className='flex justify-between items-center mb-6'>
+              <h2
+                className='text-2xl font-semibold'
+                style={{ fontFamily: 'Tiro Bangla, serif' }}
+              >
+                সার্ভে সংশোধন
+              </h2>
+              <button
+                onClick={() => setIsDrawerOpen(false)}
+                className='p-2 hover:bg-gray-100 rounded-full'
+              >
+                <MdClose className='w-6 h-6' />
+              </button>
+            </div>
+
+            {/* Editable Survey Details */}
+            {renderKeyValuePairs(
+              editingData.person_details,
+              'ব্যক্তিগত তথ্য',
+              'person_details'
+            )}
+            {renderKeyValuePairs(
+              editingData.location_details,
+              'অবস্থানের তথ্য',
+              'location_details'
+            )}
+            {renderDemandDetails(editingData.demand_details)}
+            <div className='mb-8'>
+              <h3
+                className='text-xl font-semibold mb-4 text-gray-800 border-b border-gray-200 pb-2'
+                style={{ fontFamily: 'Tiro Bangla, serif' }}
+              >
+                যোগ্য দল
+              </h3>
+              <input
+                type='text'
+                value={editingData.worthful_party_name || ''}
+                onChange={(e) => {
+                  setEditingData((prev) => ({
+                    ...prev,
+                    worthful_party_name: e.target.value,
+                  }));
+                }}
+                className='w-full p-2 border rounded-lg'
+                style={{ fontFamily: 'Tiro Bangla, serif' }}
+              />
+            </div>
+            {renderPartyDetails(
+              editingData.avail_party_details,
+              'উপলব্ধ দলের তথ্য',
+              'avail_party_details'
+            )}
+            {renderPartyDetails(
+              editingData.candidate_details,
+              'প্রার্থীর তথ্য',
+              'candidate_details'
+            )}
+            {renderSelectedCandidateDetails(
+              editingData.selected_candidate_details
+            )}
+            {renderKeyValuePairs(
+              editingData.candidate_work_details,
+              'প্রার্থীর কার্যক্রমের তথ্য',
+              'candidate_work_details'
+            )}
+
+            <div className='flex gap-3'>
+              <button
+                onClick={handleSave}
+                className='px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2'
+                style={{ fontFamily: 'Tiro Bangla, serif' }}
+              >
+                <MdSave className='w-4 h-4' />
+                সংরক্ষণ করুন
+              </button>
+              <button
+                onClick={() => setIsDrawerOpen(false)}
+                className='px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2'
+                style={{ fontFamily: 'Tiro Bangla, serif' }}
+              >
+                <MdCancel className='w-4 h-4' />
+                বাতিল করুন
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Survey Details */}
       <motion.div
@@ -398,12 +842,20 @@ export default function SurveyDetails({ params }) {
       >
         {/* Personal Details */}
         <div className='bg-white rounded-xl shadow-sm p-8'>
-          {renderKeyValuePairs(survey.person_details, 'ব্যক্তিগত তথ্য')}
+          {renderKeyValuePairs(
+            survey.person_details,
+            'ব্যক্তিগত তথ্য',
+            'person_details'
+          )}
         </div>
 
         {/* Location Details */}
         <div className='bg-white rounded-xl shadow-sm p-8'>
-          {renderKeyValuePairs(survey.location_details, 'অবস্থানের তথ্য')}
+          {renderKeyValuePairs(
+            survey.location_details,
+            'অবস্থানের তথ্য',
+            'location_details'
+          )}
         </div>
 
         {/* Demand Details */}
@@ -431,80 +883,33 @@ export default function SurveyDetails({ params }) {
 
         {/* Available Party Details */}
         <div className='bg-white rounded-xl shadow-sm p-8'>
-          {renderPartyDetails(survey.avail_party_details, 'উপলব্ধ দলের তথ্য')}
+          {renderPartyDetails(
+            survey.avail_party_details,
+            'উপলব্ধ দলের তথ্য',
+            'avail_party_details'
+          )}
         </div>
 
         {/* Candidate Details */}
         <div className='bg-white rounded-xl shadow-sm p-8'>
-          {renderPartyDetails(survey.candidate_details, 'প্রার্থীর তথ্য')}
+          {renderPartyDetails(
+            survey.candidate_details,
+            'প্রার্থীর তথ্য',
+            'candidate_details'
+          )}
         </div>
 
         {/* Selected Candidate Details */}
         <div className='bg-white rounded-xl shadow-sm p-8'>
-          <h3
-            className='text-xl font-semibold mb-4 text-gray-800 border-b border-gray-200 pb-2'
-            style={{ fontFamily: 'Tiro Bangla, serif' }}
-          >
-            নির্বাচিত প্রার্থীর বিবরণ
-          </h3>
-          {survey.selected_candidate_details && (
-            <div className='space-y-6'>
-              {Object.entries(survey.selected_candidate_details).map(
-                ([key, value]) => (
-                  <div key={key}>
-                    <h4
-                      className='font-semibold text-gray-700 mb-3'
-                      style={{ fontFamily: 'Tiro Bangla, serif' }}
-                    >
-                      {key}
-                    </h4>
-                    {typeof value === 'object' && value !== null ? (
-                      <div className='grid grid-cols-2 md:grid-cols-3 gap-3'>
-                        {Object.entries(value).map(([option, val]) => (
-                          <div
-                            key={option}
-                            className={`p-3 rounded-lg border-2 ${
-                              val === 1
-                                ? 'bg-green-50 border-green-300'
-                                : 'bg-gray-50 border-gray-200'
-                            }`}
-                          >
-                            <div className='flex items-center justify-between'>
-                              <span
-                                className='text-sm'
-                                style={{ fontFamily: 'Tiro Bangla, serif' }}
-                              >
-                                {option}
-                              </span>
-                              {val === 1 ? (
-                                <MdCheckCircle className='w-5 h-5 text-green-600' />
-                              ) : (
-                                <div className='w-5 h-5 rounded-full border-2 border-gray-300'></div>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p
-                        className='text-gray-700 bg-gray-50 p-3 rounded-lg'
-                        style={{ fontFamily: 'Tiro Bangla, serif' }}
-                      >
-                        {value}
-                      </p>
-                    )}
-                  </div>
-                )
-              )}
-            </div>
-          )}
+          {renderSelectedCandidateDetails(survey.selected_candidate_details)}
         </div>
 
         {/* Candidate Work Details */}
         <div className='bg-white rounded-xl shadow-sm p-8'>
           {renderKeyValuePairs(
             survey.candidate_work_details,
-            'প্রার্থীর কার্যক্রমের তথ্য'
+            'প্রার্থীর কার্যক্রমের তথ্য',
+            'candidate_work_details'
           )}
         </div>
 

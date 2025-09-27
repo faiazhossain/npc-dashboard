@@ -1,8 +1,8 @@
-"use client";
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { MdClose } from "react-icons/md";
-import administrationData from "@/public/json/administration.json";
+'use client';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MdClose } from 'react-icons/md';
+import administrationData from '@/public/json/administration.json';
 
 export default function SuperUsers() {
   const [superUsers, setSuperUsers] = useState([]);
@@ -18,14 +18,14 @@ export default function SuperUsers() {
       <div className='flex justify-between items-center mb-6'>
         <h2
           className='text-xl font-semibold'
-          style={{ fontFamily: "Tiro Bangla, serif" }}
+          style={{ fontFamily: 'Tiro Bangla, serif' }}
         >
           সুপার ইউজার তালিকা
         </h2>
         <button
           onClick={() => setIsAddDrawerOpen(true)}
           className='px-4 py-2 bg-[#006747] text-white rounded-lg hover:bg-[#005536] transition-colors'
-          style={{ fontFamily: "Tiro Bangla, serif" }}
+          style={{ fontFamily: 'Tiro Bangla, serif' }}
         >
           নতুন সুপার ইউজার যুক্ত করুন
         </button>
@@ -36,11 +36,11 @@ export default function SuperUsers() {
         <table className='w-full'>
           <thead className='bg-gray-50'>
             <tr>
-              {["নাম", "মোবাইল", "ইমেইল", "অ্যাকশন"].map((header) => (
+              {['নাম', 'মোবাইল', 'ইমেইল', 'অ্যাকশন'].map((header) => (
                 <th
                   key={header}
                   className='px-6 py-4 text-left text-sm font-medium text-gray-500'
-                  style={{ fontFamily: "Tiro Bangla, serif" }}
+                  style={{ fontFamily: 'Tiro Bangla, serif' }}
                 >
                   {header}
                 </th>
@@ -51,12 +51,12 @@ export default function SuperUsers() {
             {superUsers.map((user) => (
               <tr key={user.id}>
                 <td className='px-6 py-4'>
-                  <span style={{ fontFamily: "Tiro Bangla, serif" }}>
+                  <span style={{ fontFamily: 'Tiro Bangla, serif' }}>
                     {user.name}
                   </span>
                 </td>
                 <td className='px-6 py-4'>
-                  <span style={{ fontFamily: "Tiro Bangla, serif" }}>
+                  <span style={{ fontFamily: 'Tiro Bangla, serif' }}>
                     {user.mobile}
                   </span>
                 </td>
@@ -68,14 +68,14 @@ export default function SuperUsers() {
                     <button
                       onClick={() => {}}
                       className='px-3 py-1 text-sm bg-[#006747] text-white rounded hover:bg-[#005536] transition-colors'
-                      style={{ fontFamily: "Tiro Bangla, serif" }}
+                      style={{ fontFamily: 'Tiro Bangla, serif' }}
                     >
-                      সম্পাদনা
+                      সংশোধন
                     </button>
                     <button
                       onClick={() => {}}
                       className='px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors'
-                      style={{ fontFamily: "Tiro Bangla, serif" }}
+                      style={{ fontFamily: 'Tiro Bangla, serif' }}
                     >
                       ডিলিট
                     </button>
@@ -99,15 +99,15 @@ export default function SuperUsers() {
               onClick={() => setIsAddDrawerOpen(false)}
             />
             <motion.div
-              initial={{ x: "100%" }}
+              initial={{ x: '100%' }}
               animate={{ x: 0 }}
-              exit={{ x: "100%" }}
+              exit={{ x: '100%' }}
               className='fixed right-0 top-0 h-full w-96 bg-white shadow-lg p-6 z-50'
             >
               <div className='flex justify-between items-center mb-6'>
                 <h3
                   className='text-xl font-semibold'
-                  style={{ fontFamily: "Tiro Bangla, serif" }}
+                  style={{ fontFamily: 'Tiro Bangla, serif' }}
                 >
                   নতুন সুপার ইউজার
                 </h3>
@@ -123,7 +123,7 @@ export default function SuperUsers() {
                 <div>
                   <label
                     className='block text-sm font-medium text-gray-700 mb-1'
-                    style={{ fontFamily: "Tiro Bangla, serif" }}
+                    style={{ fontFamily: 'Tiro Bangla, serif' }}
                   >
                     নাম
                   </label>
@@ -135,7 +135,7 @@ export default function SuperUsers() {
                 <div>
                   <label
                     className='block text-sm font-medium text-gray-700 mb-1'
-                    style={{ fontFamily: "Tiro Bangla, serif" }}
+                    style={{ fontFamily: 'Tiro Bangla, serif' }}
                   >
                     মোবাইল
                   </label>
@@ -147,7 +147,7 @@ export default function SuperUsers() {
                 <div>
                   <label
                     className='block text-sm font-medium text-gray-700 mb-1'
-                    style={{ fontFamily: "Tiro Bangla, serif" }}
+                    style={{ fontFamily: 'Tiro Bangla, serif' }}
                   >
                     ইমেইল
                   </label>
@@ -159,7 +159,7 @@ export default function SuperUsers() {
                 <div>
                   <label
                     className='block text-sm font-medium text-gray-700 mb-1'
-                    style={{ fontFamily: "Tiro Bangla, serif" }}
+                    style={{ fontFamily: 'Tiro Bangla, serif' }}
                   >
                     পাসওয়ার্ড
                   </label>
@@ -173,7 +173,7 @@ export default function SuperUsers() {
                   <button
                     type='submit'
                     className='flex-1 px-4 py-2 bg-[#006747] text-white rounded-lg hover:bg-[#005536] transition-colors'
-                    style={{ fontFamily: "Tiro Bangla, serif" }}
+                    style={{ fontFamily: 'Tiro Bangla, serif' }}
                   >
                     যুক্ত করুন
                   </button>
@@ -181,7 +181,7 @@ export default function SuperUsers() {
                     type='button'
                     onClick={() => setIsAddDrawerOpen(false)}
                     className='flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors'
-                    style={{ fontFamily: "Tiro Bangla, serif" }}
+                    style={{ fontFamily: 'Tiro Bangla, serif' }}
                   >
                     বাতিল করুন
                   </button>

@@ -1,6 +1,6 @@
 'use client';
 import { motion } from 'framer-motion';
-import { MdRemoveRedEye } from 'react-icons/md';
+import { MdRemoveRedEye, MdEdit } from 'react-icons/md';
 import { useRouter } from 'next/navigation';
 
 export default function SurveyTable({
@@ -171,14 +171,30 @@ export default function SurveyTable({
                   </span>
                 </td>
                 <td className='px-6 py-4 whitespace-nowrap text-right text-sm font-medium'>
-                  <motion.button
-                    onClick={() => router.push(`/dashboard/surveys/${item.id}`)}
-                    className='text-[#006747] hover:text-[#005536] transition-colors duration-200'
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    <MdRemoveRedEye className='w-5 h-5' />
-                  </motion.button>
+                  <div className='flex justify-end space-x-2'>
+                    <motion.button
+                      onClick={() =>
+                        router.push(`/dashboard/surveys/${item.id}`)
+                      }
+                      className='text-[#006747] hover:text-[#005536] transition-colors duration-200'
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      title='দেখুন'
+                    >
+                      <MdRemoveRedEye className='w-5 h-5' />
+                    </motion.button>
+                    <motion.button
+                      onClick={() =>
+                        router.push(`/dashboard/surveys/${item.id}?edit=true`)
+                      }
+                      className='text-blue-500 hover:text-blue-600 transition-colors duration-200'
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      title='সংশোধন করুন'
+                    >
+                      <MdEdit className='w-5 h-5' />
+                    </motion.button>
+                  </div>
                 </td>
               </motion.tr>
             ))}

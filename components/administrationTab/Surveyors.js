@@ -444,7 +444,7 @@ export default function Surveyors() {
                   className='text-xl font-semibold'
                   style={{ fontFamily: 'Tiro Bangla, serif' }}
                 >
-                  {isEditMode ? 'সম্পাদনা করুন' : 'বিস্তারিত তথ্য'}
+                  {isEditMode ? 'সংশোধন করুন' : 'বিস্তারিত তথ্য'}
                 </h3>
                 <button
                   onClick={() => {
