@@ -49,10 +49,17 @@ export default function Login({ onLoginSuccess }) {
       const data = await response.json();
 
       if (response.ok && data.access_token) {
-        // Store token (e.g., in localStorage or pass to parent component)
-        localStorage.setItem('access_token', data.access_token);
-        if (onLoginSuccess) {
-          onLoginSuccess();
+        // Check if user_type is one of the allowed types
+        const allowedUserTypes = ['mpuser', 'admin', 'super_admin'];
+        if (allowedUserTypes.includes(data.user_type)) {
+          // Store token and proceed with login
+          localStorage.setItem('access_token', data.access_token);
+          if (onLoginSuccess) {
+            onLoginSuccess();
+          }
+        } else {
+          // Set error if user_type is not allowed
+          setError('আপনার লগইন করার অনুমতি নেই।');
         }
       } else {
         setError(data.message || 'Invalid email or password');
