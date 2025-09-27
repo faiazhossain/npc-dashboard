@@ -464,7 +464,7 @@ export default function SurveyContent() {
 
   useEffect(() => {
     loadSurveys(currentPage, currentFilters);
-  }, [currentPage, currentFilters, loadSurveys]);
+  }, [currentPage, loadSurveys]); // Removed currentFilters from dependencies
 
   const handleFilterChange = (key, value) => {
     setCurrentFilters((prev) => ({ ...prev, [key]: value }));
@@ -483,10 +483,15 @@ export default function SurveyContent() {
 
   const handleSearch = () => {
     console.log('Applying filters:', currentFilters);
-    setCurrentPage(1);
-    setSelectedSurveys([]);
-    loadSurveys(1, currentFilters);
+    setCurrentPage(1); // Reset to first page
+    setSelectedSurveys([]); // Clear selected surveys
+    loadSurveys(1, currentFilters); // Load surveys with current filters
   };
+
+  useEffect(() => {
+    // Load surveys with initial filters on component mount
+    loadSurveys(1, currentFilters);
+  }, [loadSurveys]); // Only run on mount or when loadSurveys changes
 
   const handleReset = () => {
     setCurrentFilters({
