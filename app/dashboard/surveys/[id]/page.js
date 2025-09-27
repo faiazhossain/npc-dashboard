@@ -225,23 +225,12 @@ export default function SurveyDetails({ params }) {
         if (response.ok) {
           const data = await response.json();
           setSurvey(data);
-          console.log('=== Survey Details Loaded ===');
-          console.log('Survey Data:', data);
-          console.log('Survey ID:', data.survey_id);
-          console.log('Survey User ID:', data.user_id);
-          console.log('Current Logged User ID:', userData?.id);
-          console.log('Current User Type:', userData?.user_type);
-          console.log(
-            'Can user edit this survey?',
-            userData?.user_type === 'super_admin' ||
-              userData?.id === data.user_id
-          );
-          console.log('=== End Survey Info ===');
 
           // If edit=true is in the URL and user has permission, open edit drawer
           if (
             shouldOpenEdit &&
             (userData?.user_type === 'super_admin' ||
+              userData?.user_type === 'admin' ||
               userData?.id === data.user_id)
           ) {
             const preparedData = prepareDataForEditing(data);
@@ -697,6 +686,7 @@ export default function SurveyDetails({ params }) {
 
           <div className='flex gap-3'>
             {(userData?.user_type === 'super_admin' ||
+              userData?.user_type === 'admin' ||
               userData?.id === survey.user_id) && (
               <>
                 <motion.button

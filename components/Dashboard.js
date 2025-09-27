@@ -12,6 +12,7 @@ import {
 import Navbar from './Navbar';
 import Image from 'next/image';
 import { fadeIn, fadeInUp, slideInLeft } from '../utils/animations';
+import { FaBackward } from 'react-icons/fa';
 
 export default function Dashboard({ onLogout, children }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -189,10 +190,10 @@ export default function Dashboard({ onLogout, children }) {
           {/* Navbar */}
           <nav className='flex items-center justify-between bg-white p-4 shadow-md sticky top-0 z-10'>
             <button
-              className='bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition'
               onClick={() => router.back()}
+              className='flex items-center gap-2 bg-white border text-green-700 border-gray-300 px-4 py-2 rounded-xl shadow-sm hover:bg-gray-100 hover:shadow-md transition-all duration-200'
             >
-              Prev
+              <FaBackward className='text-md' />
             </button>
 
             <div className='flex items-center space-x-10'>
