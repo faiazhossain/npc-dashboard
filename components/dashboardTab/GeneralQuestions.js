@@ -206,53 +206,38 @@ export default function GeneralQuestions() {
     }
   }, [filters.constituency]);
 
-  useEffect(() => {
-    if (filters.thana) {
-      fetch(`https://npsbd.xyz/api/thanas/${filters.thana}/unions`, {
-        method: "GET",
-        headers: { accept: "application/json" },
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          setUnions([
-            ...data,
-            { id: "custom", name: "Custom Input", bn_name: "কাস্টম ইনপুট" },
-          ]);
-          setFilters((prev) => ({ ...prev, union: "" }));
-        })
-        .catch((error) => console.error("Error fetching unions:", error));
-    } else {
-      setUnions([]);
-      setFilters((prev) => ({ ...prev, union: "" }));
-    }
-  }, [filters.thana]);
+  // useEffect(() => {
+  //   if (filters.thana) {
+  //     fetch(`https://npsbd.xyz/api/thanas/${filters.thana}/unions`, {
+  //       method: "GET",
+  //       headers: { accept: "application/json" },
+  //     })
+  //       .then((response) => response.json())
+  //       .then((data) => {
+  //         setUnions([
+  //           ...data,
+  //           { id: "custom", name: "Custom Input", bn_name: "কাস্টম ইনপুট" },
+  //         ]);
+  //         setFilters((prev) => ({ ...prev, union: "" }));
+  //       })
+  //       .catch((error) => console.error("Error fetching unions:", error));
+  //   } else {
+  //     setUnions([]);
+  //     setFilters((prev) => ({ ...prev, union: "" }));
+  //   }
+  // }, [filters.thana]);
 
   // New useEffect for fetching wards
   useEffect(() => {
-    console.log("useEffect for wards triggered");
-    console.log(
-      "filters.district:",
-      filters.district,
-      "filters.thana:",
-      filters.thana
-    );
-    console.log("districts:", districts);
-    console.log("thanas:", thanas);
-
     if (filters.district && filters.thana) {
-      // Find selected district and thana, with type coercion for safety
       const selectedDistrict = districts.find((d) => d.id == filters.district);
-      console.log(
-        "🚀 ~ GeneralQuestions ~ selectedDistrict:",
-        selectedDistrict
-      );
       const selectedThana = thanas.find((t) => t.id == filters.thana);
-      console.log("🚀 ~ GeneralQuestions ~ selectedThana:", selectedThana);
 
       if (selectedDistrict && selectedThana) {
         const districtBnName = encodeURIComponent(selectedDistrict.bn_name);
         const thanaBnName = encodeURIComponent(selectedThana.bn_name);
         const wardApiUrl = `https://npsbd.xyz/api/users/${districtBnName}/${thanaBnName}/unions_wards`;
+
         console.log("Ward API URL:", wardApiUrl);
 
         fetch(wardApiUrl, {
@@ -266,34 +251,63 @@ export default function GeneralQuestions() {
             return response.json();
           })
           .then((data) => {
-            console.log("Ward API response:", data);
-            // Transform wards array into objects with id and bn_name
+            // Transform wards
             const wardsData = Array.isArray(data.wards)
               ? data.wards.map((ward, index) => ({
-                  id: index + 1, // Generate a unique ID (or use ward if it’s unique)
+                  id: index + 1,
                   bn_name: ward,
                 }))
               : [];
+
+            // Transform unions
+            const unionsData = Array.isArray(data.unions)
+              ? data.unions.map((union, index) => ({
+                  id: index + 1,
+                  bn_name: union,
+                }))
+              : [];
+
             setWards(wardsData);
-            if (wardsData.length === 0) {
-              console.warn("No wards returned for this district and thana.");
-            }
-            setFilters((prev) => ({ ...prev, ward: "" }));
+            setUnions(unionsData);
+
+            // reset ward & union filter
+            setFilters((prev) => ({
+              ...prev,
+              ward: "",
+              union: "",
+            }));
           })
           .catch((error) => {
-            console.error("Error fetching wards:", error);
+            console.error("Error fetching wards/unions:", error);
             setWards([]);
-            setFilters((prev) => ({ ...prev, ward: "" }));
+            setUnions([]);
+            setFilters((prev) => ({
+              ...prev,
+              ward: "",
+              union: "",
+            }));
           });
       } else {
-        console.warn("Selected district or thana not found. Resetting wards.");
+        console.warn(
+          "Selected district or thana not found. Resetting wards/unions."
+        );
         setWards([]);
-        setFilters((prev) => ({ ...prev, ward: "" }));
+        setUnions([]);
+        setFilters((prev) => ({
+          ...prev,
+          ward: "",
+          union: "",
+        }));
       }
     } else {
-      console.log("District or thana not selected. Resetting wards.");
+      console.log("District or thana not selected. Resetting wards/unions.");
       setWards([]);
-      setFilters((prev) => ({ ...prev, ward: "" }));
+      setUnions([]);
+      setFilters((prev) => ({
+        ...prev,
+        ward: "",
+        union: "",
+      }));
     }
   }, [filters.district, filters.thana, districts, thanas]);
 
@@ -644,35 +658,27 @@ export default function GeneralQuestions() {
             >
               ইউনিয়ন
             </label>
-            {unions.length > 0 ? (
-              <motion.select
-                value={filters.union}
-                onChange={(e) => handleFilterChange("union", e.target.value)}
-                className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
-                style={{ fontFamily: "Tiro Bangla, serif" }}
-                whileHover={{ scale: 1.02 }}
-              >
+            <motion.select
+              value={filters.union}
+              onChange={(e) => handleFilterChange("union", e.target.value)}
+              className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
+              style={{ fontFamily: "Tiro Bangla, serif" }}
+              whileHover={{ scale: 1.02 }}
+            >
+              {filters.district && filters.thana && unions.length === 0 ? (
+                <option className='text-sm text-red-600' value=''>
+                  ইউনিয়ন পাওয়া যায়নি
+                </option>
+              ) : (
                 <option value=''>নির্বাচন করুন</option>
-                {unions.map((union) => (
-                  <option
-                    key={union.id}
-                    value={union.id === "custom" ? "" : union.id}
-                  >
-                    {union.id === "custom" ? "কাস্টম ইনপুট" : union.bn_name}
-                  </option>
-                ))}
-              </motion.select>
-            ) : (
-              <motion.input
-                type='text'
-                value={filters.union}
-                onChange={(e) => handleFilterChange("union", e.target.value)}
-                className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
-                style={{ fontFamily: "Tiro Bangla, serif" }}
-                placeholder='ইউনিয়ন লিখুন'
-                whileHover={{ scale: 1.02 }}
-              />
-            )}
+              )}
+
+              {unions.map((union) => (
+                <option key={union.id} value={union.id}>
+                  {union.bn_name}
+                </option>
+              ))}
+            </motion.select>
           </div>
 
           <div className='flex flex-col'>
