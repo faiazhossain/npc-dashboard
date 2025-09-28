@@ -429,10 +429,10 @@ export default function GeneralQuestions() {
       .then((apiData) => {
         const formattedData = {
           voterStatistics: {
-            totalVoters: '0', // Placeholder, update if API provides this
-            maleVoters: '0',
-            femaleVoters: '0',
-            thirdGenderVoters: '0',
+            totalVoters: '234', // Placeholder, update if API provides this
+            maleVoters: '122',
+            femaleVoters: '100',
+            thirdGenderVoters: '12',
           },
           charts: apiData.map((item) => ({
             id: item.question,
