@@ -189,7 +189,11 @@ export default function SurveyTable({
                   <div className='flex justify-end space-x-2'>
                     <motion.button
                       onClick={() =>
-                        router.push(`/dashboard/surveys/${item.id}`)
+                        window.open(
+                          `/dashboard/surveys/${item.id}`,
+                          '_blank',
+                          'noopener,noreferrer'
+                        )
                       }
                       className='text-[#006747] hover:text-[#005536] transition-colors duration-200'
                       whileHover={{ scale: 1.1 }}
@@ -198,9 +202,14 @@ export default function SurveyTable({
                     >
                       <MdRemoveRedEye className='w-5 h-5' />
                     </motion.button>
+
                     <motion.button
                       onClick={() =>
-                        router.push(`/dashboard/surveys/${item.id}?edit=true`)
+                        window.open(
+                          `/dashboard/surveys/${item.id}?edit=true`,
+                          '_blank',
+                          'noopener,noreferrer'
+                        )
                       }
                       className='text-blue-500 hover:text-blue-600 transition-colors duration-200'
                       whileHover={{ scale: 1.1 }}

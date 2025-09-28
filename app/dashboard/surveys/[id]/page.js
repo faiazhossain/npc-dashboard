@@ -652,6 +652,10 @@ export default function SurveyDetails({ params }) {
               <p className='text-gray-600'>ব্যবহারকারী আইডি:</p>
               <p className='text-lg font-medium'>#{survey.user_id}</p>
             </div>
+            <div className='mb-2' style={{ fontFamily: 'Tiro Bangla, serif' }}>
+              <p className='text-gray-600'>ব্যবহারকারী নাম:</p>
+              <p className='text-lg font-medium'>{survey.person_details.নাম}</p>
+            </div>
             <span
               className={`px-3 py-1 rounded-full text-sm ${
                 getStatusInBangla(survey.status) === 'অনুমোদিত'
