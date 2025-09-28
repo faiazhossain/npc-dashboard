@@ -30,6 +30,7 @@ export default function GeneralQuestions() {
     gender: "",
     profession: "",
     age: "",
+    status: "",
   });
 
   const [divisions, setDivisions] = useState([]);
@@ -37,6 +38,7 @@ export default function GeneralQuestions() {
   const [constituencies, setConstituencies] = useState([]);
   const [thanas, setThanas] = useState([]);
   const [unions, setUnions] = useState([]);
+  const [wards, setWards] = useState([]); // New state for wards
 
   const genderOptions = ["নারী", "পুরুষ", "তৃতীয় লিঙ্গ"];
   const professionOptions = [
@@ -116,12 +118,14 @@ export default function GeneralQuestions() {
           setConstituencies([]);
           setThanas([]);
           setUnions([]);
+          setWards([]); // Reset wards
           setFilters((prev) => ({
             ...prev,
             district: "",
             constituency: "",
             thana: "",
             union: "",
+            ward: "", // Reset ward
           }));
         })
         .catch((error) => console.error("Error fetching districts:", error));
@@ -130,12 +134,14 @@ export default function GeneralQuestions() {
       setConstituencies([]);
       setThanas([]);
       setUnions([]);
+      setWards([]); // Reset wards
       setFilters((prev) => ({
         ...prev,
         district: "",
         constituency: "",
         thana: "",
         union: "",
+        ward: "", // Reset ward
       }));
     }
   }, [filters.division]);
@@ -149,10 +155,16 @@ export default function GeneralQuestions() {
         .then((response) => response.json())
         .then((data) => {
           setConstituencies(data);
-          setFilters((prev) => ({ ...prev, constituency: "" }));
           setThanas([]);
           setUnions([]);
-          setFilters((prev) => ({ ...prev, thana: "", union: "" }));
+          setWards([]); // Reset wards
+          setFilters((prev) => ({
+            ...prev,
+            constituency: "",
+            thana: "",
+            union: "",
+            ward: "", // Reset ward
+          }));
         })
         .catch((error) =>
           console.error("Error fetching constituencies:", error)
@@ -161,11 +173,13 @@ export default function GeneralQuestions() {
       setConstituencies([]);
       setThanas([]);
       setUnions([]);
+      setWards([]); // Reset wards
       setFilters((prev) => ({
         ...prev,
         constituency: "",
         thana: "",
         union: "",
+        ward: "", // Reset ward
       }));
     }
   }, [filters.district]);
@@ -180,13 +194,15 @@ export default function GeneralQuestions() {
         .then((data) => {
           setThanas(data);
           setUnions([]);
-          setFilters((prev) => ({ ...prev, thana: "", union: "" }));
+          setWards([]); // Reset wards
+          setFilters((prev) => ({ ...prev, thana: "", union: "", ward: "" }));
         })
         .catch((error) => console.error("Error fetching thanas:", error));
     } else {
       setThanas([]);
       setUnions([]);
-      setFilters((prev) => ({ ...prev, thana: "", union: "" }));
+      setWards([]); // Reset wards
+      setFilters((prev) => ({ ...prev, thana: "", union: "", ward: "" }));
     }
   }, [filters.constituency]);
 
@@ -211,7 +227,78 @@ export default function GeneralQuestions() {
     }
   }, [filters.thana]);
 
+  // New useEffect for fetching wards
+  useEffect(() => {
+    console.log("useEffect for wards triggered");
+    console.log(
+      "filters.district:",
+      filters.district,
+      "filters.thana:",
+      filters.thana
+    );
+    console.log("districts:", districts);
+    console.log("thanas:", thanas);
+
+    if (filters.district && filters.thana) {
+      // Find selected district and thana, with type coercion for safety
+      const selectedDistrict = districts.find((d) => d.id == filters.district);
+      console.log(
+        "🚀 ~ GeneralQuestions ~ selectedDistrict:",
+        selectedDistrict
+      );
+      const selectedThana = thanas.find((t) => t.id == filters.thana);
+      console.log("🚀 ~ GeneralQuestions ~ selectedThana:", selectedThana);
+
+      if (selectedDistrict && selectedThana) {
+        const districtBnName = encodeURIComponent(selectedDistrict.bn_name);
+        const thanaBnName = encodeURIComponent(selectedThana.bn_name);
+        const wardApiUrl = `https://npsbd.xyz/api/users/${districtBnName}/${thanaBnName}/unions_wards`;
+        console.log("Ward API URL:", wardApiUrl);
+
+        fetch(wardApiUrl, {
+          method: "GET",
+          headers: { accept: "application/json" },
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then((data) => {
+            console.log("Ward API response:", data);
+            // Transform wards array into objects with id and bn_name
+            const wardsData = Array.isArray(data.wards)
+              ? data.wards.map((ward, index) => ({
+                  id: index + 1, // Generate a unique ID (or use ward if it’s unique)
+                  bn_name: ward,
+                }))
+              : [];
+            setWards(wardsData);
+            if (wardsData.length === 0) {
+              console.warn("No wards returned for this district and thana.");
+            }
+            setFilters((prev) => ({ ...prev, ward: "" }));
+          })
+          .catch((error) => {
+            console.error("Error fetching wards:", error);
+            setWards([]);
+            setFilters((prev) => ({ ...prev, ward: "" }));
+          });
+      } else {
+        console.warn("Selected district or thana not found. Resetting wards.");
+        setWards([]);
+        setFilters((prev) => ({ ...prev, ward: "" }));
+      }
+    } else {
+      console.log("District or thana not selected. Resetting wards.");
+      setWards([]);
+      setFilters((prev) => ({ ...prev, ward: "" }));
+    }
+  }, [filters.district, filters.thana, districts, thanas]);
+
   const handleFilterChange = (key, value) => {
+    console.log(`Filter changed: ${key} = ${value}`);
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -243,12 +330,13 @@ export default function GeneralQuestions() {
       gender: "",
       profession: "",
       age: "",
-      status: "", // Reset status
+      status: "",
     });
     setDistricts([]);
     setConstituencies([]);
     setThanas([]);
     setUnions([]);
+    setWards([]); // Reset wards
     setFilteredChartData(data);
   };
 
@@ -525,15 +613,28 @@ export default function GeneralQuestions() {
             >
               ওয়ার্ড
             </label>
-            <motion.input
-              type='text'
+
+            <motion.select
               value={filters.ward}
               onChange={(e) => handleFilterChange("ward", e.target.value)}
               className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
               style={{ fontFamily: "Tiro Bangla, serif" }}
-              placeholder='ওয়ার্ড লিখুন'
               whileHover={{ scale: 1.02 }}
-            />
+            >
+              {filters.district && filters.thana && wards.length === 0 ? (
+                <option className='text-sm text-red-600' value=''>
+                  ওয়ার্ড পাওয়া যায়নি
+                </option>
+              ) : (
+                <option value=''>নির্বাচন করুন</option>
+              )}
+
+              {wards.map((ward) => (
+                <option key={ward.id} value={ward.id}>
+                  {ward.bn_name}
+                </option>
+              ))}
+            </motion.select>
           </div>
 
           <div className='flex flex-col'>
