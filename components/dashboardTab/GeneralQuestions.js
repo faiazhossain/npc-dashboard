@@ -47,20 +47,20 @@ export default function GeneralQuestions() {
   // If token is in Redux, uncomment and use this instead:
   // const { token } = useAuth();
 
-  const genderOptions = ['নারী', 'পুরুষ', 'তৃতীয় লিঙ্গ'];
+  const genderOptions = ['নারী', 'পুরুষ', 'তৃতীয় লিঙ্গ'];
   const professionOptions = [
     'শিক্ষার্থী (কলেজ)',
-    'শিক্ষার্থী (বিশ্ববিদ্যালয়)',
+    'শিক্ষার্থী (বিশ্ববিদ্যালয়)',
     'কৃষক',
     'শিক্ষক/শিক্ষিকা',
     'চিকিৎসক/নার্স',
-    'ইঞ্জিনিয়ার',
-    'ব্যবসায়ী',
+    'ইঞ্জিনিয়ার',
+    'ব্যবসায়ী',
     'সরকারি চাকরিজীবী',
     'ব্যাংক কর্মকর্তা',
-    'মার্কেটিং/বিক্রয় প্রতিনিধি',
+    'মার্কেটিং/বিক্রয় প্রতিনিধি',
     'আইটি পেশাজীবী',
-    'মিডিয়া কর্মী',
+    'মিডিয়া কর্মী',
     'কর্মচারী',
     'নির্মাণ/মিস্ত্রি',
     'গৃহকর্মী',
@@ -68,8 +68,8 @@ export default function GeneralQuestions() {
     'অ্যাডভোকেট/আইনজীবী',
     'সামাজিক কাজ/NGO কর্মী',
     'শিল্পী',
-    'বিপণন/বিক্রয় বিশেষজ্ঞ',
-    'খুচরা ব্যবসায়ী',
+    'বিপণন/বিক্রয় বিশেষজ্ঞ',
+    'খুচরা ব্যবসায়ী',
     'অন্যান্য',
   ];
 
@@ -499,20 +499,7 @@ export default function GeneralQuestions() {
     const chartData = processChartData(chart.responses);
 
     return (
-      <motion.div
-        className='bg-white p-6 rounded-xl shadow-sm border border-gray-100'
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{
-          duration: 0.3,
-          delay: 0.4 + index * 0.1,
-          ease: 'easeOut',
-        }}
-        whileHover={{
-          scale: 1.01,
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-        }}
-      >
+      <div className='bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow'>
         <h2
           className='text-xl font-medium text-gray-900 mb-6'
           style={{ fontFamily: 'Tiro Bangla, serif' }}
@@ -563,7 +550,7 @@ export default function GeneralQuestions() {
             </ResponsiveContainer>
           </div>
         </div>
-      </motion.div>
+      </div>
     );
   };
 
@@ -590,12 +577,7 @@ export default function GeneralQuestions() {
 
   return (
     <div className='p-4 lg:p-8 space-y-8'>
-      <motion.div
-        className='bg-gradient-to-br from-white to-gray-50 p-4 rounded-xl shadow-md border border-gray-100 mx-auto'
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
-      >
+      <div className='bg-gradient-to-br from-white to-gray-50 p-4 rounded-xl shadow-md border border-gray-100 mx-auto'>
         <h2
           className='text-xl font-semibold text-gray-800 mb-4'
           style={{ fontFamily: 'Tiro Bangla, serif' }}
@@ -610,12 +592,11 @@ export default function GeneralQuestions() {
             >
               বিভাগ
             </label>
-            <motion.select
+            <select
               value={filters.division}
               onChange={(e) => handleFilterChange('division', e.target.value)}
-              className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
+              className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm hover:scale-[1.02]'
               style={{ fontFamily: 'Tiro Bangla, serif' }}
-              whileHover={{ scale: 1.02 }}
             >
               <option value=''>নির্বাচন করুন</option>
               {divisions.map((division) => (
@@ -623,7 +604,7 @@ export default function GeneralQuestions() {
                   {division.bn_name}
                 </option>
               ))}
-            </motion.select>
+            </select>
           </div>
 
           <div className='flex flex-col'>
@@ -633,12 +614,11 @@ export default function GeneralQuestions() {
             >
               জেলা
             </label>
-            <motion.select
+            <select
               value={filters.district}
               onChange={(e) => handleFilterChange('district', e.target.value)}
-              className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
+              className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm hover:scale-[1.02]'
               style={{ fontFamily: 'Tiro Bangla, serif' }}
-              whileHover={{ scale: 1.02 }}
             >
               <option value=''>নির্বাচন করুন</option>
               {districts.map((district) => (
@@ -646,7 +626,7 @@ export default function GeneralQuestions() {
                   {district.bn_name}
                 </option>
               ))}
-            </motion.select>
+            </select>
           </div>
 
           <div className='flex flex-col'>
@@ -656,14 +636,13 @@ export default function GeneralQuestions() {
             >
               আসন
             </label>
-            <motion.select
+            <select
               value={filters.constituency}
               onChange={(e) =>
                 handleFilterChange('constituency', e.target.value)
               }
-              className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
+              className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm hover:scale-[1.02]'
               style={{ fontFamily: 'Tiro Bangla, serif' }}
-              whileHover={{ scale: 1.02 }}
             >
               <option value=''>নির্বাচন করুন</option>
               {constituencies.map((constituency) => (
@@ -671,7 +650,7 @@ export default function GeneralQuestions() {
                   {constituency.bn_name}
                 </option>
               ))}
-            </motion.select>
+            </select>
           </div>
 
           <div className='flex flex-col'>
@@ -681,12 +660,11 @@ export default function GeneralQuestions() {
             >
               থানা
             </label>
-            <motion.select
+            <select
               value={filters.thana}
               onChange={(e) => handleFilterChange('thana', e.target.value)}
-              className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
+              className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm hover:scale-[1.02]'
               style={{ fontFamily: 'Tiro Bangla, serif' }}
-              whileHover={{ scale: 1.02 }}
             >
               <option value=''>নির্বাচন করুন</option>
               {thanas.map((thana) => (
@@ -694,7 +672,7 @@ export default function GeneralQuestions() {
                   {thana.bn_name}
                 </option>
               ))}
-            </motion.select>
+            </select>
           </div>
 
           <div className='flex flex-col'>
@@ -704,12 +682,11 @@ export default function GeneralQuestions() {
             >
               ওয়ার্ড
             </label>
-            <motion.select
+            <select
               value={filters.ward}
               onChange={(e) => handleFilterChange('ward', e.target.value)}
-              className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
+              className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm hover:scale-[1.02]'
               style={{ fontFamily: 'Tiro Bangla, serif' }}
-              whileHover={{ scale: 1.02 }}
             >
               {filters.district && filters.thana && wards.length === 0 ? (
                 <option className='text-sm text-red-600' value=''>
@@ -723,7 +700,7 @@ export default function GeneralQuestions() {
                   {ward.bn_name}
                 </option>
               ))}
-            </motion.select>
+            </select>
           </div>
 
           <div className='flex flex-col'>
@@ -733,12 +710,11 @@ export default function GeneralQuestions() {
             >
               ইউনিয়ন
             </label>
-            <motion.select
+            <select
               value={filters.union}
               onChange={(e) => handleFilterChange('union', e.target.value)}
-              className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
+              className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm hover:scale-[1.02]'
               style={{ fontFamily: 'Tiro Bangla, serif' }}
-              whileHover={{ scale: 1.02 }}
             >
               {filters.district && filters.thana && unions.length === 0 ? (
                 <option className='text-sm text-red-600' value=''>
@@ -752,7 +728,7 @@ export default function GeneralQuestions() {
                   {union.bn_name}
                 </option>
               ))}
-            </motion.select>
+            </select>
           </div>
 
           <div className='flex flex-col'>
@@ -762,12 +738,11 @@ export default function GeneralQuestions() {
             >
               লিঙ্গ
             </label>
-            <motion.select
+            <select
               value={filters.gender}
               onChange={(e) => handleFilterChange('gender', e.target.value)}
-              className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
+              className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm hover:scale-[1.02]'
               style={{ fontFamily: 'Tiro Bangla, serif' }}
-              whileHover={{ scale: 1.02 }}
             >
               <option value=''>নির্বাচন করুন</option>
               {genderOptions.map((gender) => (
@@ -775,7 +750,7 @@ export default function GeneralQuestions() {
                   {gender}
                 </option>
               ))}
-            </motion.select>
+            </select>
           </div>
 
           <div className='flex flex-col'>
@@ -785,12 +760,11 @@ export default function GeneralQuestions() {
             >
               পেশা
             </label>
-            <motion.select
+            <select
               value={filters.profession}
               onChange={(e) => handleFilterChange('profession', e.target.value)}
-              className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
+              className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm hover:scale-[1.02]'
               style={{ fontFamily: 'Tiro Bangla, serif' }}
-              whileHover={{ scale: 1.02 }}
             >
               <option value=''>নির্বাচন করুন</option>
               {professionOptions.map((profession) => (
@@ -798,7 +772,7 @@ export default function GeneralQuestions() {
                   {profession}
                 </option>
               ))}
-            </motion.select>
+            </select>
           </div>
 
           <div className='flex flex-col'>
@@ -808,19 +782,18 @@ export default function GeneralQuestions() {
             >
               বয়স
             </label>
-            <motion.select
+            <select
               value={filters.age}
               onChange={(e) => handleFilterChange('age', e.target.value)}
-              className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
+              className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm hover:scale-[1.02]'
               style={{ fontFamily: 'Tiro Bangla, serif' }}
-              whileHover={{ scale: 1.02 }}
             >
               <option value=''>নির্বাচন করুন</option>
               <option value='18-34'>১৮-৩৪</option>
               <option value='35-45'>৩৫-৪৫</option>
               <option value='46-60'>৪৬-৬০</option>
               <option value='60+'>৬০+</option>
-            </motion.select>
+            </select>
           </div>
           {(userType === 'super_admin' || userType === 'admin') && (
             <div className='flex flex-col'>
@@ -830,12 +803,11 @@ export default function GeneralQuestions() {
               >
                 স্ট্যাটাস
               </label>
-              <motion.select
+              <select
                 value={filters.status}
                 onChange={(e) => handleFilterChange('status', e.target.value)}
-                className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
+                className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm hover:scale-[1.02]'
                 style={{ fontFamily: 'Tiro Bangla, serif' }}
-                whileHover={{ scale: 1.02 }}
               >
                 <option value=''>নির্বাচন করুন</option>
                 {statusOptions.map((option) => (
@@ -843,44 +815,29 @@ export default function GeneralQuestions() {
                     {option.label}
                   </option>
                 ))}
-              </motion.select>
+              </select>
             </div>
           )}
         </div>
         <div className='flex justify-end space-x-2'>
-          <motion.button
+          <button
             onClick={handleReset}
-            className='bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors duration-200 text-sm'
+            className='bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors duration-200 text-sm hover:scale-105 hover:shadow-md active:scale-95'
             style={{ fontFamily: 'Tiro Bangla, serif' }}
-            whileHover={{
-              scale: 1.05,
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-            }}
-            whileTap={{ scale: 0.95 }}
           >
             রিসেট করুন
-          </motion.button>
-          <motion.button
+          </button>
+          <button
             onClick={handleView}
-            className='bg-[#006747] text-white px-4 py-2 rounded-md hover:bg-[#005536] transition-colors duration-200 text-sm'
+            className='bg-[#006747] text-white px-4 py-2 rounded-md hover:bg-[#005536] transition-colors duration-200 text-sm hover:scale-105 hover:shadow-md active:scale-95'
             style={{ fontFamily: 'Tiro Bangla, serif' }}
-            whileHover={{
-              scale: 1.05,
-              boxShadow: '0 2px 8px rgba(0, 103, 71, 0.2)',
-            }}
-            whileTap={{ scale: 0.95 }}
           >
             দেখুন
-          </motion.button>
+          </button>
         </div>
-      </motion.div>
+      </div>
 
-      <motion.div
-        className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
-      >
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
         {Object.entries(filteredChartData.voterStatistics).map(
           ([key, value], index) => {
             const titles = {
@@ -907,16 +864,9 @@ export default function GeneralQuestions() {
             };
 
             return (
-              <motion.div
+              <div
                 key={key}
                 className={`${colors[key]} p-4 rounded-lg shadow-sm border border-gray-100 flex flex-col items-center transition-all duration-300`}
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{
-                  duration: 0.3,
-                  delay: 0.2 + index * 0.08,
-                  ease: 'easeOut',
-                }}
               >
                 <Image
                   src={`/Images/gender/${icons[key]}`}
@@ -937,22 +887,17 @@ export default function GeneralQuestions() {
                 >
                   {value}
                 </p>
-              </motion.div>
+              </div>
             );
           }
         )}
-      </motion.div>
+      </div>
 
-      <motion.div
-        className='grid grid-cols-1 lg:grid-cols-2 gap-6'
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.4, ease: 'easeOut' }}
-      >
+      <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
         {filteredChartData.charts?.map((chart, index) => (
           <ChartComponent key={chart.id} chart={chart} index={index} />
         ))}
-      </motion.div>
+      </div>
     </div>
   );
 }
