@@ -368,23 +368,34 @@ export default function GeneralQuestions() {
       const constituency = constituencies.find(
         (c) => c.id == filters.constituency
       );
-      if (constituency)
-        queryParams.append('আসন', encodeURIComponent(constituency.bn_name));
+      if (constituency && constituency.bn_name) {
+        queryParams.append('আসন', constituency.bn_name.trim());
+      }
     }
+
     if (filters.district) {
       const district = districts.find((d) => d.id == filters.district);
-      if (district)
-        queryParams.append('জেলা', encodeURIComponent(district.bn_name));
+      if (district && district.bn_name) {
+        // Trim and append directly
+        queryParams.append('জেলা', district.bn_name.trim());
+      }
     }
+
     if (filters.thana) {
       const thana = thanas.find((t) => t.id == filters.thana);
-      if (thana) queryParams.append('থানা', encodeURIComponent(thana.bn_name));
+      if (thana && thana.bn_name) {
+        queryParams.append('থানা', thana.bn_name.trim());
+      }
     }
+
     if (filters.division) {
       const division = divisions.find((d) => d.id == filters.division);
-      if (division)
-        queryParams.append('বিভাগ', encodeURIComponent(division.bn_name));
+      if (division && division.bn_name) {
+        // Trim and append directly; URLSearchParams handles encoding
+        queryParams.append('বিভাগ', division.bn_name.trim());
+      }
     }
+
     if (filters.union) {
       const union = unions.find((u) => u.id == filters.union);
       if (union)
@@ -394,10 +405,11 @@ export default function GeneralQuestions() {
       const ward = wards.find((w) => w.id == filters.ward);
       if (ward) queryParams.append('ওয়ার্ড', encodeURIComponent(ward.bn_name));
     }
-
     if (filters.status) queryParams.append('status', filters.status);
-    if (filters.profession)
-      queryParams.append('পেশা', encodeURIComponent(filters.profession));
+    if (filters.profession && filters.profession.trim()) {
+      queryParams.append('পেশা', filters.profession.trim());
+    }
+    // Updated line
 
     const apiUrl = `https://npsbd.xyz/api/dashboard/questions/stats?${queryParams.toString()}`;
 
@@ -436,7 +448,6 @@ export default function GeneralQuestions() {
       })
       .catch((error) => console.error('Error fetching filtered data:', error));
   };
-
   const handleReset = () => {
     setFilters({
       division: '',
@@ -843,10 +854,10 @@ export default function GeneralQuestions() {
               whileHover={{ scale: 1.02 }}
             >
               <option value=''>নির্বাচন করুন</option>
-              <option value='18-25'>১৮-৩৪</option>
-              <option value='26-35'>৩৫-৪৫</option>
-              <option value='36-45'>৪৬-৬০</option>
-              <option value='46+'>৬০+</option>
+              <option value='18-34'>১৮-৩৪</option>
+              <option value='35-45'>৩৫-৪৫</option>
+              <option value='46-60'>৪৬-৬০</option>
+              <option value='60+'>৬০+</option>
             </motion.select>
           </div>
           {(userType === 'super_admin' || userType === 'admin') && (
