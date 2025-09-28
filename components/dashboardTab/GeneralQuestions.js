@@ -497,11 +497,6 @@ export default function GeneralQuestions() {
 
   const ChartComponent = ({ chart, index }) => {
     const chartData = processChartData(chart.responses);
-    const isPartyPreference = chart.id.includes('রাজনৈতিক দল');
-
-    const maxPercentage = isPartyPreference
-      ? Math.max(...chartData.map((entry) => entry.value))
-      : 100;
 
     return (
       <motion.div
@@ -524,10 +519,7 @@ export default function GeneralQuestions() {
         >
           {chart.question}
         </h2>
-        <div
-          className='flex'
-          style={{ height: isPartyPreference ? '600px' : '320px' }}
-        >
+        <div className='flex' style={{ height: '320px' }}>
           <div className='w-1/2 flex flex-col justify-center space-y-2 pr-4 overflow-y-auto'>
             {chartData.map((entry, entryIndex) => (
               <div key={entry.name} className='flex items-center'>
@@ -548,56 +540,26 @@ export default function GeneralQuestions() {
           </div>
           <div className='w-1/2'>
             <ResponsiveContainer width='100%' height='100%'>
-              {isPartyPreference ? (
-                <BarChart
+              <PieChart>
+                <Pie
                   data={chartData}
-                  layout='vertical'
-                  margin={{ top: 20, right: 20, left: 20, bottom: 20 }}
+                  cx='50%'
+                  cy='50%'
+                  innerRadius={chart.hasInnerRadius ? 40 : 0}
+                  outerRadius={80}
+                  fill='#8884d8'
+                  paddingAngle={1}
+                  dataKey='value'
                 >
-                  <CartesianGrid strokeDasharray='3 3' />
-                  <XAxis
-                    type='number'
-                    domain={[0, maxPercentage]}
-                    tickFormatter={(value) => `${value}%`}
-                  />
-                  <YAxis
-                    type='category'
-                    dataKey='name'
-                    width={100}
-                    tick={{ fontSize: 12, fontFamily: 'Tiro Bangla, serif' }}
-                  />
-                  <Tooltip formatter={(value) => [`${value.toFixed(1)}%`]} />
-                  <Bar dataKey='value' fill='#8884d8'>
-                    {chartData.map((entry, entryIndex) => (
-                      <Cell
-                        key={`cell-${entryIndex}`}
-                        fill={COLORS[entryIndex % COLORS.length]}
-                      />
-                    ))}
-                  </Bar>
-                </BarChart>
-              ) : (
-                <PieChart>
-                  <Pie
-                    data={chartData}
-                    cx='50%'
-                    cy='50%'
-                    innerRadius={chart.hasInnerRadius ? 40 : 0}
-                    outerRadius={80}
-                    fill='#8884d8'
-                    paddingAngle={1}
-                    dataKey='value'
-                  >
-                    {chartData.map((entry, entryIndex) => (
-                      <Cell
-                        key={`cell-${entryIndex}`}
-                        fill={COLORS[entryIndex % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => [`${value.toFixed(1)}%`]} />
-                </PieChart>
-              )}
+                  {chartData.map((entry, entryIndex) => (
+                    <Cell
+                      key={`cell-${entryIndex}`}
+                      fill={COLORS[entryIndex % COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => [`${value.toFixed(1)}%`]} />
+              </PieChart>
             </ResponsiveContainer>
           </div>
         </div>
