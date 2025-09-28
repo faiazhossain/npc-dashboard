@@ -1,6 +1,6 @@
-"use client";
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+'use client';
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import {
   PieChart,
   Pie,
@@ -12,25 +12,25 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-} from "recharts";
-import Image from "next/image";
-import { useAuth } from "@/hooks/useAuth";
+} from 'recharts';
+import Image from 'next/image';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function GeneralQuestions() {
   const [data, setData] = useState(null);
   const [filteredChartData, setFilteredChartData] = useState(null);
-  const { userData } = useAuth();
+  const { userData, userType } = useAuth(); // Using userData and userType from useAuth
   const [filters, setFilters] = useState({
-    division: "",
-    district: "",
-    constituency: "",
-    thana: "",
-    ward: "",
-    union: "",
-    gender: "",
-    profession: "",
-    age: "",
-    status: "",
+    division: '',
+    district: '',
+    constituency: '',
+    thana: '',
+    ward: '',
+    union: '',
+    gender: '',
+    profession: '',
+    age: '',
+    status: '',
   });
 
   const [divisions, setDivisions] = useState([]);
@@ -38,79 +38,123 @@ export default function GeneralQuestions() {
   const [constituencies, setConstituencies] = useState([]);
   const [thanas, setThanas] = useState([]);
   const [unions, setUnions] = useState([]);
-  const [wards, setWards] = useState([]); // New state for wards
+  const [wards, setWards] = useState([]);
 
-  const genderOptions = ["নারী", "পুরুষ", "তৃতীয় লিঙ্গ"];
+  // Retrieve token from localStorage (adjust key if different)
+  const token =
+    typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+
+  // If token is in Redux, uncomment and use this instead:
+  // const { token } = useAuth();
+
+  const genderOptions = ['নারী', 'পুরুষ', 'তৃতীয় লিঙ্গ'];
   const professionOptions = [
-    "শিক্ষার্থী (কলেজ)",
-    "শিক্ষার্থী (বিশ্ববিদ্যালয়)",
-    "কৃষক",
-    "শিক্ষক/শিক্ষিকা",
-    "চিকিৎসক/নার্স",
-    "ইঞ্জিনিয়ার",
-    "ব্যবসায়ী",
-    "সরকারি চাকরিজীবী",
-    "ব্যাংক কর্মকর্তা",
-    "মার্কেটিং/বিক্রয় প্রতিনিধি",
-    "আইটি পেশাজীবী",
-    "মিডিয়া কর্মী",
-    "কর্মচারী",
-    "নির্মাণ/মিস্ত্রি",
-    "গৃহকর্মী",
-    "ফ্রিল্যান্সার",
-    "অ্যাডভোকেট/আইনজীবী",
-    "সামাজিক কাজ/NGO কর্মী",
-    "শিল্পী",
-    "বিপণন/বিক্রয় বিশেষজ্ঞ",
-    "খুচরা ব্যবসায়ী",
-    "অন্যান্য",
+    'শিক্ষার্থী (কলেজ)',
+    'শিক্ষার্থী (বিশ্ববিদ্যালয়)',
+    'কৃষক',
+    'শিক্ষক/শিক্ষিকা',
+    'চিকিৎসক/নার্স',
+    'ইঞ্জিনিয়ার',
+    'ব্যবসায়ী',
+    'সরকারি চাকরিজীবী',
+    'ব্যাংক কর্মকর্তা',
+    'মার্কেটিং/বিক্রয় প্রতিনিধি',
+    'আইটি পেশাজীবী',
+    'মিডিয়া কর্মী',
+    'কর্মচারী',
+    'নির্মাণ/মিস্ত্রি',
+    'গৃহকর্মী',
+    'ফ্রিল্যান্সার',
+    'অ্যাডভোকেট/আইনজীবী',
+    'সামাজিক কাজ/NGO কর্মী',
+    'শিল্পী',
+    'বিপণন/বিক্রয় বিশেষজ্ঞ',
+    'খুচরা ব্যবসায়ী',
+    'অন্যান্য',
   ];
 
   const statusOptions = [
-    { value: "pending", label: "অপেক্ষামান" },
-    { value: "accepted", label: "অনুমোদিত" },
-    { value: "rejected", label: "বাতিল" },
+    { value: 'pending', label: 'অপেক্ষামান' },
+    { value: 'accepted', label: 'অনুমোদিত' },
+    { value: 'rejected', label: 'বাতিল' },
   ];
 
   const convertBengaliToEnglish = (bengaliNumber) => {
     const bengaliDigits = {
-      "০": "0",
-      "১": "1",
-      "২": "2",
-      "৩": "3",
-      "৪": "4",
-      "৫": "5",
-      "৬": "6",
-      "৭": "7",
-      "৮": "8",
-      "৯": "9",
+      '০': '0',
+      '১': '1',
+      '২': '2',
+      '৩': '3',
+      '৪': '4',
+      '৫': '5',
+      '৬': '6',
+      '৭': '7',
+      '৮': '8',
+      '৯': '9',
     };
     return bengaliNumber.replace(/[০-৯]/g, (match) => bengaliDigits[match]);
   };
 
   useEffect(() => {
-    fetch("https://npsbd.xyz/api/divisions", {
-      method: "GET",
-      headers: { accept: "application/json" },
+    if (!token) {
+      console.error('No token available for API requests');
+      return;
+    }
+
+    // Fetch divisions
+    fetch('https://npsbd.xyz/api/divisions', {
+      method: 'GET',
+      headers: { accept: 'application/json', Authorization: `Bearer ${token}` },
     })
       .then((response) => response.json())
       .then((data) => setDivisions(data))
-      .catch((error) => console.error("Error fetching divisions:", error));
+      .catch((error) => console.error('Error fetching divisions:', error));
 
-    fetch("/json/general-questions.json")
-      .then((response) => response.json())
-      .then((data) => {
-        setData(data);
-        setFilteredChartData(data);
+    // Fetch initial chart data
+    fetch('https://npsbd.xyz/api/dashboard/questions/stats', {
+      method: 'GET',
+      headers: { accept: 'application/json', Authorization: `Bearer ${token}` },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
       })
-      .catch((error) => console.error("Error loading data:", error));
-  }, []);
+      .then((data) => {
+        const formattedData = {
+          voterStatistics: {
+            totalVoters: '0', // Placeholder, update if API provides this
+            maleVoters: '0',
+            femaleVoters: '0',
+            thirdGenderVoters: '0',
+          },
+          charts: data.map((item) => ({
+            id: item.question,
+            question: item.question,
+            responses: item.stats.map((stat) => ({
+              label: stat.label,
+              percentage: `${stat.value}%`,
+            })),
+            hasInnerRadius: item.question.includes('প্রধান চাওয়া'),
+          })),
+        };
+        setData(formattedData);
+        setFilteredChartData(formattedData);
+      })
+      .catch((error) => console.error('Error loading initial data:', error));
+  }, [token]);
 
   useEffect(() => {
+    if (!token) return;
+
     if (filters.division) {
       fetch(`https://npsbd.xyz/api/divisions/${filters.division}/districts`, {
-        method: "GET",
-        headers: { accept: "application/json" },
+        method: 'GET',
+        headers: {
+          accept: 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
       })
         .then((response) => response.json())
         .then((data) => {
@@ -118,117 +162,107 @@ export default function GeneralQuestions() {
           setConstituencies([]);
           setThanas([]);
           setUnions([]);
-          setWards([]); // Reset wards
+          setWards([]);
           setFilters((prev) => ({
             ...prev,
-            district: "",
-            constituency: "",
-            thana: "",
-            union: "",
-            ward: "", // Reset ward
+            district: '',
+            constituency: '',
+            thana: '',
+            union: '',
+            ward: '',
           }));
         })
-        .catch((error) => console.error("Error fetching districts:", error));
+        .catch((error) => console.error('Error fetching districts:', error));
     } else {
       setDistricts([]);
       setConstituencies([]);
       setThanas([]);
       setUnions([]);
-      setWards([]); // Reset wards
+      setWards([]);
       setFilters((prev) => ({
         ...prev,
-        district: "",
-        constituency: "",
-        thana: "",
-        union: "",
-        ward: "", // Reset ward
+        district: '',
+        constituency: '',
+        thana: '',
+        union: '',
+        ward: '',
       }));
     }
-  }, [filters.division]);
+  }, [filters.division, token]);
 
   useEffect(() => {
+    if (!token) return;
+
     if (filters.district) {
       fetch(`https://npsbd.xyz/api/districts/${filters.district}/seats`, {
-        method: "GET",
-        headers: { accept: "application/json" },
+        method: 'GET',
+        headers: {
+          accept: 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
       })
         .then((response) => response.json())
         .then((data) => {
           setConstituencies(data);
           setThanas([]);
           setUnions([]);
-          setWards([]); // Reset wards
+          setWards([]);
           setFilters((prev) => ({
             ...prev,
-            constituency: "",
-            thana: "",
-            union: "",
-            ward: "", // Reset ward
+            constituency: '',
+            thana: '',
+            union: '',
+            ward: '',
           }));
         })
         .catch((error) =>
-          console.error("Error fetching constituencies:", error)
+          console.error('Error fetching constituencies:', error)
         );
     } else {
       setConstituencies([]);
       setThanas([]);
       setUnions([]);
-      setWards([]); // Reset wards
+      setWards([]);
       setFilters((prev) => ({
         ...prev,
-        constituency: "",
-        thana: "",
-        union: "",
-        ward: "", // Reset ward
+        constituency: '',
+        thana: '',
+        union: '',
+        ward: '',
       }));
     }
-  }, [filters.district]);
+  }, [filters.district, token]);
 
   useEffect(() => {
+    if (!token) return;
+
     if (filters.constituency) {
       fetch(`https://npsbd.xyz/api/seats/${filters.constituency}/thanas`, {
-        method: "GET",
-        headers: { accept: "application/json" },
+        method: 'GET',
+        headers: {
+          accept: 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
       })
         .then((response) => response.json())
         .then((data) => {
           setThanas(data);
           setUnions([]);
-          setWards([]); // Reset wards
-          setFilters((prev) => ({ ...prev, thana: "", union: "", ward: "" }));
+          setWards([]);
+          setFilters((prev) => ({ ...prev, thana: '', union: '', ward: '' }));
         })
-        .catch((error) => console.error("Error fetching thanas:", error));
+        .catch((error) => console.error('Error fetching thanas:', error));
     } else {
       setThanas([]);
       setUnions([]);
-      setWards([]); // Reset wards
-      setFilters((prev) => ({ ...prev, thana: "", union: "", ward: "" }));
+      setWards([]);
+      setFilters((prev) => ({ ...prev, thana: '', union: '', ward: '' }));
     }
-  }, [filters.constituency]);
+  }, [filters.constituency, token]);
 
-  // useEffect(() => {
-  //   if (filters.thana) {
-  //     fetch(`https://npsbd.xyz/api/thanas/${filters.thana}/unions`, {
-  //       method: "GET",
-  //       headers: { accept: "application/json" },
-  //     })
-  //       .then((response) => response.json())
-  //       .then((data) => {
-  //         setUnions([
-  //           ...data,
-  //           { id: "custom", name: "Custom Input", bn_name: "কাস্টম ইনপুট" },
-  //         ]);
-  //         setFilters((prev) => ({ ...prev, union: "" }));
-  //       })
-  //       .catch((error) => console.error("Error fetching unions:", error));
-  //   } else {
-  //     setUnions([]);
-  //     setFilters((prev) => ({ ...prev, union: "" }));
-  //   }
-  // }, [filters.thana]);
-
-  // New useEffect for fetching wards
   useEffect(() => {
+    if (!token) return;
+
     if (filters.district && filters.thana) {
       const selectedDistrict = districts.find((d) => d.id == filters.district);
       const selectedThana = thanas.find((t) => t.id == filters.thana);
@@ -238,11 +272,12 @@ export default function GeneralQuestions() {
         const thanaBnName = encodeURIComponent(selectedThana.bn_name);
         const wardApiUrl = `https://npsbd.xyz/api/users/${districtBnName}/${thanaBnName}/unions_wards`;
 
-        console.log("Ward API URL:", wardApiUrl);
-
         fetch(wardApiUrl, {
-          method: "GET",
-          headers: { accept: "application/json" },
+          method: 'GET',
+          headers: {
+            accept: 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
         })
           .then((response) => {
             if (!response.ok) {
@@ -251,7 +286,6 @@ export default function GeneralQuestions() {
             return response.json();
           })
           .then((data) => {
-            // Transform wards
             const wardsData = Array.isArray(data.wards)
               ? data.wards.map((ward, index) => ({
                   id: index + 1,
@@ -259,7 +293,6 @@ export default function GeneralQuestions() {
                 }))
               : [];
 
-            // Transform unions
             const unionsData = Array.isArray(data.unions)
               ? data.unions.map((union, index) => ({
                   id: index + 1,
@@ -269,47 +302,41 @@ export default function GeneralQuestions() {
 
             setWards(wardsData);
             setUnions(unionsData);
-
-            // reset ward & union filter
             setFilters((prev) => ({
               ...prev,
-              ward: "",
-              union: "",
+              ward: '',
+              union: '',
             }));
           })
           .catch((error) => {
-            console.error("Error fetching wards/unions:", error);
+            console.error('Error fetching wards/unions:', error);
             setWards([]);
             setUnions([]);
             setFilters((prev) => ({
               ...prev,
-              ward: "",
-              union: "",
+              ward: '',
+              union: '',
             }));
           });
       } else {
-        console.warn(
-          "Selected district or thana not found. Resetting wards/unions."
-        );
         setWards([]);
         setUnions([]);
         setFilters((prev) => ({
           ...prev,
-          ward: "",
-          union: "",
+          ward: '',
+          union: '',
         }));
       }
     } else {
-      console.log("District or thana not selected. Resetting wards/unions.");
       setWards([]);
       setUnions([]);
       setFilters((prev) => ({
         ...prev,
-        ward: "",
-        union: "",
+        ward: '',
+        union: '',
       }));
     }
-  }, [filters.district, filters.thana, districts, thanas]);
+  }, [filters.district, filters.thana, districts, thanas, token]);
 
   const handleFilterChange = (key, value) => {
     console.log(`Filter changed: ${key} = ${value}`);
@@ -317,40 +344,117 @@ export default function GeneralQuestions() {
   };
 
   const handleView = () => {
-    console.log("Filters applied:", filters);
-    if (data) {
-      const filteredData = {
-        ...data,
-        charts: data.charts.map((chart) => ({
-          ...chart,
-          responses: chart.responses.map((response) => ({
-            ...response,
-            percentage: response.percentage,
-          })),
-        })),
-      };
-      setFilteredChartData(filteredData);
+    if (!token) {
+      console.error('No token available for API request');
+      return;
     }
+
+    console.log('Filters applied:', filters);
+    const queryParams = new URLSearchParams();
+
+    // Map filters to Bengali parameter names
+    if (filters.age) {
+      // Map age range to a single value if needed (adjust based on API requirements)
+      const ageMap = {
+        '18-25': '25',
+        '26-35': '35',
+        '36-45': '45',
+        '46+': '60',
+      };
+      queryParams.append('বয়স', ageMap[filters.age] || filters.age);
+    }
+    if (filters.gender) queryParams.append('লিঙ্গ', filters.gender);
+    if (filters.constituency) {
+      const constituency = constituencies.find(
+        (c) => c.id == filters.constituency
+      );
+      if (constituency)
+        queryParams.append('আসন', encodeURIComponent(constituency.bn_name));
+    }
+    if (filters.district) {
+      const district = districts.find((d) => d.id == filters.district);
+      if (district)
+        queryParams.append('জেলা', encodeURIComponent(district.bn_name));
+    }
+    if (filters.thana) {
+      const thana = thanas.find((t) => t.id == filters.thana);
+      if (thana) queryParams.append('থানা', encodeURIComponent(thana.bn_name));
+    }
+    if (filters.division) {
+      const division = divisions.find((d) => d.id == filters.division);
+      if (division)
+        queryParams.append('বিভাগ', encodeURIComponent(division.bn_name));
+    }
+    if (filters.union) {
+      const union = unions.find((u) => u.id == filters.union);
+      if (union)
+        queryParams.append('ইউনিয়ন', encodeURIComponent(union.bn_name));
+    }
+    if (filters.ward) {
+      const ward = wards.find((w) => w.id == filters.ward);
+      if (ward) queryParams.append('ওয়ার্ড', encodeURIComponent(ward.bn_name));
+    }
+
+    if (filters.status) queryParams.append('status', filters.status);
+    if (filters.profession)
+      queryParams.append('পেশা', encodeURIComponent(filters.profession));
+
+    const apiUrl = `https://npsbd.xyz/api/dashboard/questions/stats?${queryParams.toString()}`;
+
+    fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        accept: 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((apiData) => {
+        const formattedData = {
+          voterStatistics: {
+            totalVoters: '0', // Placeholder, update if API provides this
+            maleVoters: '0',
+            femaleVoters: '0',
+            thirdGenderVoters: '0',
+          },
+          charts: apiData.map((item) => ({
+            id: item.question,
+            question: item.question,
+            responses: item.stats.map((stat) => ({
+              label: stat.label,
+              percentage: `${stat.value}%`,
+            })),
+            hasInnerRadius: item.question.includes('প্রধান চাওয়া'),
+          })),
+        };
+        setFilteredChartData(formattedData);
+      })
+      .catch((error) => console.error('Error fetching filtered data:', error));
   };
 
   const handleReset = () => {
     setFilters({
-      division: "",
-      district: "",
-      constituency: "",
-      thana: "",
-      ward: "",
-      union: "",
-      gender: "",
-      profession: "",
-      age: "",
-      status: "",
+      division: '',
+      district: '',
+      constituency: '',
+      thana: '',
+      ward: '',
+      union: '',
+      gender: '',
+      profession: '',
+      age: '',
+      status: '',
     });
     setDistricts([]);
     setConstituencies([]);
     setThanas([]);
     setUnions([]);
-    setWards([]); // Reset wards
+    setWards([]);
     setFilteredChartData(data);
   };
 
@@ -362,7 +466,7 @@ export default function GeneralQuestions() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className='text-lg text-gray-600 bg-white p-8 rounded-xl shadow-sm border border-gray-100'
-          style={{ fontFamily: "Tiro Bangla, serif" }}
+          style={{ fontFamily: 'Tiro Bangla, serif' }}
         >
           ডেটা লোড করা হচ্ছে...
         </motion.div>
@@ -374,7 +478,7 @@ export default function GeneralQuestions() {
     return responses.map((item) => ({
       name: item.label,
       value: parseFloat(
-        convertBengaliToEnglish(item.percentage.replace("%", ""))
+        convertBengaliToEnglish(item.percentage.replace('%', ''))
       ),
       displayValue: item.percentage,
     }));
@@ -382,7 +486,7 @@ export default function GeneralQuestions() {
 
   const ChartComponent = ({ chart, index }) => {
     const chartData = processChartData(chart.responses);
-    const isPartyPreference = chart.id === "partyPreference";
+    const isPartyPreference = chart.id.includes('রাজনৈতিক দল');
 
     const maxPercentage = isPartyPreference
       ? Math.max(...chartData.map((entry) => entry.value))
@@ -396,22 +500,22 @@ export default function GeneralQuestions() {
         transition={{
           duration: 0.3,
           delay: 0.4 + index * 0.1,
-          ease: "easeOut",
+          ease: 'easeOut',
         }}
         whileHover={{
           scale: 1.01,
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
         }}
       >
         <h2
           className='text-xl font-medium text-gray-900 mb-6'
-          style={{ fontFamily: "Tiro Bangla, serif" }}
+          style={{ fontFamily: 'Tiro Bangla, serif' }}
         >
           {chart.question}
         </h2>
         <div
           className='flex'
-          style={{ height: isPartyPreference ? "600px" : "320px" }}
+          style={{ height: isPartyPreference ? '600px' : '320px' }}
         >
           <div className='w-1/2 flex flex-col justify-center space-y-2 pr-4 overflow-y-auto'>
             {chartData.map((entry, entryIndex) => (
@@ -424,7 +528,7 @@ export default function GeneralQuestions() {
                 ></div>
                 <span
                   className='text-sm font-medium truncate'
-                  style={{ fontFamily: "Tiro Bangla, serif" }}
+                  style={{ fontFamily: 'Tiro Bangla, serif' }}
                 >
                   {entry.name}: {entry.displayValue}
                 </span>
@@ -449,7 +553,7 @@ export default function GeneralQuestions() {
                     type='category'
                     dataKey='name'
                     width={100}
-                    tick={{ fontSize: 12, fontFamily: "Tiro Bangla, serif" }}
+                    tick={{ fontSize: 12, fontFamily: 'Tiro Bangla, serif' }}
                   />
                   <Tooltip formatter={(value) => [`${value.toFixed(1)}%`]} />
                   <Bar dataKey='value' fill='#8884d8'>
@@ -491,24 +595,24 @@ export default function GeneralQuestions() {
   };
 
   const COLORS = [
-    "#06C584",
-    "#8C5CF0",
-    "#EC489B",
-    "#0EA7EC",
-    "#F39E0B",
-    "#f5ffc6",
-    "#003b36",
-    "#59114d",
-    "#FF6F61",
-    "#6B7280",
-    "#10B981",
-    "#FBBF24",
-    "#3B82F6",
-    "#D1D5DB",
-    "#EF4444",
-    "#8B5CF6",
-    "#F97316",
-    "#4B5563",
+    '#06C584',
+    '#8C5CF0',
+    '#EC489B',
+    '#0EA7EC',
+    '#F39E0B',
+    '#f5ffc6',
+    '#003b36',
+    '#59114d',
+    '#FF6F61',
+    '#6B7280',
+    '#10B981',
+    '#FBBF24',
+    '#3B82F6',
+    '#D1D5DB',
+    '#EF4444',
+    '#8B5CF6',
+    '#F97316',
+    '#4B5563',
   ];
 
   return (
@@ -517,11 +621,11 @@ export default function GeneralQuestions() {
         className='bg-gradient-to-br from-white to-gray-50 p-4 rounded-xl shadow-md border border-gray-100 mx-auto'
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
       >
         <h2
           className='text-xl font-semibold text-gray-800 mb-4'
-          style={{ fontFamily: "Tiro Bangla, serif" }}
+          style={{ fontFamily: 'Tiro Bangla, serif' }}
         >
           ফিল্টার
         </h2>
@@ -529,15 +633,15 @@ export default function GeneralQuestions() {
           <div className='flex flex-col'>
             <label
               className='block text-xs font-medium text-gray-600 mb-1'
-              style={{ fontFamily: "Tiro Bangla, serif" }}
+              style={{ fontFamily: 'Tiro Bangla, serif' }}
             >
               বিভাগ
             </label>
             <motion.select
               value={filters.division}
-              onChange={(e) => handleFilterChange("division", e.target.value)}
+              onChange={(e) => handleFilterChange('division', e.target.value)}
               className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
-              style={{ fontFamily: "Tiro Bangla, serif" }}
+              style={{ fontFamily: 'Tiro Bangla, serif' }}
               whileHover={{ scale: 1.02 }}
             >
               <option value=''>নির্বাচন করুন</option>
@@ -552,15 +656,15 @@ export default function GeneralQuestions() {
           <div className='flex flex-col'>
             <label
               className='block text-xs font-medium text-gray-600 mb-1'
-              style={{ fontFamily: "Tiro Bangla, serif" }}
+              style={{ fontFamily: 'Tiro Bangla, serif' }}
             >
               জেলা
             </label>
             <motion.select
               value={filters.district}
-              onChange={(e) => handleFilterChange("district", e.target.value)}
+              onChange={(e) => handleFilterChange('district', e.target.value)}
               className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
-              style={{ fontFamily: "Tiro Bangla, serif" }}
+              style={{ fontFamily: 'Tiro Bangla, serif' }}
               whileHover={{ scale: 1.02 }}
             >
               <option value=''>নির্বাচন করুন</option>
@@ -575,17 +679,17 @@ export default function GeneralQuestions() {
           <div className='flex flex-col'>
             <label
               className='block text-xs font-medium text-gray-600 mb-1'
-              style={{ fontFamily: "Tiro Bangla, serif" }}
+              style={{ fontFamily: 'Tiro Bangla, serif' }}
             >
               আসন
             </label>
             <motion.select
               value={filters.constituency}
               onChange={(e) =>
-                handleFilterChange("constituency", e.target.value)
+                handleFilterChange('constituency', e.target.value)
               }
               className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
-              style={{ fontFamily: "Tiro Bangla, serif" }}
+              style={{ fontFamily: 'Tiro Bangla, serif' }}
               whileHover={{ scale: 1.02 }}
             >
               <option value=''>নির্বাচন করুন</option>
@@ -600,15 +704,15 @@ export default function GeneralQuestions() {
           <div className='flex flex-col'>
             <label
               className='block text-xs font-medium text-gray-600 mb-1'
-              style={{ fontFamily: "Tiro Bangla, serif" }}
+              style={{ fontFamily: 'Tiro Bangla, serif' }}
             >
               থানা
             </label>
             <motion.select
               value={filters.thana}
-              onChange={(e) => handleFilterChange("thana", e.target.value)}
+              onChange={(e) => handleFilterChange('thana', e.target.value)}
               className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
-              style={{ fontFamily: "Tiro Bangla, serif" }}
+              style={{ fontFamily: 'Tiro Bangla, serif' }}
               whileHover={{ scale: 1.02 }}
             >
               <option value=''>নির্বাচন করুন</option>
@@ -623,16 +727,15 @@ export default function GeneralQuestions() {
           <div className='flex flex-col'>
             <label
               className='block text-xs font-medium text-gray-600 mb-1'
-              style={{ fontFamily: "Tiro Bangla, serif" }}
+              style={{ fontFamily: 'Tiro Bangla, serif' }}
             >
               ওয়ার্ড
             </label>
-
             <motion.select
               value={filters.ward}
-              onChange={(e) => handleFilterChange("ward", e.target.value)}
+              onChange={(e) => handleFilterChange('ward', e.target.value)}
               className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
-              style={{ fontFamily: "Tiro Bangla, serif" }}
+              style={{ fontFamily: 'Tiro Bangla, serif' }}
               whileHover={{ scale: 1.02 }}
             >
               {filters.district && filters.thana && wards.length === 0 ? (
@@ -642,7 +745,6 @@ export default function GeneralQuestions() {
               ) : (
                 <option value=''>নির্বাচন করুন</option>
               )}
-
               {wards.map((ward) => (
                 <option key={ward.id} value={ward.id}>
                   {ward.bn_name}
@@ -654,15 +756,15 @@ export default function GeneralQuestions() {
           <div className='flex flex-col'>
             <label
               className='block text-xs font-medium text-gray-600 mb-1'
-              style={{ fontFamily: "Tiro Bangla, serif" }}
+              style={{ fontFamily: 'Tiro Bangla, serif' }}
             >
               ইউনিয়ন
             </label>
             <motion.select
               value={filters.union}
-              onChange={(e) => handleFilterChange("union", e.target.value)}
+              onChange={(e) => handleFilterChange('union', e.target.value)}
               className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
-              style={{ fontFamily: "Tiro Bangla, serif" }}
+              style={{ fontFamily: 'Tiro Bangla, serif' }}
               whileHover={{ scale: 1.02 }}
             >
               {filters.district && filters.thana && unions.length === 0 ? (
@@ -672,7 +774,6 @@ export default function GeneralQuestions() {
               ) : (
                 <option value=''>নির্বাচন করুন</option>
               )}
-
               {unions.map((union) => (
                 <option key={union.id} value={union.id}>
                   {union.bn_name}
@@ -684,15 +785,15 @@ export default function GeneralQuestions() {
           <div className='flex flex-col'>
             <label
               className='block text-xs font-medium text-gray-600 mb-1'
-              style={{ fontFamily: "Tiro Bangla, serif" }}
+              style={{ fontFamily: 'Tiro Bangla, serif' }}
             >
               লিঙ্গ
             </label>
             <motion.select
               value={filters.gender}
-              onChange={(e) => handleFilterChange("gender", e.target.value)}
+              onChange={(e) => handleFilterChange('gender', e.target.value)}
               className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
-              style={{ fontFamily: "Tiro Bangla, serif" }}
+              style={{ fontFamily: 'Tiro Bangla, serif' }}
               whileHover={{ scale: 1.02 }}
             >
               <option value=''>নির্বাচন করুন</option>
@@ -707,15 +808,15 @@ export default function GeneralQuestions() {
           <div className='flex flex-col'>
             <label
               className='block text-xs font-medium text-gray-600 mb-1'
-              style={{ fontFamily: "Tiro Bangla, serif" }}
+              style={{ fontFamily: 'Tiro Bangla, serif' }}
             >
               পেশা
             </label>
             <motion.select
               value={filters.profession}
-              onChange={(e) => handleFilterChange("profession", e.target.value)}
+              onChange={(e) => handleFilterChange('profession', e.target.value)}
               className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
-              style={{ fontFamily: "Tiro Bangla, serif" }}
+              style={{ fontFamily: 'Tiro Bangla, serif' }}
               whileHover={{ scale: 1.02 }}
             >
               <option value=''>নির্বাচন করুন</option>
@@ -730,38 +831,37 @@ export default function GeneralQuestions() {
           <div className='flex flex-col'>
             <label
               className='block text-xs font-medium text-gray-600 mb-1'
-              style={{ fontFamily: "Tiro Bangla, serif" }}
+              style={{ fontFamily: 'Tiro Bangla, serif' }}
             >
               বয়স
             </label>
             <motion.select
               value={filters.age}
-              onChange={(e) => handleFilterChange("age", e.target.value)}
+              onChange={(e) => handleFilterChange('age', e.target.value)}
               className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
-              style={{ fontFamily: "Tiro Bangla, serif" }}
+              style={{ fontFamily: 'Tiro Bangla, serif' }}
               whileHover={{ scale: 1.02 }}
             >
               <option value=''>নির্বাচন করুন</option>
-              <option value='18-25'>১৮-২৫</option>
-              <option value='26-35'>২৬-৩৫</option>
-              <option value='36-45'>৩৬-৪৫</option>
-              <option value='46+'>৪৬+</option>
+              <option value='18-25'>১৮-৩৪</option>
+              <option value='26-35'>৩৫-৪৫</option>
+              <option value='36-45'>৪৬-৬০</option>
+              <option value='46+'>৬০+</option>
             </motion.select>
           </div>
-          {(userData?.user_type === "super_admin" ||
-            userData?.user_type === "admin") && (
+          {(userType === 'super_admin' || userType === 'admin') && (
             <div className='flex flex-col'>
               <label
                 className='block text-xs font-medium text-gray-600 mb-1'
-                style={{ fontFamily: "Tiro Bangla, serif" }}
+                style={{ fontFamily: 'Tiro Bangla, serif' }}
               >
                 স্ট্যাটাস
               </label>
               <motion.select
                 value={filters.status}
-                onChange={(e) => handleFilterChange("status", e.target.value)}
+                onChange={(e) => handleFilterChange('status', e.target.value)}
                 className='w-full px-3 py-2 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
-                style={{ fontFamily: "Tiro Bangla, serif" }}
+                style={{ fontFamily: 'Tiro Bangla, serif' }}
                 whileHover={{ scale: 1.02 }}
               >
                 <option value=''>নির্বাচন করুন</option>
@@ -778,10 +878,10 @@ export default function GeneralQuestions() {
           <motion.button
             onClick={handleReset}
             className='bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors duration-200 text-sm'
-            style={{ fontFamily: "Tiro Bangla, serif" }}
+            style={{ fontFamily: 'Tiro Bangla, serif' }}
             whileHover={{
               scale: 1.05,
-              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
             }}
             whileTap={{ scale: 0.95 }}
           >
@@ -790,10 +890,10 @@ export default function GeneralQuestions() {
           <motion.button
             onClick={handleView}
             className='bg-[#006747] text-white px-4 py-2 rounded-md hover:bg-[#005536] transition-colors duration-200 text-sm'
-            style={{ fontFamily: "Tiro Bangla, serif" }}
+            style={{ fontFamily: 'Tiro Bangla, serif' }}
             whileHover={{
               scale: 1.05,
-              boxShadow: "0 2px 8px rgba(0, 103, 71, 0.2)",
+              boxShadow: '0 2px 8px rgba(0, 103, 71, 0.2)',
             }}
             whileTap={{ scale: 0.95 }}
           >
@@ -806,31 +906,31 @@ export default function GeneralQuestions() {
         className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+        transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
       >
         {Object.entries(filteredChartData.voterStatistics).map(
           ([key, value], index) => {
             const titles = {
-              totalVoters: "মোট ভোটার",
-              maleVoters: "পুরুষ ভোটার",
-              femaleVoters: "নারী ভোটার",
-              thirdGenderVoters: "তৃতীয় লিঙ্গের ভোটার",
+              totalVoters: 'মোট ভোটার',
+              maleVoters: 'পুরুষ ভোটার',
+              femaleVoters: 'নারী ভোটার',
+              thirdGenderVoters: 'তৃতীয় লিঙ্গের ভোটার',
             };
             const colors = {
               totalVoters:
-                "bg-gradient-to-br from-[#e0edeb] to-[#e0e7eb] text-gray-800",
+                'bg-gradient-to-br from-[#e0edeb] to-[#e0e7eb] text-gray-800',
               maleVoters:
-                "bg-gradient-to-br from-[#e0ecf8] to-[#e0ecf0] text-gray-800",
+                'bg-gradient-to-br from-[#e0ecf8] to-[#e0ecf0] text-gray-800',
               femaleVoters:
-                "bg-gradient-to-br from-[#e5e5ff] to-[#e5e0ff] text-gray-800",
+                'bg-gradient-to-br from-[#e5e5ff] to-[#e5e0ff] text-gray-800',
               thirdGenderVoters:
-                "bg-gradient-to-br from-[#ffe5e0] to-[#f0e5e0] text-gray-800",
+                'bg-gradient-to-br from-[#ffe5e0] to-[#f0e5e0] text-gray-800',
             };
             const icons = {
-              totalVoters: "profile.svg",
-              maleVoters: "man.svg",
-              femaleVoters: "woman.svg",
-              thirdGenderVoters: "aquarius.svg",
+              totalVoters: 'profile.svg',
+              maleVoters: 'man.svg',
+              femaleVoters: 'woman.svg',
+              thirdGenderVoters: 'aquarius.svg',
             };
 
             return (
@@ -842,7 +942,7 @@ export default function GeneralQuestions() {
                 transition={{
                   duration: 0.3,
                   delay: 0.2 + index * 0.08,
-                  ease: "easeOut",
+                  ease: 'easeOut',
                 }}
               >
                 <Image
@@ -854,13 +954,13 @@ export default function GeneralQuestions() {
                 />
                 <h3
                   className='text-xs font-medium text-center'
-                  style={{ fontFamily: "Tiro Bangla, serif" }}
+                  style={{ fontFamily: 'Tiro Bangla, serif' }}
                 >
                   {titles[key]}
                 </h3>
                 <p
                   className='text-xl font-bold'
-                  style={{ fontFamily: "Tiro Bangla, serif" }}
+                  style={{ fontFamily: 'Tiro Bangla, serif' }}
                 >
                   {value}
                 </p>
@@ -874,7 +974,7 @@ export default function GeneralQuestions() {
         className='grid grid-cols-1 lg:grid-cols-2 gap-6'
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
+        transition={{ duration: 0.6, delay: 0.4, ease: 'easeOut' }}
       >
         {filteredChartData.charts?.map((chart, index) => (
           <ChartComponent key={chart.id} chart={chart} index={index} />
