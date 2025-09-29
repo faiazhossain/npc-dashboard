@@ -74,11 +74,13 @@ const RadialBarChartComponent = memo(({ chart, index, userType }) => {
   }));
 
   const legendStyle = {
-    top: "50%",
-    right: 0,
-    transform: "translate(0, -50%)",
-    lineHeight: "20px",
-    fontSize: "12px",
+    top: "10%",
+    right: 10,
+    lineHeight: "18px",
+    fontSize: "11px",
+    maxWidth: "40%",
+    overflowY: "auto",
+    padding: "10px",
   };
 
   return (
@@ -89,26 +91,37 @@ const RadialBarChartComponent = memo(({ chart, index, userType }) => {
       >
         {chart.question}
       </h2>
-      <div className="h-96">
+      <div className="h-[450px]">
         <ResponsiveContainer width="100%" height="100%">
           <RadialBarChart
             cx="50%"
             cy="50%"
-            innerRadius="10%"
-            outerRadius="80%"
-            barSize={10}
+            innerRadius="20%"
+            outerRadius="90%"
+            barSize={8}
             data={chartData}
+            startAngle={90}
+            endAngle={-270}
           >
             <RadialBar
-              minAngle={15}
-              label={{ position: "insideStart", fill: "#fff", fontSize: 10 }}
-              background
-              clockWise
+              minAngle={10}
+              label={{
+                position: "outside",
+                fill: "#333",
+                fontSize: 9,
+                formatter: (value) => (value > 5 ? `${value}%` : ""),
+              }}
+              background={{ fill: "#eee" }}
+              clockWise={false}
               dataKey="uv"
-            />
+            >
+              {chartData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.fill} />
+              ))}
+            </RadialBar>
             <Legend
               layout="vertical"
-              verticalAlign="middle"
+              verticalAlign="top"
               wrapperStyle={{
                 ...legendStyle,
                 fontFamily: "Tiro Bangla, serif",
@@ -536,7 +549,7 @@ export default function Candidates() {
           };
         });
 
-      // ✅ Always include flaws chart (either real data or fallback)
+      // Always include flaws chart (either real data or fallback)
       if (
         apiData.q7_candidate_flaws &&
         Object.keys(apiData.q7_candidate_flaws).length > 0
@@ -554,7 +567,6 @@ export default function Candidates() {
           chartType: "pie",
         });
       } else {
-        // Fallback if no flaws → Show "No flaws 100%"
         transformedAdditional.push({
           id: `additional-chart-3`,
           question: "প্রার্থীর ত্রুটি",
@@ -562,7 +574,7 @@ export default function Candidates() {
             {
               label: "কোনো ত্রুটি নেই",
               percentage: "100%",
-              total: 1, // you can decide whether to use 0 or 1 here
+              total: 1,
             },
           ],
           chartType: "pie",

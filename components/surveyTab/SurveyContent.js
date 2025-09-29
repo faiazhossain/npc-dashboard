@@ -22,7 +22,7 @@ export default function SurveyContent() {
   const [selectedSurveys, setSelectedSurveys] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const itemsPerPage = 30;
+  const itemsPerPage = 100;
 
   const [divisions, setDivisions] = useState([]);
   const [districts, setDistricts] = useState([]);
