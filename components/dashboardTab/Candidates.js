@@ -14,6 +14,9 @@ import {
 
 export default function Candidates() {
   const [data, setData] = useState(null);
+  const [divisions, setDivisions] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [constituencies, setConstituencies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
@@ -22,8 +25,12 @@ export default function Candidates() {
     constituency: "",
   });
 
-  // API endpoint - can be easily changed to real API
-  const API_ENDPOINT = "/json/candidates.json"; // Change this to your API endpoint
+  // API endpoint for chart data
+  const API_ENDPOINT = "/json/candidates.json"; // Local JSON file for charts, candidate cards, and qualities
+
+  // Replace with your actual token (e.g., from context, localStorage, or environment variable)
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
 
   // Function to convert Bengali numerals to English numerals
   const convertBengaliToEnglish = (bengaliNumber) => {
@@ -39,34 +46,158 @@ export default function Candidates() {
       "৮": "8",
       "৯": "9",
     };
-
     return bengaliNumber.replace(/[০-৯]/g, (match) => bengaliDigits[match]);
   };
 
+  // Fetch divisions and initial chart data on component mount
   useEffect(() => {
-    // Load data from JSON file (this can be replaced with API call)
-    const loadData = async () => {
+    if (!token) {
+      setError("Authentication token is missing");
+      setLoading(false);
+      return;
+    }
+
+    const loadInitialData = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        const response = await fetch(API_ENDPOINT);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        // Fetch divisions from API
+        const divisionsResponse = await fetch(
+          "https://npsbd.xyz/api/divisions",
+          {
+            method: "GET",
+            headers: {
+              accept: "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (!divisionsResponse.ok) {
+          throw new Error(`HTTP error! status: ${divisionsResponse.status}`);
         }
+        const divisionsData = await divisionsResponse.json();
+        setDivisions(divisionsData);
 
-        const jsonData = await response.json();
-        setData(jsonData);
+        // Fetch chart data from JSON file
+        const chartResponse = await fetch(API_ENDPOINT);
+        if (!chartResponse.ok) {
+          throw new Error(`HTTP error! status: ${chartResponse.status}`);
+        }
+        const chartData = await chartResponse.json();
+        setData(chartData);
       } catch (error) {
-        console.error("Error loading data:", error);
+        console.error("Error loading initial data:", error);
         setError(error.message);
       } finally {
         setLoading(false);
       }
     };
 
-    loadData();
-  }, []);
+    loadInitialData();
+  }, [token]);
+
+  // Fetch districts when division changes
+  useEffect(() => {
+    if (!token || !filters.division) {
+      setDistricts([]);
+      setConstituencies([]);
+      setFilters((prev) => ({
+        ...prev,
+        district: "",
+        constituency: "",
+      }));
+      return;
+    }
+
+    const loadDistricts = async () => {
+      try {
+        // Find the division ID corresponding to the selected bn_name
+        const selectedDivision = divisions.find(
+          (div) => div.bn_name === filters.division
+        );
+        if (!selectedDivision) {
+          throw new Error("Selected division not found");
+        }
+
+        const response = await fetch(
+          `https://npsbd.xyz/api/divisions/${selectedDivision.id}/districts`,
+          {
+            method: "GET",
+            headers: {
+              accept: "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setDistricts(data);
+        setConstituencies([]);
+        setFilters((prev) => ({
+          ...prev,
+          district: "",
+          constituency: "",
+        }));
+      } catch (error) {
+        console.error("Error fetching districts:", error);
+        setError(error.message);
+      }
+    };
+
+    loadDistricts();
+  }, [filters.division, token, divisions]);
+
+  // Fetch constituencies when district changes
+  useEffect(() => {
+    if (!token || !filters.district) {
+      setConstituencies([]);
+      setFilters((prev) => ({
+        ...prev,
+        constituency: "",
+      }));
+      return;
+    }
+
+    const loadConstituencies = async () => {
+      try {
+        // Find the district ID corresponding to the selected bn_name
+        const selectedDistrict = districts.find(
+          (dist) => dist.bn_name === filters.district
+        );
+        if (!selectedDistrict) {
+          throw new Error("Selected district not found");
+        }
+
+        const response = await fetch(
+          `https://npsbd.xyz/api/districts/${selectedDistrict.id}/seats`,
+          {
+            method: "GET",
+            headers: {
+              accept: "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setConstituencies(data);
+        setFilters((prev) => ({
+          ...prev,
+          constituency: "",
+        }));
+      } catch (error) {
+        console.error("Error fetching constituencies:", error);
+        setError(error.message);
+      }
+    };
+
+    loadConstituencies();
+  }, [filters.district, token, districts]);
 
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -74,7 +205,7 @@ export default function Candidates() {
 
   const handleView = () => {
     console.log("Filters applied:", filters);
-    // Apply filters logic here
+    // Add logic to fetch filtered chart data using bn_name as params in future
   };
 
   const handleReset = () => {
@@ -206,11 +337,11 @@ export default function Candidates() {
   // Function to process chart data dynamically
   const processChartData = (responses) => {
     return responses.map((item) => ({
-      name: item.label, // Keep Bengali label as is
+      name: item.label,
       value: parseFloat(
         convertBengaliToEnglish(item.percentage.replace("%", ""))
       ),
-      displayValue: item.percentage, // Keep original Bengali percentage for display
+      displayValue: item.percentage,
     }));
   };
 
@@ -240,7 +371,6 @@ export default function Candidates() {
           {chart.question}
         </h2>
         <div className='h-80 flex'>
-          {/* Custom Legend */}
           <div className='w-1/2 flex flex-col justify-center space-y-2 pr-4'>
             {chartData.map((entry, entryIndex) => (
               <div key={entry.name} className='flex items-center'>
@@ -259,7 +389,6 @@ export default function Candidates() {
               </div>
             ))}
           </div>
-          {/* Pie Chart */}
           <div className='w-1/2'>
             <ResponsiveContainer width='100%' height='100%'>
               <PieChart>
@@ -308,10 +437,7 @@ export default function Candidates() {
           transition: { duration: 0.3 },
         }}
       >
-        {/* Subtle background accent */}
         <div className='absolute inset-0 bg-gradient-to-r from-[#006747]/10 to-transparent opacity-20' />
-
-        {/* Card Content */}
         <h3
           className='text-xl font-bold px-4 py-2 bg-gray-200 text-gray-900 mb-5 relative z-10'
           style={{ fontFamily: "Tiro Bangla, serif" }}
@@ -372,27 +498,76 @@ export default function Candidates() {
           ফিল্টার
         </h2>
         <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-4'>
-          {Object.entries(data.filters).map(([key, label]) => (
-            <div key={key} className='flex flex-col'>
-              <label
-                className='block text-xs font-medium text-gray-600 mb-1'
-                style={{ fontFamily: "Tiro Bangla, serif" }}
-              >
-                {label}
-              </label>
-              <motion.select
-                value={filters[key]}
-                onChange={(e) => handleFilterChange(key, e.target.value)}
-                className='w-full px-3 py-3 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
-                style={{ fontFamily: "Tiro Bangla, serif" }}
-                whileHover={{ scale: 1.02 }}
-              >
-                <option value=''>নির্বাচন করুন</option>
-                <option value='option1'>বিকল্প ১</option>
-                <option value='option2'>বিকল্প ২</option>
-              </motion.select>
-            </div>
-          ))}
+          <div className='flex flex-col'>
+            <label
+              className='block text-xs font-medium text-gray-600 mb-1'
+              style={{ fontFamily: "Tiro Bangla, serif" }}
+            >
+              বিভাগ
+            </label>
+            <motion.select
+              value={filters.division}
+              onChange={(e) => handleFilterChange("division", e.target.value)}
+              className='w-full px-3 py-3 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
+              style={{ fontFamily: "Tiro Bangla, serif" }}
+              whileHover={{ scale: 1.02 }}
+            >
+              <option value=''>নির্বাচন করুন</option>
+              {divisions.map((division) => (
+                <option key={division.id} value={division.bn_name}>
+                  {division.bn_name}
+                </option>
+              ))}
+            </motion.select>
+          </div>
+          <div className='flex flex-col'>
+            <label
+              className='block text-xs font-medium text-gray-600 mb-1'
+              style={{ fontFamily: "Tiro Bangla, serif" }}
+            >
+              জেলা
+            </label>
+            <motion.select
+              value={filters.district}
+              onChange={(e) => handleFilterChange("district", e.target.value)}
+              className='w-full px-3 py-3 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
+              style={{ fontFamily: "Tiro Bangla, serif" }}
+              whileHover={{ scale: 1.02 }}
+              disabled={!filters.division}
+            >
+              <option value=''>নির্বাচন করুন</option>
+              {districts.map((district) => (
+                <option key={district.id} value={district.bn_name}>
+                  {district.bn_name}
+                </option>
+              ))}
+            </motion.select>
+          </div>
+          <div className='flex flex-col'>
+            <label
+              className='block text-xs font-medium text-gray-600 mb-1'
+              style={{ fontFamily: "Tiro Bangla, serif" }}
+            >
+              নির্বাচনী এলাকা
+            </label>
+            <motion.select
+              value={filters.constituency}
+              onChange={(e) =>
+                handleFilterChange("constituency", e.target.value)
+              }
+              className='w-full px-3 py-3 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
+              style={{ fontFamily: "Tiro Bangla, serif" }}
+              whileHover={{ scale: 1.02 }}
+              disabled={!filters.district}
+            >
+              <option value=''>নির্বাচন করুন</option>
+              {constituencies.map((constituency) => (
+                <option key={constituency.id} value={constituency.bn_name}>
+                  {constituency.bn_name}
+                </option>
+              ))}
+            </motion.select>
+          </div>
         </div>
         <div className='flex justify-end space-x-2'>
           <motion.button
@@ -435,7 +610,6 @@ export default function Candidates() {
         >
           আপনার এলাকার সম্ভাব্য প্রার্থীদের নামসমূহ?
         </h2>
-        {/* Section 3: Candidate Cards Grid */}
         <motion.div
           className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
           initial={{ y: 20, opacity: 0 }}
@@ -458,14 +632,12 @@ export default function Candidates() {
         transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
         className='shadow-sm rounded-2xl p-6 bg-white'
       >
-        {" "}
         <h2
           className='text-2xl font-semibold text-gray-800 mb-6'
           style={{ fontFamily: "Tiro Bangla, serif" }}
         >
           আপনার এলাকায় কোন দলের কাকে প্রার্থী করা উচিত বলে আপনি মনে করেন?
         </h2>
-        {/* Section 4: Dynamic Charts Grid */}
         <motion.div
           className='grid grid-cols-1 lg:grid-cols-2 gap-6'
           initial={{ y: 20, opacity: 0 }}
@@ -473,11 +645,10 @@ export default function Candidates() {
           transition={{ duration: 0.6, delay: 0.5, ease: "easeOut" }}
         >
           {data.charts?.map((chart, index) => {
-            // Determine chart type based on chart properties
             const shouldUseRadialChart =
               chart.id === "candidate-qualifications" ||
               chart.chartType === "radial" ||
-              (chart.responses && chart.responses.length > 8); // Use radial for complex data with many options
+              (chart.responses && chart.responses.length > 8);
 
             if (shouldUseRadialChart) {
               return (
@@ -489,7 +660,6 @@ export default function Candidates() {
               );
             }
 
-            // Use PieChart for all other questions
             return (
               <PieChartComponent key={chart.id} chart={chart} index={index} />
             );
@@ -505,11 +675,10 @@ export default function Candidates() {
         transition={{ duration: 0.6, delay: 0.5, ease: "easeOut" }}
       >
         {data.qualities?.map((chart, index) => {
-          // Determine chart type based on chart properties
           const shouldUseRadialChart =
             chart.id === "candidate-qualifications" ||
             chart.chartType === "radial" ||
-            (chart.responses && chart.responses.length > 8); // Use radial for complex data with many options
+            (chart.responses && chart.responses.length > 8);
 
           if (shouldUseRadialChart) {
             return (
@@ -521,7 +690,6 @@ export default function Candidates() {
             );
           }
 
-          // Use PieChart for all other questions
           return (
             <PieChartComponent key={chart.id} chart={chart} index={index} />
           );
