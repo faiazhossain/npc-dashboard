@@ -408,6 +408,7 @@ export default function GeneralQuestions() {
         return response.json();
       })
       .then((apiData) => {
+        console.log("Filtered API Response:", apiData); // Log to verify total
         const formattedData = {
           voterStatistics: {
             totalVoters: "234",
@@ -421,10 +422,12 @@ export default function GeneralQuestions() {
             responses: item.stats.map((stat) => ({
               label: stat.label,
               percentage: `${stat.value}%`,
+              total: stat.total || 0, // Include total field
             })),
             hasInnerRadius: item.question.includes("প্রধান চাওয়া"),
           })),
         };
+        console.log("Formatted Filtered Data:", formattedData); // Log formatted data
         setFilteredChartData(formattedData);
       })
       .catch((error) => console.error("Error fetching filtered data:", error));
@@ -724,7 +727,7 @@ export default function GeneralQuestions() {
             >
               {filters.district && filters.thana && unions.length === 0 ? (
                 <option className="text-sm text-red-600" value="">
-                  ই�ユনিয়ন পাওয়া যায়নি
+                  ইউনিয়ন পাওয়া যায়নি
                 </option>
               ) : (
                 <option value="">নির্বাচন করুন</option>
