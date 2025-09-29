@@ -504,11 +504,11 @@ export default function Candidates() {
         q7_candidate_flaws: "q7_total_counts",
       };
 
-      // Pick the first 3 charts
+      // Pick the first 3 charts (excluding flaws)
       let transformedAdditional = Object.entries(apiData)
         .filter(([key, value]) => Object.keys(value).length > 0)
-        .filter(([key]) => key !== "q7_candidate_flaws") // exclude flaws first
-        .slice(0, 3) // ensure only 3
+        .filter(([key]) => key !== "q7_candidate_flaws")
+        .slice(0, 3)
         .map(([key, value], index) => {
           let question;
           switch (key) {
@@ -536,7 +536,7 @@ export default function Candidates() {
           };
         });
 
-      // ✅ Add 4th chart only if flaws exist
+      // ✅ Always include flaws chart (either real data or fallback)
       if (
         apiData.q7_candidate_flaws &&
         Object.keys(apiData.q7_candidate_flaws).length > 0
@@ -551,6 +551,20 @@ export default function Candidates() {
               total: apiData.q7_total_counts?.[label] || 0,
             })
           ),
+          chartType: "pie",
+        });
+      } else {
+        // Fallback if no flaws → Show "No flaws 100%"
+        transformedAdditional.push({
+          id: `additional-chart-3`,
+          question: "প্রার্থীর ত্রুটি",
+          responses: [
+            {
+              label: "কোনো ত্রুটি নেই",
+              percentage: "100%",
+              total: 1, // you can decide whether to use 0 or 1 here
+            },
+          ],
           chartType: "pie",
         });
       }
