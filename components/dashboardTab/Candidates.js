@@ -198,6 +198,7 @@ export default function Candidates() {
   const [districts, setDistricts] = useState([]);
   const [constituencies, setConstituencies] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [additionalLoading, setAdditionalLoading] = useState(false);
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
     division: "",
@@ -458,8 +459,7 @@ export default function Candidates() {
     }
 
     try {
-      setLoading(true);
-      setError(null);
+      setAdditionalLoading(true);
 
       const queryParams = buildQueryParams();
       queryParams.append("প্রার্থী", candidate);
@@ -513,9 +513,8 @@ export default function Candidates() {
       setAdditionalData({ charts: transformedAdditional });
     } catch (error) {
       console.error("Error fetching additional data:", error);
-      setError(error.message);
     } finally {
-      setLoading(false);
+      setAdditionalLoading(false);
     }
   };
 
@@ -834,6 +833,7 @@ export default function Candidates() {
                   className='w-full px-3 py-3 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
                   style={{ fontFamily: "Tiro Bangla, serif" }}
                   whileHover={{ scale: 1.02 }}
+                  disabled={additionalLoading} // Disable only when additional data is loading
                 >
                   {qualifiedCandidates.map((candidate) => (
                     <option key={candidate} value={candidate}>
@@ -842,31 +842,45 @@ export default function Candidates() {
                   ))}
                 </motion.select>
               </div>
-              {additionalData && additionalData.charts?.length > 0 && (
-                <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
-                  {additionalData.charts.map((chart, index) => {
-                    if (!chart.responses || chart.responses.length === 0)
-                      return null;
 
-                    const shouldUseRadialChart =
-                      chart.chartType === "radial" ||
-                      (chart.responses && chart.responses.length > 8);
-
-                    return shouldUseRadialChart ? (
-                      <RadialBarChartComponent
-                        key={chart.id}
-                        chart={chart}
-                        index={index}
-                      />
-                    ) : (
-                      <PieChartComponent
-                        key={chart.id}
-                        chart={chart}
-                        index={index}
-                      />
-                    );
-                  })}
+              {/* Show loading state only for additional data */}
+              {additionalLoading ? (
+                <div className='flex justify-center items-center min-h-[200px]'>
+                  <div
+                    className='text-lg text-gray-600'
+                    style={{ fontFamily: "Tiro Bangla, serif" }}
+                  >
+                    প্রার্থীর তথ্য লোড করা হচ্ছে...
+                  </div>
                 </div>
+              ) : (
+                additionalData &&
+                additionalData.charts?.length > 0 && (
+                  <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+                    {additionalData.charts.map((chart, index) => {
+                      if (!chart.responses || chart.responses.length === 0)
+                        return null;
+
+                      const shouldUseRadialChart =
+                        chart.chartType === "radial" ||
+                        (chart.responses && chart.responses.length > 8);
+
+                      return shouldUseRadialChart ? (
+                        <RadialBarChartComponent
+                          key={chart.id}
+                          chart={chart}
+                          index={index}
+                        />
+                      ) : (
+                        <PieChartComponent
+                          key={chart.id}
+                          chart={chart}
+                          index={index}
+                        />
+                      );
+                    })}
+                  </div>
+                )
               )}
             </motion.div>
           )}
