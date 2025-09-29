@@ -497,7 +497,6 @@ export default function Candidates() {
 
       const apiData = await response.json();
 
-      // Mapping of chart keys to their total count keys
       const totalCountKeyMap = {
         q4_how_recognize_candidate: "q4_total_counts",
         q5_candidate_qualities: "q5_total_counts",
@@ -505,9 +504,11 @@ export default function Candidates() {
         q7_candidate_flaws: "q7_total_counts",
       };
 
-      const transformedAdditional = Object.entries(apiData)
+      // Pick the first 3 charts
+      let transformedAdditional = Object.entries(apiData)
         .filter(([key, value]) => Object.keys(value).length > 0)
-        .slice(0, 3) // Only keep first 3 items
+        .filter(([key]) => key !== "q7_candidate_flaws") // exclude flaws first
+        .slice(0, 3) // ensure only 3
         .map(([key, value], index) => {
           let question;
           switch (key) {
@@ -515,13 +516,10 @@ export default function Candidates() {
               question = "প্রার্থীর যোগ্যতার মাপকাঠি কি কি?";
               break;
             case "q4_how_recognize_candidate":
-              question = "আপনি কিভাবে এই প্রার্থীকে চিনেন? ";
+              question = "আপনি কিভাবে এই প্রার্থীকে চিনেন?";
               break;
             case "q6_candidate_contributions":
-              question = "সাধারণ মানুষের জন্য এই ব্যাক্তি কি কি করেছেন? ";
-              break;
-            case "q7_candidate_flaws":
-              question = "প্রার্থীর ত্রুটি";
+              question = "সাধারণ মানুষের জন্য এই ব্যাক্তি কি কি করেছেন?";
               break;
             default:
               question = key;
@@ -532,11 +530,30 @@ export default function Candidates() {
             responses: Object.entries(value).map(([label, perc]) => ({
               label,
               percentage: `${perc}%`,
-              total: apiData[totalCountKeyMap[key]]?.[label] || 0, // Use the mapped total count key
+              total: apiData[totalCountKeyMap[key]]?.[label] || 0,
             })),
             chartType: "pie",
           };
         });
+
+      // ✅ Add 4th chart only if flaws exist
+      if (
+        apiData.q7_candidate_flaws &&
+        Object.keys(apiData.q7_candidate_flaws).length > 0
+      ) {
+        transformedAdditional.push({
+          id: `additional-chart-3`,
+          question: "প্রার্থীর ত্রুটি",
+          responses: Object.entries(apiData.q7_candidate_flaws).map(
+            ([label, perc]) => ({
+              label,
+              percentage: `${perc}%`,
+              total: apiData.q7_total_counts?.[label] || 0,
+            })
+          ),
+          chartType: "pie",
+        });
+      }
 
       setAdditionalData({ charts: transformedAdditional });
     } catch (error) {
