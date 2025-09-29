@@ -686,7 +686,7 @@ export default function Candidates() {
             className='text-lg text-gray-600'
             style={{ fontFamily: "Tiro Bangla, serif" }}
           >
-            কোনো ডেটা উপলব্ধ নেই
+            ফিল্টার নির্বাচন করে &quot;দেখুন&quot; বাটনে ক্লিক করুন
           </div>
         </div>
       ) : (
