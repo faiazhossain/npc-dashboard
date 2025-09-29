@@ -35,32 +35,6 @@
         { "label": "দ্রব্যমূল্য নিয়ন্ত্রন", "percentage": "৫৮.২%" },
         { "label": "দূর্নীতি নিয়ন্ত্রণ", "percentage": "৪১.৮%" }
       ]
-    },
-    {
-      "id": "partyPreference",
-      "question": "আগামীর বাংলাদেশ পরিচালনায় কোন রাজনৈতিক দলকে যোগ্য মনে করেন?",
-      "chartType": "pie",
-      "hasInnerRadius": false,
-      "responses": [
-        { "label": "বিএনপি", "percentage": "২১.৩%" },
-        { "label": "বাংলাদেশ জামায়াতে ইসলামী", "percentage": "১১.৪%" },
-        { "label": "এনসিপি", "percentage": "৫.৯%" },
-        { "label": "আওয়ামী লীগ", "percentage": "১.৩%" },
-        { "label": "জাতীয় পার্টি", "percentage": "১২.৬%" },
-        { "label": "ওয়ার্কার্স পার্টি", "percentage": "৪.২%" },
-        { "label": "গণ অধিকার পরিষদ", "percentage": "৭.৮%" },
-        { "label": "ইসলামী শাসনতন্ত্র আন্দোলন", "percentage": "৩.৬%" },
-        { "label": "এলডিপি", "percentage": "২.৯%" },
-        { "label": "বাসদ", "percentage": "১.৮%" },
-        { "label": "জাসদ", "percentage": "২.৪%" },
-        { "label": "সিপিবি", "percentage": "১.৯%" },
-        { "label": "কল্যাণ পার্টি", "percentage": "১.৬%" },
-        { "label": "জাগপা", "percentage": "১.২%" },
-        { "label": "জেপি", "percentage": "১.৫%" },
-        { "label": "বিজেপি", "percentage": "১.১%" },
-        { "label": "জেএসডি", "percentage": "১.৭%" },
-        { "label": "জাতীয় দল", "percentage": "২.৪%" }
-      ]
     }
   ]
 }
