@@ -978,8 +978,24 @@ export default function GeneralQuestions() {
                   {chart.question}
                 </h2>
                 <div className="flex flex-1 overflow-hidden">
-                  <div className="w-1/2 pr-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                    <div className="space-y-2">
+                  <div className="w-1/2 flex flex-col pr-4 h-full overflow-y-auto custom-scrollbar">
+                    <style jsx>{`
+                      .custom-scrollbar::-webkit-scrollbar {
+                        width: 6px;
+                      }
+                      .custom-scrollbar::-webkit-scrollbar-track {
+                        background: #f1f1f1;
+                        border-radius: 10px;
+                      }
+                      .custom-scrollbar::-webkit-scrollbar-thumb {
+                        background: #c1c1c1;
+                        border-radius: 10px;
+                      }
+                      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                        background: #a1a1a1;
+                      }
+                    `}</style>
+                    <div className="space-y-2 pb-2 flex-grow">
                       {chart.responses.map((response, responseIndex) => (
                         <div key={response.label} className="flex items-center">
                           <div
@@ -1017,7 +1033,6 @@ export default function GeneralQuestions() {
                           innerRadius={chart.hasInnerRadius ? 40 : 0}
                           outerRadius={80}
                           fill="#8884d8"
-                          paddingAngle={1}
                           dataKey="value"
                         >
                           {chart.responses.map((entry, entryIndex) => (

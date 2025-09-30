@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, memo } from "react";
+import { useState, useEffect, memo, useCallback } from "react";
 import { motion } from "framer-motion";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { useAuth } from "@/hooks/useAuth";
@@ -41,12 +41,28 @@ const CandidateCard = memo(({ candidateCard, index }) => {
         {candidateCard.title}
       </h3>
       <ul
-        className="space-y-3 px-4 py-2 max-h-64 overflow-y-auto"
+        className="space-y-3 px-4 py-2 h-64 overflow-y-auto custom-scrollbar"
         style={{
           scrollbarWidth: "thin", // For Firefox
           scrollbarColor: "#d1d5db #f3f4f6", // thumb and track colors for Firefox
         }}
       >
+        <style jsx>{`
+          .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+          }
+        `}</style>
         {candidateCard.candidates.map((candidate, candidateIndex) => (
           <motion.li
             key={candidateIndex}
@@ -89,7 +105,23 @@ const PieChartComponent = memo(({ chart, index, userType }) => {
         {chart.question}
       </h2>
       <div className="h-80 flex">
-        <div className="w-1/2 flex flex-col justify-center space-y-2 pr-4 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+        <div className="w-1/2 flex flex-col justify-start space-y-2 pr-4 h-full overflow-y-auto custom-scrollbar">
+          <style jsx>{`
+            .custom-scrollbar::-webkit-scrollbar {
+              width: 6px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-track {
+              background: #f1f1f1;
+              border-radius: 10px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-thumb {
+              background: #c1c1c1;
+              border-radius: 10px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+              background: #a1a1a1;
+            }
+          `}</style>
           {chartData.map((entry, entryIndex) => (
             <div key={entry.name} className="flex items-center">
               <div
@@ -118,7 +150,7 @@ const PieChartComponent = memo(({ chart, index, userType }) => {
                 innerRadius={chart.hasInnerRadius ? 40 : 0}
                 outerRadius={80}
                 fill="#8884d8"
-                paddingAngle={1}
+                // paddingAngle={1}
                 dataKey="value"
               >
                 {chartData.map((entry, entryIndex) => (
@@ -439,13 +471,13 @@ export default function Candidates() {
     }
   };
 
-  const buildQueryParams = () => {
+  const buildQueryParams = useCallback(() => {
     const queryParams = new URLSearchParams();
     if (division) queryParams.append("বিভাগ", division.trim());
     if (district) queryParams.append("জেলা", district.trim());
     if (constituency) queryParams.append("আসন", constituency.trim());
     return queryParams;
-  };
+  }, [division, district, constituency]);
 
   const handleView = async () => {
     if (!token) {
@@ -544,7 +576,7 @@ export default function Candidates() {
     }
   };
 
-  const fetchAdditionalData = async (candidate) => {
+  const fetchAdditionalData = useCallback(async (candidate) => {
     if (!token || !candidate) {
       return;
     }
@@ -645,7 +677,7 @@ export default function Candidates() {
     } finally {
       setAdditionalLoading(false);
     }
-  };
+  }, [token, buildQueryParams]);
 
   const handleReset = () => {
     dispatch(resetFilters());
@@ -660,7 +692,7 @@ export default function Candidates() {
     if (selectedCandidate) {
       fetchAdditionalData(selectedCandidate);
     }
-  }, [selectedCandidate]);
+  }, [selectedCandidate, fetchAdditionalData]);
 
   return (
     <div className="p-4 lg:p-8 space-y-8">
