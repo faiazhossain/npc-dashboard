@@ -24,12 +24,14 @@ export default function SeatDistribution() {
     district: "",
     constituency: "",
   });
+  const [worthfulData, setWorthfulData] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 50;
 
-  // Replace with your actual token
   const token =
     typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
 
-  // Fetch divisions on component mount
   useEffect(() => {
     if (!token) {
       setError("Authentication token is missing");
@@ -67,7 +69,6 @@ export default function SeatDistribution() {
     loadInitialData();
   }, [token]);
 
-  // Fetch districts when division changes
   useEffect(() => {
     if (!token || !filters.division) {
       setDistricts([]);
@@ -119,7 +120,6 @@ export default function SeatDistribution() {
     loadDistricts();
   }, [filters.division, token, divisions]);
 
-  // Fetch constituencies when district changes
   useEffect(() => {
     if (!token || !filters.district) {
       setConstituencies([]);
@@ -167,7 +167,6 @@ export default function SeatDistribution() {
     loadConstituencies();
   }, [filters.district, token, districts]);
 
-  // Fetch party popularity data when "দেখুন" button is clicked
   const handleView = async () => {
     if (!token) {
       setError("Authentication token is missing");
@@ -179,9 +178,10 @@ export default function SeatDistribution() {
       setError(null);
 
       const queryParams = buildQueryParams();
-      const url = `https://npsbd.xyz/api/dashboard/party/popularity${
-        queryParams.toString() ? `?${queryParams.toString()}` : ""
-      }`;
+      const baseUrl = "https://npsbd.xyz/api/dashboard/party/popularity";
+      const url = queryParams.toString()
+        ? `${baseUrl}?${queryParams.toString()}`
+        : baseUrl;
 
       const response = await fetch(url, {
         method: "GET",
@@ -197,16 +197,45 @@ export default function SeatDistribution() {
 
       const popularityData = await response.json();
       setData(popularityData);
+
+      // Fetch worthful party data with filters
+      const worthfulBaseUrl = `https://npsbd.xyz/api/dashboard/party/worthful?page=${currentPage}&page_size=${pageSize}`;
+      const worthfulUrl = queryParams.toString()
+        ? `${worthfulBaseUrl}&${queryParams.toString()}`
+        : worthfulBaseUrl;
+
+      const worthfulResponse = await fetch(worthfulUrl, {
+        method: "GET",
+        headers: {
+          accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!worthfulResponse.ok) {
+        throw new Error(`HTTP error! status: ${worthfulResponse.status}`);
+      }
+
+      const worthfulResult = await worthfulResponse.json();
+      setWorthfulData(worthfulResult.data);
+      setTotalCount(worthfulResult.total_count);
     } catch (error) {
-      console.error("Error fetching party popularity:", error);
+      console.error("Error fetching data:", error);
       setError(error.message);
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    if (data) {
+      handleView();
+    }
+  }, [currentPage]);
+
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
+    setCurrentPage(1); // Reset to first page when filters change
   };
 
   const buildQueryParams = () => {
@@ -224,7 +253,16 @@ export default function SeatDistribution() {
       constituency: "",
     });
     setData(null);
+    setWorthfulData([]);
+    setTotalCount(0);
+    setCurrentPage(1);
   };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   if (loading) {
     return (
@@ -587,6 +625,87 @@ export default function SeatDistribution() {
               </BarChart>
             </ResponsiveContainer>
           </div>
+
+          {worthfulData.length > 0 && (
+            <div className='mt-8'>
+              <h2
+                className='text-xl font-semibold text-gray-800 mb-4'
+                style={{ fontFamily: "Tiro Bangla, serif" }}
+              >
+                সবচেয়ে মূল্যবান দল
+              </h2>
+              <div
+                className='text-lg text-gray-600 mb-4'
+                style={{ fontFamily: "Tiro Bangla, serif" }}
+              >
+                মোট ডেটা: {totalCount}
+              </div>
+              <div className='overflow-x-auto'>
+                <table
+                  className='min-w-full bg-white border border-gray-200'
+                  style={{ fontFamily: "Tiro Bangla, serif" }}
+                >
+                  <thead>
+                    <tr className='bg-gray-100'>
+                      <th className='py-3 px-4 border-b text-left text-sm font-medium text-gray-700'>
+                        বিভাগ
+                      </th>
+                      <th className='py-3 px-4 border-b text-left text-sm font-medium text-gray-700'>
+                        জেলা
+                      </th>
+                      <th className='py-3 px-4 border-b text-left text-sm font-medium text-gray-700'>
+                        নির্বাচনী এলাকা
+                      </th>
+                      <th className='py-3 px-4 border-b text-left text-sm font-medium text-gray-700'>
+                        সবচেয়ে মূল্যবান দল
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {worthfulData.map((item, index) => (
+                      <tr key={index} className='hover:bg-gray-50'>
+                        <td className='py-3 px-4 border-b text-sm text-gray-600'>
+                          {item.division}
+                        </td>
+                        <td className='py-3 px-4 border-b text-sm text-gray-600'>
+                          {item.district}
+                        </td>
+                        <td className='py-3 px-4 border-b text-sm text-gray-600'>
+                          {item.constituency}
+                        </td>
+                        <td className='py-3 px-4 border-b text-sm text-gray-600'>
+                          {item.most_worthful_party}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className='flex justify-center mt-4 space-x-2'>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (page) => (
+                    <motion.button
+                      key={page}
+                      onClick={() => handlePageChange(page)}
+                      className={`px-4 py-2 rounded-md text-sm ${
+                        currentPage === page
+                          ? "bg-[#006747] text-white"
+                          : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+                      }`}
+                      style={{ fontFamily: "Tiro Bangla, serif" }}
+                      whileHover={{
+                        scale: 1.05,
+                        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+                      }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      {page}
+                    </motion.button>
+                  )
+                )}
+              </div>
+            </div>
+          )}
         </motion.div>
       )}
     </div>
