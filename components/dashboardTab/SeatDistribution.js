@@ -64,6 +64,15 @@ export default function SeatDistribution() {
 
   // Load initial dropdown data on mount and fetch data if filters are pre-selected
   useEffect(() => {
+    // Log Redux state for debugging
+    console.log("SeatDistribution - Redux State on Mount:", {
+      division,
+      district,
+      constituency,
+      divisionsCount: divisions.length,
+      districtsCount: districts.length,
+      constituenciesCount: constituencies.length,
+    });
     if (!token) {
       setError("Authentication token is missing");
       return;
@@ -164,15 +173,46 @@ export default function SeatDistribution() {
     setCurrentPage(1);
   }, [division, district, constituency]);
 
+  // Special effect to load constituency data if we have district and constituencies but no constituency selected
+  useEffect(() => {
+    if (district && constituencies.length > 0 && !constituency) {
+      console.log(
+        "SeatDistribution.js - Trying to restore constituency from localStorage"
+      );
+      const savedConstituency = localStorage.getItem("savedConstituency");
+      if (savedConstituency) {
+        console.log(
+          "SeatDistribution.js - Restoring constituency:",
+          savedConstituency
+        );
+        dispatch(setConstituency(savedConstituency));
+      }
+    }
+    // When constituency is set, save it for future restoration
+    if (constituency) {
+      console.log(
+        "SeatDistribution.js - Saving constituency to localStorage:",
+        constituency
+      );
+      localStorage.setItem("savedConstituency", constituency);
+    }
+  }, [district, constituencies.length, constituency, dispatch]);
+
   // Fetch districts when division changes
   useEffect(() => {
     if (!token || !division) {
       dispatch(setDistricts([]));
       dispatch(setConstituencies([]));
       dispatch(setDistrict(""));
-      dispatch(setConstituency(""));
+      // Only clear constituency if division was actively changed, not on initial mount
+      if (division === "" && localStorage.getItem("previousDivision")) {
+        dispatch(setConstituency(""));
+      }
       return;
     }
+
+    // Store current division for future reference
+    localStorage.setItem("previousDivision", division);
 
     const loadDistricts = async () => {
       try {
@@ -213,9 +253,15 @@ export default function SeatDistribution() {
   useEffect(() => {
     if (!token || !district) {
       dispatch(setConstituencies([]));
-      dispatch(setConstituency(""));
+      // Only clear constituency if district was actively changed, not on initial mount
+      if (district === "" && localStorage.getItem("previousDistrict")) {
+        dispatch(setConstituency(""));
+      }
       return;
     }
+
+    // Store current district for future reference
+    localStorage.setItem("previousDistrict", district);
 
     const loadConstituencies = async () => {
       try {
@@ -252,9 +298,16 @@ export default function SeatDistribution() {
 
   const buildQueryParams = () => {
     const queryParams = new URLSearchParams();
-    if (division) queryParams.append("বিভাগ", division);
-    if (district) queryParams.append("জেলা", district);
-    if (constituency) queryParams.append("আসন", constituency);
+    if (division) queryParams.append("বিভাগ", division.trim());
+    if (district) queryParams.append("জেলা", district.trim());
+    if (constituency) {
+      console.log(
+        "SeatDistribution.js - buildQueryParams - constituency:",
+        constituency
+      );
+      queryParams.append("আসন", constituency.trim());
+    }
+    console.log("SeatDistribution.js - queryParams:", queryParams.toString());
     return queryParams;
   };
 
@@ -263,6 +316,12 @@ export default function SeatDistribution() {
       setError("Authentication token is missing");
       return;
     }
+
+    // Debug: Log the constituency value
+    console.log(
+      "SeatDistribution.js - handleView - constituency:",
+      constituency
+    );
 
     try {
       setLoading(true);
