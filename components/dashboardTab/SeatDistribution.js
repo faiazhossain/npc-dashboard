@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+
 import {
   BarChart,
   Bar,
@@ -10,9 +11,12 @@ import {
   ResponsiveContainer,
   Tooltip,
   LabelList,
+  Cell,
 } from "recharts";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function SeatDistribution() {
+  const { userType } = useAuth();
   const [data, setData] = useState(null);
   const [divisions, setDivisions] = useState([]);
   const [districts, setDistricts] = useState([]);
@@ -198,7 +202,6 @@ export default function SeatDistribution() {
       const popularityData = await response.json();
       setData(popularityData);
 
-      // Fetch worthful party data with filters
       const worthfulBaseUrl = `https://npsbd.xyz/api/dashboard/party/worthful?page=${currentPage}&page_size=${pageSize}`;
       const worthfulUrl = queryParams.toString()
         ? `${worthfulBaseUrl}&${queryParams.toString()}`
@@ -235,7 +238,7 @@ export default function SeatDistribution() {
 
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
-    setCurrentPage(1); // Reset to first page when filters change
+    setCurrentPage(1);
   };
 
   const buildQueryParams = () => {
@@ -596,31 +599,36 @@ export default function SeatDistribution() {
                   tickFormatter={(value) => `${value}%`}
                 />
                 <Tooltip
-                  formatter={(value, name, props) => [
-                    `${value}% (মোট: ${props.payload.total})`,
-                    "জনপ্রিয়তা",
-                  ]}
+                  formatter={(value, name, props) =>
+                    userType === "duser"
+                      ? [`${value}%`, "জনপ্রিয়তা"]
+                      : [
+                          `${value}% (মোট: ${props.payload.total})`,
+                          "জনপ্রিয়তা",
+                        ]
+                  }
                   labelStyle={{ fontFamily: "Tiro Bangla, serif" }}
                   contentStyle={{ fontFamily: "Tiro Bangla, serif" }}
                 />
                 <Bar dataKey='value' radius={[4, 4, 0, 0]} barSize={80}>
                   {data.party_popularity?.map((entry, index) => (
-                    <Bar
-                      key={`bar-${index}`}
-                      dataKey='value'
+                    <Cell
+                      key={`cell-${index}`}
                       fill={COLORS[index % COLORS.length]}
                     />
                   ))}
-                  <LabelList
-                    dataKey='total'
-                    position='top'
-                    style={{
-                      fontFamily: "Tiro Bangla, serif",
-                      fill: "#333",
-                      fontSize: 12,
-                    }}
-                    formatter={(value) => `${value}`}
-                  />
+                  {userType !== "duser" && (
+                    <LabelList
+                      dataKey='total'
+                      position='top'
+                      style={{
+                        fontFamily: "Tiro Bangla, serif",
+                        fill: "#333",
+                        fontSize: 12,
+                      }}
+                      formatter={(value) => `${value}`}
+                    />
+                  )}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
