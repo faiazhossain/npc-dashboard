@@ -768,13 +768,18 @@ export default function SeatDistribution() {
                 />
                 <YAxis
                   dataKey={userType === "duser" ? "value" : "total"}
+                  domain={userType === "duser" ? [0, 100] : [0, "auto"]}
                   label={{
-                    value: userType !== "duser" ? "আসন সংখ্যা" : "আসন অনুপাত",
+                    value:
+                      userType !== "duser" ? "আসন সংখ্যা" : "আসন শতাংশ (%)",
                     angle: -90,
-                    position: "insideLeft",
+                    position: "insideBottomLeft",
                     style: { fontFamily: "Tiro Bangla, serif" },
                   }}
                   style={{ fontFamily: "Tiro Bangla, serif" }}
+                  tickFormatter={
+                    userType === "duser" ? (tick) => `${tick}%` : undefined
+                  }
                 />
                 <Tooltip
                   formatter={(value, name, props) => [
