@@ -904,36 +904,38 @@ export default function GeneralQuestions() {
             {filteredChartData.charts.map((chart, index) => (
               <div
                 key={chart.id}
-                className='bg-white p-6 rounded-xl shadow-sm border border-gray-100'
+                className='bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-[400px] flex flex-col'
               >
                 <h2
-                  className='text-xl font-medium text-gray-900 mb-6'
+                  className='text-xl font-medium text-gray-900 mb-4'
                   style={{ fontFamily: "Tiro Bangla, serif" }}
                 >
                   {chart.question}
                 </h2>
-                <div className='h-80 flex'>
-                  <div className='w-1/2 flex flex-col justify-center space-y-2 pr-4'>
-                    {chart.responses.map((response, responseIndex) => (
-                      <div key={response.label} className='flex items-center'>
-                        <div
-                          className='w-4 h-4 rounded mr-2'
-                          style={{
-                            backgroundColor:
-                              COLORS[responseIndex % COLORS.length],
-                          }}
-                        ></div>
-                        <span
-                          className='text-sm font-medium'
-                          style={{ fontFamily: "Tiro Bangla, serif" }}
-                        >
-                          {response.label}: {response.percentage}{" "}
-                          {userType !== "duser"
-                            ? `(মোট: ${response.total})`
-                            : ""}
-                        </span>
-                      </div>
-                    ))}
+                <div className='flex flex-1 overflow-hidden'>
+                  <div className='w-1/2 pr-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100'>
+                    <div className='space-y-2'>
+                      {chart.responses.map((response, responseIndex) => (
+                        <div key={response.label} className='flex items-center'>
+                          <div
+                            className='w-4 h-4 rounded mr-2'
+                            style={{
+                              backgroundColor:
+                                COLORS[responseIndex % COLORS.length],
+                            }}
+                          ></div>
+                          <span
+                            className='text-sm font-medium'
+                            style={{ fontFamily: "Tiro Bangla, serif" }}
+                          >
+                            {response.label}: {response.percentage}{" "}
+                            {userType !== "duser"
+                              ? `(মোট: ${response.total})`
+                              : ""}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                   <div className='w-1/2'>
                     <ResponsiveContainer width='100%' height='100%'>
