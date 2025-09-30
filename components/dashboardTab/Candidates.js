@@ -12,6 +12,16 @@ import {
   Legend,
 } from "recharts";
 import { useAuth } from "@/hooks/useAuth";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  setDivision,
+  setDistrict,
+  setConstituency,
+  setDivisions,
+  setDistricts,
+  setConstituencies,
+  resetFilters,
+} from "@/store/slices/filterSlice";
 
 const COLORS = [
   "#06C584",
@@ -31,19 +41,19 @@ const COLORS = [
 // Memoized CandidateCard component
 const CandidateCard = memo(({ candidateCard, index }) => {
   return (
-    <div className="relative bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200/50 hover:shadow-xl transition-shadow duration-300 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-r from-[#006747]/10 to-transparent opacity-20" />
+    <div className='relative bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200/50 hover:shadow-xl transition-shadow duration-300 overflow-hidden'>
+      <div className='absolute inset-0 bg-gradient-to-r from-[#006747]/10 to-transparent opacity-20' />
       <h3
-        className="text-xl font-bold px-4 py-2 bg-gray-200 text-gray-900 mb-5 relative z-10"
+        className='text-xl font-bold px-4 py-2 bg-gray-200 text-gray-900 mb-5 relative z-10'
         style={{ fontFamily: "Tiro Bangla, serif" }}
       >
         {candidateCard.title}
       </h3>
-      <ul className="space-y-3 px-4 py-2">
+      <ul className='space-y-3 px-4 py-2'>
         {candidateCard.candidates.map((candidate, candidateIndex) => (
           <motion.li
             key={candidateIndex}
-            className="flex items-center text-gray-700 text-sm"
+            className='flex items-center text-gray-700 text-sm'
             style={{ fontFamily: "Tiro Bangla, serif" }}
             initial={{ x: -10, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
@@ -53,8 +63,8 @@ const CandidateCard = memo(({ candidateCard, index }) => {
               ease: "easeOut",
             }}
           >
-            <div className="w-3 h-3 bg-[#006747] rounded-full mr-3 flex-shrink-0" />
-            <span className="leading-relaxed">{candidate}</span>
+            <div className='w-3 h-3 bg-[#006747] rounded-full mr-3 flex-shrink-0' />
+            <span className='leading-relaxed'>{candidate}</span>
           </motion.li>
         ))}
       </ul>
@@ -84,20 +94,20 @@ const RadialBarChartComponent = memo(({ chart, index, userType }) => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+    <div className='bg-white p-6 rounded-xl shadow-sm border border-gray-100'>
       <h2
-        className="text-xl font-medium text-gray-900 mb-6"
+        className='text-xl font-medium text-gray-900 mb-6'
         style={{ fontFamily: "Tiro Bangla, serif" }}
       >
         {chart.question}
       </h2>
-      <div className="h-[450px]">
-        <ResponsiveContainer width="100%" height="100%">
+      <div className='h-[450px]'>
+        <ResponsiveContainer width='100%' height='100%'>
           <RadialBarChart
-            cx="50%"
-            cy="50%"
-            innerRadius="20%"
-            outerRadius="90%"
+            cx='50%'
+            cy='50%'
+            innerRadius='20%'
+            outerRadius='90%'
             barSize={8}
             data={chartData}
             startAngle={90}
@@ -113,15 +123,15 @@ const RadialBarChartComponent = memo(({ chart, index, userType }) => {
               }}
               background={{ fill: "#eee" }}
               clockWise={false}
-              dataKey="uv"
+              dataKey='uv'
             >
               {chartData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.fill} />
               ))}
             </RadialBar>
             <Legend
-              layout="vertical"
-              verticalAlign="top"
+              layout='vertical'
+              verticalAlign='top'
               wrapperStyle={{
                 ...legendStyle,
                 fontFamily: "Tiro Bangla, serif",
@@ -158,25 +168,25 @@ const PieChartComponent = memo(({ chart, index, userType }) => {
   }));
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+    <div className='bg-white p-6 rounded-xl shadow-sm border border-gray-100'>
       <h2
-        className="text-xl font-medium text-gray-900 mb-6"
+        className='text-xl font-medium text-gray-900 mb-6'
         style={{ fontFamily: "Tiro Bangla, serif" }}
       >
         {chart.question}
       </h2>
-      <div className="h-80 flex">
-        <div className="w-1/2 flex flex-col justify-center space-y-2 pr-4">
+      <div className='h-80 flex'>
+        <div className='w-1/2 flex flex-col justify-center space-y-2 pr-4'>
           {chartData.map((entry, entryIndex) => (
-            <div key={entry.name} className="flex items-center">
+            <div key={entry.name} className='flex items-center'>
               <div
-                className="w-4 h-4 rounded mr-2"
+                className='w-4 h-4 rounded mr-2'
                 style={{
                   backgroundColor: COLORS[entryIndex % COLORS.length],
                 }}
               ></div>
               <span
-                className="text-sm font-medium"
+                className='text-sm font-medium'
                 style={{ fontFamily: "Tiro Bangla, serif" }}
               >
                 {entry.name}: {entry.displayValue}{" "}
@@ -185,18 +195,18 @@ const PieChartComponent = memo(({ chart, index, userType }) => {
             </div>
           ))}
         </div>
-        <div className="w-1/2">
-          <ResponsiveContainer width="100%" height="100%">
+        <div className='w-1/2'>
+          <ResponsiveContainer width='100%' height='100%'>
             <PieChart>
               <Pie
                 data={chartData}
-                cx="50%"
-                cy="50%"
+                cx='50%'
+                cy='50%'
                 innerRadius={chart.hasInnerRadius ? 40 : 0}
                 outerRadius={80}
-                fill="#8884d8"
+                fill='#8884d8'
                 paddingAngle={1}
-                dataKey="value"
+                dataKey='value'
               >
                 {chartData.map((entry, entryIndex) => (
                   <Cell
@@ -224,26 +234,29 @@ PieChartComponent.displayName = "PieChartComponent";
 
 export default function Candidates() {
   const [data, setData] = useState(null);
-  const [divisions, setDivisions] = useState([]);
-  const [districts, setDistricts] = useState([]);
-  const [constituencies, setConstituencies] = useState([]);
   const [loading, setLoading] = useState(false);
   const [additionalLoading, setAdditionalLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [filters, setFilters] = useState({
-    division: "",
-    district: "",
-    constituency: "",
-  });
   const [shouldAnimateCharts, setShouldAnimateCharts] = useState(false);
   const [qualifiedCandidates, setQualifiedCandidates] = useState([]);
   const [selectedCandidate, setSelectedCandidate] = useState("");
   const [additionalData, setAdditionalData] = useState(null);
   const { userType } = useAuth();
 
+  const dispatch = useDispatch();
+  const {
+    division,
+    district,
+    constituency,
+    divisions,
+    districts,
+    constituencies,
+  } = useSelector((state) => state.filter);
+
   const token =
     typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
 
+  // Load initial data (divisions) and fetch data based on pre-selected filters
   useEffect(() => {
     if (!token) {
       setError("Authentication token is missing");
@@ -255,23 +268,79 @@ export default function Candidates() {
         setLoading(true);
         setError(null);
 
-        const divisionsResponse = await fetch(
-          "https://npsbd.xyz/api/divisions",
-          {
-            method: "GET",
-            headers: {
-              accept: "application/json",
-              Authorization: `Bearer ${token}`,
-            },
+        // Fetch divisions if not already loaded
+        if (divisions.length === 0) {
+          const divisionsResponse = await fetch(
+            "https://npsbd.xyz/api/divisions",
+            {
+              method: "GET",
+              headers: {
+                accept: "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          if (!divisionsResponse.ok) {
+            throw new Error(`HTTP error! status: ${divisionsResponse.status}`);
           }
-        );
-        if (!divisionsResponse.ok) {
-          throw new Error(`HTTP error! status: ${divisionsResponse.status}`);
+          const divisionsData = await divisionsResponse.json();
+          dispatch(setDivisions(divisionsData));
         }
-        const divisionsData = await divisionsResponse.json();
-        setDivisions(divisionsData);
+
+        // If division is pre-selected, fetch districts
+        if (division && divisions.length > 0) {
+          const selectedDivision = divisions.find(
+            (div) => div.bn_name === division
+          );
+          if (selectedDivision && districts.length === 0) {
+            const response = await fetch(
+              `https://npsbd.xyz/api/divisions/${selectedDivision.id}/districts`,
+              {
+                method: "GET",
+                headers: {
+                  accept: "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            dispatch(setDistricts(data));
+          }
+        }
+
+        // If district is pre-selected, fetch constituencies
+        if (district && districts.length > 0) {
+          const selectedDistrict = districts.find(
+            (dist) => dist.bn_name === district
+          );
+          if (selectedDistrict && constituencies.length === 0) {
+            const response = await fetch(
+              `https://npsbd.xyz/api/districts/${selectedDistrict.id}/seats`,
+              {
+                method: "GET",
+                headers: {
+                  accept: "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            dispatch(setConstituencies(data));
+          }
+        }
+
+        // If any filter is pre-selected, fetch initial candidate data
+        if (division || district || constituency) {
+          await handleView();
+        }
       } catch (error) {
-        console.error("Error loading divisions:", error);
+        console.error("Error loading initial data:", error);
         setError(error.message);
       } finally {
         setLoading(false);
@@ -279,24 +348,29 @@ export default function Candidates() {
     };
 
     loadInitialData();
-  }, [token]);
+  }, [
+    token,
+    divisions.length,
+    division,
+    district,
+    constituencies.length,
+    dispatch,
+  ]);
 
+  // Fetch districts when division changes
   useEffect(() => {
-    if (!token || !filters.division) {
-      setDistricts([]);
-      setConstituencies([]);
-      setFilters((prev) => ({
-        ...prev,
-        district: "",
-        constituency: "",
-      }));
+    if (!token || !division) {
+      dispatch(setDistricts([]));
+      dispatch(setConstituencies([]));
+      dispatch(setDistrict(""));
+      dispatch(setConstituency(""));
       return;
     }
 
     const loadDistricts = async () => {
       try {
         const selectedDivision = divisions.find(
-          (div) => div.bn_name === filters.division
+          (div) => div.bn_name === division
         );
         if (!selectedDivision) {
           throw new Error("Selected division not found");
@@ -316,13 +390,9 @@ export default function Candidates() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        setDistricts(data);
-        setConstituencies([]);
-        setFilters((prev) => ({
-          ...prev,
-          district: "",
-          constituency: "",
-        }));
+        dispatch(setDistricts(data));
+        dispatch(setConstituencies([]));
+        dispatch(setConstituency(""));
       } catch (error) {
         console.error("Error fetching districts:", error);
         setError(error.message);
@@ -330,22 +400,20 @@ export default function Candidates() {
     };
 
     loadDistricts();
-  }, [filters.division, token, divisions]);
+  }, [division, token, divisions, dispatch]);
 
+  // Fetch constituencies when district changes
   useEffect(() => {
-    if (!token || !filters.district) {
-      setConstituencies([]);
-      setFilters((prev) => ({
-        ...prev,
-        constituency: "",
-      }));
+    if (!token || !district) {
+      dispatch(setConstituencies([]));
+      dispatch(setConstituency(""));
       return;
     }
 
     const loadConstituencies = async () => {
       try {
         const selectedDistrict = districts.find(
-          (dist) => dist.bn_name === filters.district
+          (dist) => dist.bn_name === district
         );
         if (!selectedDistrict) {
           throw new Error("Selected district not found");
@@ -365,11 +433,8 @@ export default function Candidates() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        setConstituencies(data);
-        setFilters((prev) => ({
-          ...prev,
-          constituency: "",
-        }));
+        dispatch(setConstituencies(data));
+        dispatch(setConstituency(""));
       } catch (error) {
         console.error("Error fetching constituencies:", error);
         setError(error.message);
@@ -377,17 +442,23 @@ export default function Candidates() {
     };
 
     loadConstituencies();
-  }, [filters.district, token, districts]);
+  }, [district, token, districts, dispatch]);
 
   const handleFilterChange = (key, value) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
+    if (key === "division") {
+      dispatch(setDivision(value));
+    } else if (key === "district") {
+      dispatch(setDistrict(value));
+    } else if (key === "constituency") {
+      dispatch(setConstituency(value));
+    }
   };
 
   const buildQueryParams = () => {
     const queryParams = new URLSearchParams();
-    if (filters.division) queryParams.append("বিভাগ", filters.division);
-    if (filters.district) queryParams.append("জেলা", filters.district);
-    if (filters.constituency) queryParams.append("আসন", filters.constituency);
+    if (division) queryParams.append("বিভাগ", division);
+    if (district) queryParams.append("জেলা", district);
+    if (constituency) queryParams.append("আসন", constituency);
     return queryParams;
   };
 
@@ -517,7 +588,6 @@ export default function Candidates() {
         q7_candidate_flaws: "q7_total_counts",
       };
 
-      // Pick the first 3 charts (excluding flaws)
       let transformedAdditional = Object.entries(apiData)
         .filter(([key, value]) => Object.keys(value).length > 0)
         .filter(([key]) => key !== "q7_candidate_flaws")
@@ -549,7 +619,6 @@ export default function Candidates() {
           };
         });
 
-      // Always include flaws chart (either real data or fallback)
       if (
         apiData.q7_candidate_flaws &&
         Object.keys(apiData.q7_candidate_flaws).length > 0
@@ -590,11 +659,7 @@ export default function Candidates() {
   };
 
   const handleReset = () => {
-    setFilters({
-      division: "",
-      district: "",
-      constituency: "",
-    });
+    dispatch(resetFilters());
     setData(null);
     setAdditionalData(null);
     setQualifiedCandidates([]);
@@ -609,95 +674,98 @@ export default function Candidates() {
   }, [selectedCandidate]);
 
   return (
-    <div className="p-4 lg:p-8 space-y-8">
+    <div className='p-4 lg:p-8 space-y-8'>
       <motion.div
-        className="bg-gradient-to-br from-white to-gray-50 p-4 rounded-xl shadow-md border border-gray-100 mx-auto"
+        className='bg-gradient-to-br from-white to-gray-50 p-4 rounded-xl shadow-md border border-gray-100 mx-auto'
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
       >
         <h2
-          className="text-xl font-semibold text-gray-800 mb-4"
+          className='text-xl font-semibold text-gray-800 mb-4'
           style={{ fontFamily: "Tiro Bangla, serif" }}
         >
           ফিল্টার
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-4">
-          <div className="flex flex-col">
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-4'>
+          <div className='flex flex-col'>
             <label
-              className="block text-xs font-medium text-gray-600 mb-1"
+              className='block text-xs font-medium text-gray-600 mb-1'
               style={{ fontFamily: "Tiro Bangla, serif" }}
             >
               বিভাগ
             </label>
             <motion.select
-              value={filters.division}
+              value={division}
               onChange={(e) => handleFilterChange("division", e.target.value)}
-              className="w-full px-3 py-3 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm"
+              className='w-full px-3 py-3 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
               style={{ fontFamily: "Tiro Bangla, serif" }}
               whileHover={{ scale: 1.02 }}
             >
-              <option value="">নির্বাচন করুন</option>
-              {divisions.map((division) => (
-                <option key={division.id} value={division.bn_name}>
-                  {division.bn_name}
+              <option value=''>নির্বাচন করুন</option>
+              {divisions.map((divisionItem) => (
+                <option key={divisionItem.id} value={divisionItem.bn_name}>
+                  {divisionItem.bn_name}
                 </option>
               ))}
             </motion.select>
           </div>
-          <div className="flex flex-col">
+          <div className='flex flex-col'>
             <label
-              className="block text-xs font-medium text-gray-600 mb-1"
+              className='block text-xs font-medium text-gray-600 mb-1'
               style={{ fontFamily: "Tiro Bangla, serif" }}
             >
               জেলা
             </label>
             <motion.select
-              value={filters.district}
+              value={district}
               onChange={(e) => handleFilterChange("district", e.target.value)}
-              className="w-full px-3 py-3 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm"
+              className='w-full px-3 py-3 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
               style={{ fontFamily: "Tiro Bangla, serif" }}
               whileHover={{ scale: 1.02 }}
-              disabled={!filters.division}
+              disabled={!division}
             >
-              <option value="">নির্বাচন করুন</option>
-              {districts.map((district) => (
-                <option key={district.id} value={district.bn_name}>
-                  {district.bn_name}
+              <option value=''>নির্বাচন করুন</option>
+              {districts.map((districtItem) => (
+                <option key={districtItem.id} value={districtItem.bn_name}>
+                  {districtItem.bn_name}
                 </option>
               ))}
             </motion.select>
           </div>
-          <div className="flex flex-col">
+          <div className='flex flex-col'>
             <label
-              className="block text-xs font-medium text-gray-600 mb-1"
+              className='block text-xs font-medium text-gray-600 mb-1'
               style={{ fontFamily: "Tiro Bangla, serif" }}
             >
               নির্বাচনী এলাকা
             </label>
             <motion.select
-              value={filters.constituency}
+              value={constituency}
               onChange={(e) =>
                 handleFilterChange("constituency", e.target.value)
               }
-              className="w-full px-3 py-3 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm"
+              className='w-full px-3 py-3 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
               style={{ fontFamily: "Tiro Bangla, serif" }}
               whileHover={{ scale: 1.02 }}
-              disabled={!filters.district}
+              disabled={!district}
             >
-              <option value="">নির্বাচন করুন</option>
-              {constituencies.map((constituency) => (
-                <option key={constituency.id} value={constituency.bn_name}>
-                  {constituency.bn_name}
+              <option value=''>নির্বাচন করুন</option>
+              {constituencies.map((constituencyItem) => (
+                <option
+                  key={constituencyItem.id}
+                  value={constituencyItem.bn_name}
+                >
+                  {constituencyItem.bn_name}
                 </option>
               ))}
             </motion.select>
           </div>
         </div>
-        <div className="flex justify-end space-x-2">
+        <div className='flex justify-end space-x-2'>
           <motion.button
             onClick={handleReset}
-            className="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors duration-200 text-sm"
+            className='bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors duration-200 text-sm'
             style={{ fontFamily: "Tiro Bangla, serif" }}
             whileHover={{
               scale: 1.05,
@@ -709,7 +777,7 @@ export default function Candidates() {
           </motion.button>
           <motion.button
             onClick={handleView}
-            className="bg-[#006747] text-white px-4 py-2 rounded-md hover:bg-[#005536] transition-colors duration-200 text-sm"
+            className='bg-[#006747] text-white px-4 py-2 rounded-md hover:bg-[#005536] transition-colors duration-200 text-sm'
             style={{ fontFamily: "Tiro Bangla, serif" }}
             whileHover={{
               scale: 1.05,
@@ -723,21 +791,21 @@ export default function Candidates() {
       </motion.div>
 
       {loading ? (
-        <div className="flex justify-center items-center min-h-[400px]">
+        <div className='flex justify-center items-center min-h-[400px]'>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-lg text-gray-600 bg-white p-8 rounded-xl shadow-sm border border-gray-100"
+            className='text-lg text-gray-600 bg-white p-8 rounded-xl shadow-sm border border-gray-100'
             style={{ fontFamily: "Tiro Bangla, serif" }}
           >
             ডেটা লোড করা হচ্ছে...
           </motion.div>
         </div>
       ) : error ? (
-        <div className="flex justify-center items-center h-64">
+        <div className='flex justify-center items-center h-64'>
           <div
-            className="text-lg text-red-600"
+            className='text-lg text-red-600'
             style={{ fontFamily: "Tiro Bangla, serif" }}
           >
             ডেটা লোড করতে সমস্যা হয়েছে: {error}
@@ -750,9 +818,9 @@ export default function Candidates() {
             data.qualities.every(
               (quality) => !quality.responses || quality.responses.length === 0
             ))) ? (
-        <div className="flex justify-center items-center h-64">
+        <div className='flex justify-center items-center h-64'>
           <div
-            className="text-lg text-gray-600"
+            className='text-lg text-gray-600'
             style={{ fontFamily: "Tiro Bangla, serif" }}
           >
             ফিল্টার নির্বাচন করে &quot;দেখুন&quot; বাটনে ক্লিক করুন
@@ -769,15 +837,15 @@ export default function Candidates() {
                   ? { duration: 0.6, delay: 0.2, ease: "easeOut" }
                   : {}
               }
-              className="shadow-sm rounded-2xl p-6 bg-white"
+              className='shadow-sm rounded-2xl p-6 bg-white'
             >
               <h2
-                className="text-2xl font-semibold text-gray-800 mb-6"
+                className='text-2xl font-semibold text-gray-800 mb-6'
                 style={{ fontFamily: "Tiro Bangla, serif" }}
               >
                 আপনার এলাকার সম্ভাব্য প্রার্থীদের নামসমূহ?
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
                 {data.candidateCards.map((candidateCard, index) => (
                   <CandidateCard
                     key={candidateCard.id}
@@ -798,15 +866,15 @@ export default function Candidates() {
                   ? { duration: 0.6, delay: 0.2, ease: "easeOut" }
                   : {}
               }
-              className="shadow-sm rounded-2xl p-6 bg-white"
+              className='shadow-sm rounded-2xl p-6 bg-white'
             >
               <h2
-                className="text-2xl font-semibold text-gray-800 mb-6"
+                className='text-2xl font-semibold text-gray-800 mb-6'
                 style={{ fontFamily: "Tiro Bangla, serif" }}
               >
                 আপনার এলাকায় কোন দলের কাকে প্রার্থী করা উচিত বলে আপনি মনে করেন?
               </h2>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
                 {data.charts.map((chart, index) => {
                   const shouldUseRadialChart =
                     chart.id === "candidate-qualifications" ||
@@ -842,7 +910,7 @@ export default function Candidates() {
                   ? { duration: 0.6, delay: 0.5, ease: "easeOut" }
                   : {}
               }
-              className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+              className='grid grid-cols-1 lg:grid-cols-2 gap-6'
             >
               {data.qualities.map((chart, index) => {
                 if (!chart.responses || chart.responses.length === 0)
@@ -881,17 +949,17 @@ export default function Candidates() {
                   ? { duration: 0.6, delay: 0.8, ease: "easeOut" }
                   : {}
               }
-              className="shadow-sm rounded-2xl p-6 bg-white"
+              className='shadow-sm rounded-2xl p-6 bg-white'
             >
               <h2
-                className="text-2xl font-semibold text-gray-800 mb-6"
+                className='text-2xl font-semibold text-gray-800 mb-6'
                 style={{ fontFamily: "Tiro Bangla, serif" }}
               >
                 প্রার্থী বিস্তারিত
               </h2>
-              <div className="flex flex-col mb-6">
+              <div className='flex flex-col mb-6'>
                 <label
-                  className="block text-xs font-medium text-gray-600 mb-1"
+                  className='block text-xs font-medium text-gray-600 mb-1'
                   style={{ fontFamily: "Tiro Bangla, serif" }}
                 >
                   প্রার্থী নির্বাচন করুন
@@ -899,7 +967,7 @@ export default function Candidates() {
                 <motion.select
                   value={selectedCandidate}
                   onChange={(e) => setSelectedCandidate(e.target.value)}
-                  className="w-full px-3 py-3 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm"
+                  className='w-full px-3 py-3 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
                   style={{ fontFamily: "Tiro Bangla, serif" }}
                   whileHover={{ scale: 1.02 }}
                   disabled={additionalLoading}
@@ -913,9 +981,9 @@ export default function Candidates() {
               </div>
 
               {additionalLoading ? (
-                <div className="flex justify-center items-center min-h-[200px]">
+                <div className='flex justify-center items-center min-h-[200px]'>
                   <div
-                    className="text-lg text-gray-600"
+                    className='text-lg text-gray-600'
                     style={{ fontFamily: "Tiro Bangla, serif" }}
                   >
                     প্রার্থীর তথ্য লোড করা হচ্ছে...
@@ -924,7 +992,7 @@ export default function Candidates() {
               ) : (
                 additionalData &&
                 additionalData.charts?.length > 0 && (
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
                     {additionalData.charts.map((chart, index) => {
                       if (!chart.responses || chart.responses.length === 0)
                         return null;

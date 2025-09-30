@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-
 import {
   BarChart,
   Bar,
@@ -14,20 +13,37 @@ import {
   Cell,
 } from "recharts";
 import { useAuth } from "@/hooks/useAuth";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  setDivision,
+  setDistrict,
+  setConstituency,
+  setDivisions,
+  setDistricts,
+  setConstituencies,
+  resetFilters,
+} from "@/store/slices/filterSlice";
+
+const COLORS = [
+  "#06C584",
+  "#8C5CF0",
+  "#EC489B",
+  "#0EA7EC",
+  "#F39E0B",
+  "#1ddb16",
+  "#003b36",
+  "#59114d",
+  "#FF6B35",
+  "#4ECDC4",
+  "#45B7D1",
+  "#96CEB4",
+];
 
 export default function SeatDistribution() {
   const { userType } = useAuth();
   const [data, setData] = useState(null);
-  const [divisions, setDivisions] = useState([]);
-  const [districts, setDistricts] = useState([]);
-  const [constituencies, setConstituencies] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [filters, setFilters] = useState({
-    division: "",
-    district: "",
-    constituency: "",
-  });
   const [worthfulData, setWorthfulData] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -36,6 +52,17 @@ export default function SeatDistribution() {
   const token =
     typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
 
+  const dispatch = useDispatch();
+  const {
+    division,
+    district,
+    constituency,
+    divisions,
+    districts,
+    constituencies,
+  } = useSelector((state) => state.filter);
+
+  // Load initial data (divisions) and fetch data based on pre-selected filters
   useEffect(() => {
     if (!token) {
       setError("Authentication token is missing");
@@ -47,23 +74,79 @@ export default function SeatDistribution() {
         setLoading(true);
         setError(null);
 
-        const divisionsResponse = await fetch(
-          "https://npsbd.xyz/api/divisions",
-          {
-            method: "GET",
-            headers: {
-              accept: "application/json",
-              Authorization: `Bearer ${token}`,
-            },
+        // Load divisions if not already loaded
+        if (divisions.length === 0) {
+          const divisionsResponse = await fetch(
+            "https://npsbd.xyz/api/divisions",
+            {
+              method: "GET",
+              headers: {
+                accept: "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          if (!divisionsResponse.ok) {
+            throw new Error(`HTTP error! status: ${divisionsResponse.status}`);
           }
-        );
-        if (!divisionsResponse.ok) {
-          throw new Error(`HTTP error! status: ${divisionsResponse.status}`);
+          const divisionsData = await divisionsResponse.json();
+          dispatch(setDivisions(divisionsData));
         }
-        const divisionsData = await divisionsResponse.json();
-        setDivisions(divisionsData);
+
+        // If division is pre-selected, fetch districts
+        if (division && divisions.length > 0) {
+          const selectedDivision = divisions.find(
+            (div) => div.bn_name === division
+          );
+          if (selectedDivision && districts.length === 0) {
+            const response = await fetch(
+              `https://npsbd.xyz/api/divisions/${selectedDivision.id}/districts`,
+              {
+                method: "GET",
+                headers: {
+                  accept: "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            dispatch(setDistricts(data));
+          }
+        }
+
+        // If district is pre-selected, fetch constituencies
+        if (district && districts.length > 0) {
+          const selectedDistrict = districts.find(
+            (dist) => dist.bn_name === district
+          );
+          if (selectedDistrict && constituencies.length === 0) {
+            const response = await fetch(
+              `https://npsbd.xyz/api/districts/${selectedDistrict.id}/seats`,
+              {
+                method: "GET",
+                headers: {
+                  accept: "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            dispatch(setConstituencies(data));
+          }
+        }
+
+        // If any filter is pre-selected, fetch party popularity and worthful data
+        if (division || district || constituency) {
+          await handleView();
+        }
       } catch (error) {
-        console.error("Error loading divisions:", error);
+        console.error("Error loading initial data:", error);
         setError(error.message);
       } finally {
         setLoading(false);
@@ -71,24 +154,29 @@ export default function SeatDistribution() {
     };
 
     loadInitialData();
-  }, [token]);
+  }, [
+    token,
+    divisions.length,
+    division,
+    district,
+    constituencies.length,
+    dispatch,
+  ]);
 
+  // Fetch districts when division changes
   useEffect(() => {
-    if (!token || !filters.division) {
-      setDistricts([]);
-      setConstituencies([]);
-      setFilters((prev) => ({
-        ...prev,
-        district: "",
-        constituency: "",
-      }));
+    if (!token || !division) {
+      dispatch(setDistricts([]));
+      dispatch(setConstituencies([]));
+      dispatch(setDistrict(""));
+      dispatch(setConstituency(""));
       return;
     }
 
     const loadDistricts = async () => {
       try {
         const selectedDivision = divisions.find(
-          (div) => div.bn_name === filters.division
+          (div) => div.bn_name === division
         );
         if (!selectedDivision) {
           throw new Error("Selected division not found");
@@ -108,13 +196,9 @@ export default function SeatDistribution() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        setDistricts(data);
-        setConstituencies([]);
-        setFilters((prev) => ({
-          ...prev,
-          district: "",
-          constituency: "",
-        }));
+        dispatch(setDistricts(data));
+        dispatch(setConstituencies([]));
+        dispatch(setConstituency(""));
       } catch (error) {
         console.error("Error fetching districts:", error);
         setError(error.message);
@@ -122,22 +206,20 @@ export default function SeatDistribution() {
     };
 
     loadDistricts();
-  }, [filters.division, token, divisions]);
+  }, [division, token, divisions, dispatch]);
 
+  // Fetch constituencies when district changes
   useEffect(() => {
-    if (!token || !filters.district) {
-      setConstituencies([]);
-      setFilters((prev) => ({
-        ...prev,
-        constituency: "",
-      }));
+    if (!token || !district) {
+      dispatch(setConstituencies([]));
+      dispatch(setConstituency(""));
       return;
     }
 
     const loadConstituencies = async () => {
       try {
         const selectedDistrict = districts.find(
-          (dist) => dist.bn_name === filters.district
+          (dist) => dist.bn_name === district
         );
         if (!selectedDistrict) {
           throw new Error("Selected district not found");
@@ -157,11 +239,7 @@ export default function SeatDistribution() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        setConstituencies(data);
-        setFilters((prev) => ({
-          ...prev,
-          constituency: "",
-        }));
+        dispatch(setConstituencies(data));
       } catch (error) {
         console.error("Error fetching constituencies:", error);
         setError(error.message);
@@ -169,7 +247,15 @@ export default function SeatDistribution() {
     };
 
     loadConstituencies();
-  }, [filters.district, token, districts]);
+  }, [district, token, districts, dispatch]);
+
+  const buildQueryParams = () => {
+    const queryParams = new URLSearchParams();
+    if (division) queryParams.append("বিভাগ", division);
+    if (district) queryParams.append("জেলা", district);
+    if (constituency) queryParams.append("আসন", constituency);
+    return queryParams;
+  };
 
   const handleView = async () => {
     if (!token) {
@@ -180,6 +266,7 @@ export default function SeatDistribution() {
     try {
       setLoading(true);
       setError(null);
+      setCurrentPage(1); // Reset to first page when filters change
 
       const queryParams = buildQueryParams();
       const baseUrl = "https://npsbd.xyz/api/dashboard/party/popularity";
@@ -230,31 +317,47 @@ export default function SeatDistribution() {
     }
   };
 
+  // Fetch worthful data when page changes
   useEffect(() => {
     if (data) {
-      handleView();
+      const fetchWorthfulData = async () => {
+        try {
+          setLoading(true);
+          const queryParams = buildQueryParams();
+          const worthfulBaseUrl = `https://npsbd.xyz/api/dashboard/party/worthful?page=${currentPage}&page_size=${pageSize}`;
+          const worthfulUrl = queryParams.toString()
+            ? `${worthfulBaseUrl}&${queryParams.toString()}`
+            : worthfulBaseUrl;
+
+          const worthfulResponse = await fetch(worthfulUrl, {
+            method: "GET",
+            headers: {
+              accept: "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (!worthfulResponse.ok) {
+            throw new Error(`HTTP error! status: ${worthfulResponse.status}`);
+          }
+
+          const worthfulResult = await worthfulResponse.json();
+          setWorthfulData(worthfulResult.data);
+          setTotalCount(worthfulResult.total_count);
+        } catch (error) {
+          console.error("Error fetching worthful data:", error);
+          setError(error.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchWorthfulData();
     }
-  }, [currentPage]);
-
-  const handleFilterChange = (key, value) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
-    setCurrentPage(1);
-  };
-
-  const buildQueryParams = () => {
-    const queryParams = new URLSearchParams();
-    if (filters.division) queryParams.append("বিভাগ", filters.division);
-    if (filters.district) queryParams.append("জেলা", filters.district);
-    if (filters.constituency) queryParams.append("আসন", filters.constituency);
-    return queryParams;
-  };
+  }, [currentPage, data, token]);
 
   const handleReset = () => {
-    setFilters({
-      division: "",
-      district: "",
-      constituency: "",
-    });
+    dispatch(resetFilters());
     setData(null);
     setWorthfulData([]);
     setTotalCount(0);
@@ -307,8 +410,8 @@ export default function SeatDistribution() {
                 বিভাগ
               </label>
               <motion.select
-                value={filters.division}
-                onChange={(e) => handleFilterChange("division", e.target.value)}
+                value={division}
+                onChange={(e) => dispatch(setDivision(e.target.value))}
                 className='w-full px-3 py-3 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
                 style={{ fontFamily: "Tiro Bangla, serif" }}
                 whileHover={{ scale: 1.02 }}
@@ -329,12 +432,12 @@ export default function SeatDistribution() {
                 জেলা
               </label>
               <motion.select
-                value={filters.district}
-                onChange={(e) => handleFilterChange("district", e.target.value)}
+                value={district}
+                onChange={(e) => dispatch(setDistrict(e.target.value))}
                 className='w-full px-3 py-3 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
                 style={{ fontFamily: "Tiro Bangla, serif" }}
                 whileHover={{ scale: 1.02 }}
-                disabled={!filters.division}
+                disabled={!division}
               >
                 <option value=''>নির্বাচন করুন</option>
                 {districts.map((district) => (
@@ -352,14 +455,12 @@ export default function SeatDistribution() {
                 নির্বাচনী এলাকা
               </label>
               <motion.select
-                value={filters.constituency}
-                onChange={(e) =>
-                  handleFilterChange("constituency", e.target.value)
-                }
+                value={constituency}
+                onChange={(e) => dispatch(setConstituency(e.target.value))}
                 className='w-full px-3 py-3 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
                 style={{ fontFamily: "Tiro Bangla, serif" }}
                 whileHover={{ scale: 1.02 }}
-                disabled={!filters.district}
+                disabled={!district}
               >
                 <option value=''>নির্বাচন করুন</option>
                 {constituencies.map((constituency) => (
@@ -410,21 +511,6 @@ export default function SeatDistribution() {
     );
   }
 
-  const COLORS = [
-    "#06C584",
-    "#8C5CF0",
-    "#EC489B",
-    "#0EA7EC",
-    "#F39E0B",
-    "#1ddb16",
-    "#003b36",
-    "#59114d",
-    "#FF6B35",
-    "#4ECDC4",
-    "#45B7D1",
-    "#96CEB4",
-  ];
-
   return (
     <div className='p-4 lg:p-8 space-y-8'>
       <motion.div
@@ -448,8 +534,8 @@ export default function SeatDistribution() {
               বিভাগ
             </label>
             <motion.select
-              value={filters.division}
-              onChange={(e) => handleFilterChange("division", e.target.value)}
+              value={division}
+              onChange={(e) => dispatch(setDivision(e.target.value))}
               className='w-full px-3 py-3 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
               style={{ fontFamily: "Tiro Bangla, serif" }}
               whileHover={{ scale: 1.02 }}
@@ -470,12 +556,12 @@ export default function SeatDistribution() {
               জেলা
             </label>
             <motion.select
-              value={filters.district}
-              onChange={(e) => handleFilterChange("district", e.target.value)}
+              value={district}
+              onChange={(e) => dispatch(setDistrict(e.target.value))}
               className='w-full px-3 py-3 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
               style={{ fontFamily: "Tiro Bangla, serif" }}
               whileHover={{ scale: 1.02 }}
-              disabled={!filters.division}
+              disabled={!division}
             >
               <option value=''>নির্বাচন করুন</option>
               {districts.map((district) => (
@@ -493,14 +579,12 @@ export default function SeatDistribution() {
               নির্বাচনী এলাকা
             </label>
             <motion.select
-              value={filters.constituency}
-              onChange={(e) =>
-                handleFilterChange("constituency", e.target.value)
-              }
+              value={constituency}
+              onChange={(e) => dispatch(setConstituency(e.target.value))}
               className='w-full px-3 py-3 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm'
               style={{ fontFamily: "Tiro Bangla, serif" }}
               whileHover={{ scale: 1.02 }}
-              disabled={!filters.district}
+              disabled={!district}
             >
               <option value=''>নির্বাচন করুন</option>
               {constituencies.map((constituency) => (
@@ -589,46 +673,39 @@ export default function SeatDistribution() {
                   style={{ fontFamily: "Tiro Bangla, serif", fontSize: 12 }}
                 />
                 <YAxis
+                  dataKey='total'
                   label={{
-                    value: "জনপ্রিয়তা (%)",
+                    value: "আসন সংখ্যা",
                     angle: -90,
                     position: "insideLeft",
                     style: { fontFamily: "Tiro Bangla, serif" },
                   }}
                   style={{ fontFamily: "Tiro Bangla, serif" }}
-                  tickFormatter={(value) => `${value}%`}
                 />
                 <Tooltip
-                  formatter={(value, name, props) =>
-                    userType === "duser"
-                      ? [`${value}%`, "জনপ্রিয়তা"]
-                      : [
-                          `${value}% (মোট: ${props.payload.total})`,
-                          "জনপ্রিয়তা",
-                        ]
-                  }
+                  formatter={(value, name, props) => [
+                    `${props.payload.value}%`,
+                    "জনপ্রিয়তা",
+                  ]}
                   labelStyle={{ fontFamily: "Tiro Bangla, serif" }}
                   contentStyle={{ fontFamily: "Tiro Bangla, serif" }}
                 />
-                <Bar dataKey='value' radius={[4, 4, 0, 0]} barSize={80}>
+                <Bar dataKey='total' radius={[4, 4, 0, 0]} barSize={80}>
                   {data.party_popularity?.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={COLORS[index % COLORS.length]}
                     />
                   ))}
-                  {userType !== "duser" && (
-                    <LabelList
-                      dataKey='total'
-                      position='top'
-                      style={{
-                        fontFamily: "Tiro Bangla, serif",
-                        fill: "#333",
-                        fontSize: 12,
-                      }}
-                      formatter={(value) => `${value}`}
-                    />
-                  )}
+                  <LabelList
+                    dataKey='total'
+                    position='top'
+                    style={{
+                      fontFamily: "Tiro Bangla, serif",
+                      fontSize: 12,
+                      fill: "#333",
+                    }}
+                  />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
