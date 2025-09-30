@@ -321,6 +321,14 @@ export default function Candidates() {
       return;
     }
 
+    // Check if division has changed from previous value
+    const previousDivision = localStorage.getItem("previousDivision");
+    if (previousDivision && previousDivision !== division) {
+      // Division has changed, clear saved constituency
+      localStorage.removeItem("savedConstituency");
+      dispatch(setConstituency(""));
+    }
+
     // Store current division for future reference
     localStorage.setItem("previousDivision", division);
 
@@ -370,6 +378,14 @@ export default function Candidates() {
       return;
     }
 
+    // Check if district has changed from previous value
+    const previousDistrict = localStorage.getItem("previousDistrict");
+    if (previousDistrict && previousDistrict !== district) {
+      // District has changed, clear saved constituency
+      localStorage.removeItem("savedConstituency");
+      dispatch(setConstituency(""));
+    }
+
     // Store current district for future reference
     localStorage.setItem("previousDistrict", district);
 
@@ -414,6 +430,12 @@ export default function Candidates() {
       dispatch(setDistrict(value));
     } else if (key === "constituency") {
       dispatch(setConstituency(value));
+      // Save constituency in localStorage only when explicitly selected by user
+      if (value) {
+        localStorage.setItem("savedConstituency", value);
+      } else {
+        localStorage.removeItem("savedConstituency");
+      }
     }
   };
 

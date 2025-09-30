@@ -211,6 +211,14 @@ export default function SeatDistribution() {
       return;
     }
 
+    // Check if division has changed from previous value
+    const previousDivision = localStorage.getItem("previousDivision");
+    if (previousDivision && previousDivision !== division) {
+      // Division has changed, clear saved constituency
+      localStorage.removeItem("savedConstituency");
+      dispatch(setConstituency(""));
+    }
+
     // Store current division for future reference
     localStorage.setItem("previousDivision", division);
 
@@ -258,6 +266,14 @@ export default function SeatDistribution() {
         dispatch(setConstituency(""));
       }
       return;
+    }
+
+    // Check if district has changed from previous value
+    const previousDistrict = localStorage.getItem("previousDistrict");
+    if (previousDistrict && previousDistrict !== district) {
+      // District has changed, clear saved constituency
+      localStorage.removeItem("savedConstituency");
+      dispatch(setConstituency(""));
     }
 
     // Store current district for future reference
@@ -516,7 +532,15 @@ export default function SeatDistribution() {
               </label>
               <motion.select
                 value={constituency}
-                onChange={(e) => dispatch(setConstituency(e.target.value))}
+                onChange={(e) => {
+                  dispatch(setConstituency(e.target.value));
+                  // Save constituency in localStorage only when explicitly selected by user
+                  if (e.target.value) {
+                    localStorage.setItem("savedConstituency", e.target.value);
+                  } else {
+                    localStorage.removeItem("savedConstituency");
+                  }
+                }}
                 className="w-full px-3 py-3 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm"
                 style={{ fontFamily: "Tiro Bangla, serif" }}
                 whileHover={{ scale: 1.02 }}
@@ -640,7 +664,15 @@ export default function SeatDistribution() {
             </label>
             <motion.select
               value={constituency}
-              onChange={(e) => dispatch(setConstituency(e.target.value))}
+              onChange={(e) => {
+                dispatch(setConstituency(e.target.value));
+                // Save constituency in localStorage only when explicitly selected by user
+                if (e.target.value) {
+                  localStorage.setItem("savedConstituency", e.target.value);
+                } else {
+                  localStorage.removeItem("savedConstituency");
+                }
+              }}
               className="w-full px-3 py-3 bg-white border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#006747] focus:border-[#006747] transition-all duration-200 text-sm"
               style={{ fontFamily: "Tiro Bangla, serif" }}
               whileHover={{ scale: 1.02 }}
@@ -777,7 +809,7 @@ export default function SeatDistribution() {
                 className="text-xl font-semibold text-gray-800 mb-4"
                 style={{ fontFamily: "Tiro Bangla, serif" }}
               >
-                সবচেয়ে মূল্যবান দল
+                সবথেকে জনপ্রিয় দল
               </h2>
               <div
                 className="text-lg text-gray-600 mb-4"
@@ -802,7 +834,7 @@ export default function SeatDistribution() {
                         নির্বাচনী এলাকা
                       </th>
                       <th className="py-3 px-4 border-b text-left text-sm font-medium text-gray-700">
-                        সবচেয়ে মূল্যবান দল
+                        সবথেকে জনপ্রিয় দল
                       </th>
                     </tr>
                   </thead>

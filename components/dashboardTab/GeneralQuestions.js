@@ -155,6 +155,19 @@ export default function GeneralQuestions() {
   useEffect(() => {
     if (!token) return;
 
+    // Check if division has changed from previous value
+    const previousDivision = localStorage.getItem("previousDivision");
+    if (previousDivision && previousDivision !== division) {
+      // Division has changed, clear saved constituency
+      localStorage.removeItem("savedConstituency");
+      dispatch(setConstituency(""));
+    }
+
+    // Store current division for future reference
+    if (division) {
+      localStorage.setItem("previousDivision", division);
+    }
+
     if (division) {
       const selectedDivision = divisions.find((d) => d.bn_name === division);
       if (selectedDivision) {
@@ -199,6 +212,19 @@ export default function GeneralQuestions() {
 
   useEffect(() => {
     if (!token) return;
+
+    // Check if district has changed from previous value
+    const previousDistrict = localStorage.getItem("previousDistrict");
+    if (previousDistrict && previousDistrict !== district) {
+      // District has changed, clear saved constituency
+      localStorage.removeItem("savedConstituency");
+      dispatch(setConstituency(""));
+    }
+
+    // Store current district for future reference
+    if (district) {
+      localStorage.setItem("previousDistrict", district);
+    }
 
     if (district) {
       const selectedDistrict = districts.find((d) => d.bn_name === district);
@@ -364,6 +390,12 @@ export default function GeneralQuestions() {
       dispatch(setDistrict(value));
     } else if (key === "constituency") {
       dispatch(setConstituency(value));
+      // Save constituency in localStorage only when explicitly selected by user
+      if (value) {
+        localStorage.setItem("savedConstituency", value);
+      } else {
+        localStorage.removeItem("savedConstituency");
+      }
     }
   };
 
@@ -803,93 +835,126 @@ export default function GeneralQuestions() {
         <>
           {/* Voter Statistics */}
           <motion.div
-            className="bg-gradient-to-br from-blue-50 to-indigo-100 p-6 rounded-xl shadow-md border border-blue-200"
+            className="p-6 rounded-xl shadow-md"
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
           >
-            <h2
-              className="text-xl font-semibold text-gray-800 mb-4"
-              style={{ fontFamily: "Tiro Bangla, serif" }}
-            >
-              ভোটার পরিসংখ্যান
-            </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {/* Total Voters */}
               <motion.div
-                className="bg-white p-4 rounded-lg shadow-sm text-center"
-                whileHover={{ scale: 1.05 }}
+                className="bg-green-50 p-4 rounded-lg shadow-sm text-center transition-all duration-300 border border-transparent hover:border-green-200 hover:shadow-md"
+                whileHover={{ scale: 1.05, y: -5 }}
               >
-                <h3
-                  className="text-2xl font-bold text-blue-600"
-                  style={{ fontFamily: "Tiro Bangla, serif" }}
-                >
-                  {convertBengaliToEnglish(
-                    filteredChartData.voterStatistics.totalVoters
-                  )}
-                </h3>
+                <div className="flex justify-center mb-2">
+                  <Image
+                    src="/Images/gender/profile.svg"
+                    alt="Total Voters"
+                    width={26}
+                    height={26}
+                  />
+                </div>
                 <p
                   className="text-sm text-gray-600"
                   style={{ fontFamily: "Tiro Bangla, serif" }}
                 >
                   মোট ভোটার
                 </p>
-              </motion.div>
-              <motion.div
-                className="bg-white p-4 rounded-lg shadow-sm text-center"
-                whileHover={{ scale: 1.05 }}
-              >
                 <h3
                   className="text-2xl font-bold text-green-600"
                   style={{ fontFamily: "Tiro Bangla, serif" }}
                 >
                   {convertBengaliToEnglish(
-                    filteredChartData.voterStatistics.maleVoters
+                    filteredChartData.voterStatistics.totalVoters
                   )}
                 </h3>
+              </motion.div>
+
+              {/* Male Voters */}
+              <motion.div
+                className="bg-cyan-50 p-4 rounded-lg shadow-sm text-center transition-all duration-300 border border-transparent hover:border-cyan-200 hover:shadow-md"
+                whileHover={{ scale: 1.05, y: -5 }}
+              >
+                <div className="flex justify-center mb-2">
+                  <Image
+                    src="/Images/gender/man.svg"
+                    alt="Male Voters"
+                    width={26}
+                    height={26}
+                  />
+                </div>
                 <p
                   className="text-sm text-gray-600"
                   style={{ fontFamily: "Tiro Bangla, serif" }}
                 >
                   পুরুষ ভোটার
                 </p>
-              </motion.div>
-              <motion.div
-                className="bg-white p-4 rounded-lg shadow-sm text-center"
-                whileHover={{ scale: 1.05 }}
-              >
                 <h3
-                  className="text-2xl font-bold text-pink-600"
+                  className="text-2xl font-bold text-cyan-600"
                   style={{ fontFamily: "Tiro Bangla, serif" }}
                 >
                   {convertBengaliToEnglish(
-                    filteredChartData.voterStatistics.femaleVoters
+                    filteredChartData.voterStatistics.maleVoters
                   )}
                 </h3>
+              </motion.div>
+
+              {/* Female Voters */}
+              <motion.div
+                className="bg-blue-50 p-4 rounded-lg shadow-sm text-center transition-all duration-300 border border-transparent hover:border-blue-200 hover:shadow-md"
+                whileHover={{ scale: 1.05, y: -5 }}
+              >
+                <div className="flex justify-center mb-2">
+                  <Image
+                    src="/Images/gender/woman.svg"
+                    alt="Female Voters"
+                    width={26}
+                    height={26}
+                  />
+                </div>
                 <p
                   className="text-sm text-gray-600"
                   style={{ fontFamily: "Tiro Bangla, serif" }}
                 >
                   নারী ভোটার
                 </p>
-              </motion.div>
-              <motion.div
-                className="bg-white p-4 rounded-lg shadow-sm text-center"
-                whileHover={{ scale: 1.05 }}
-              >
                 <h3
-                  className="text-2xl font-bold text-purple-600"
+                  className="text-2xl font-bold text-blue-600"
                   style={{ fontFamily: "Tiro Bangla, serif" }}
                 >
                   {convertBengaliToEnglish(
-                    filteredChartData.voterStatistics.thirdGenderVoters
+                    filteredChartData.voterStatistics.femaleVoters
                   )}
                 </h3>
+              </motion.div>
+
+              {/* Third Gender Voters */}
+              <motion.div
+                className="bg-purple-50 p-4 rounded-lg shadow-sm text-center transition-all duration-300 border border-transparent hover:border-purple-200 hover:shadow-md"
+                whileHover={{ scale: 1.05, y: -5 }}
+              >
+                <div className="flex justify-center mb-2">
+                  <Image
+                    src="/Images/gender/aquarius.svg"
+                    alt="Third Gender Voters"
+                    width={26}
+                    height={26}
+                  />
+                </div>
                 <p
                   className="text-sm text-gray-600"
                   style={{ fontFamily: "Tiro Bangla, serif" }}
                 >
                   তৃতীয় লিঙ্গের ভোটার
                 </p>
+                <h3
+                  className="text-2xl font-bold text-red-600"
+                  style={{ fontFamily: "Tiro Bangla, serif" }}
+                >
+                  {convertBengaliToEnglish(
+                    filteredChartData.voterStatistics.thirdGenderVoters
+                  )}
+                </h3>
               </motion.div>
             </div>
           </motion.div>
