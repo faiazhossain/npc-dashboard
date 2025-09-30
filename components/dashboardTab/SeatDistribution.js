@@ -365,7 +365,7 @@ export default function SeatDistribution() {
       const popularityData = await response.json();
       setData(popularityData);
 
-      const worthfulBaseUrl = `https://npsbd.xyz/api/dashboard/party/worthful?page=${currentPage}&page_size=${pageSize}`;
+      const worthfulBaseUrl = `https://npsbd.xyz/api/dashboard/party/popular?page=${currentPage}&page_size=${pageSize}`;
       const worthfulUrl = queryParams.toString()
         ? `${worthfulBaseUrl}&${queryParams.toString()}`
         : worthfulBaseUrl;
@@ -400,7 +400,7 @@ export default function SeatDistribution() {
         try {
           setLoading(true);
           const queryParams = buildQueryParams();
-          const worthfulBaseUrl = `https://npsbd.xyz/api/dashboard/party/worthful?page=${currentPage}&page_size=${pageSize}`;
+          const worthfulBaseUrl = `https://npsbd.xyz/api/dashboard/party/popular?page=${currentPage}&page_size=${pageSize}`;
           const worthfulUrl = queryParams.toString()
             ? `${worthfulBaseUrl}&${queryParams.toString()}`
             : worthfulBaseUrl;
@@ -737,12 +737,14 @@ export default function SeatDistribution() {
           >
             দলের জনপ্রিয়তা
           </h2>
-          <div
-            className="text-lg text-gray-600 mb-4"
-            style={{ fontFamily: "Tiro Bangla, serif" }}
-          >
-            মোট প্রতিক্রিয়া: {data.total_responses}
-          </div>
+          {userType !== "duser" && (
+            <div
+              className="text-lg text-gray-600 mb-4"
+              style={{ fontFamily: "Tiro Bangla, serif" }}
+            >
+              মোট প্রতিক্রিয়া: {data.total_responses}
+            </div>
+          )}
           <div className="h-96">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
@@ -765,9 +767,9 @@ export default function SeatDistribution() {
                   style={{ fontFamily: "Tiro Bangla, serif", fontSize: 12 }}
                 />
                 <YAxis
-                  dataKey="total"
+                  dataKey={userType === "duser" ? "value" : "total"}
                   label={{
-                    value: "আসন সংখ্যা",
+                    value: userType !== "duser" ? "আসন সংখ্যা" : "আসন অনুপাত",
                     angle: -90,
                     position: "insideLeft",
                     style: { fontFamily: "Tiro Bangla, serif" },
@@ -782,7 +784,11 @@ export default function SeatDistribution() {
                   labelStyle={{ fontFamily: "Tiro Bangla, serif" }}
                   contentStyle={{ fontFamily: "Tiro Bangla, serif" }}
                 />
-                <Bar dataKey="total" radius={[4, 4, 0, 0]} barSize={80}>
+                <Bar
+                  dataKey={userType === "duser" ? "value" : "total"}
+                  radius={[4, 4, 0, 0]}
+                  barSize={80}
+                >
                   {data.party_popularity?.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
@@ -790,20 +796,23 @@ export default function SeatDistribution() {
                     />
                   ))}
                   <LabelList
-                    dataKey="total"
+                    dataKey={userType === "duser" ? "value" : "total"}
                     position="top"
                     style={{
                       fontFamily: "Tiro Bangla, serif",
                       fontSize: 12,
                       fill: "#333",
                     }}
+                    formatter={(value) =>
+                      userType === "duser" ? `${value}%` : value
+                    }
                   />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
 
-          {worthfulData.length > 0 && (
+          {worthfulData.length > 0 && userType && (
             <div className="mt-8">
               <h2
                 className="text-xl font-semibold text-gray-800 mb-4"
@@ -811,12 +820,14 @@ export default function SeatDistribution() {
               >
                 সবথেকে জনপ্রিয় দল
               </h2>
-              <div
-                className="text-lg text-gray-600 mb-4"
-                style={{ fontFamily: "Tiro Bangla, serif" }}
-              >
-                মোট ডেটা: {totalCount}
-              </div>
+              {userType !== "duser" && (
+                <div
+                  className="text-lg text-gray-600 mb-4"
+                  style={{ fontFamily: "Tiro Bangla, serif" }}
+                >
+                  মোট ডেটা: {totalCount}
+                </div>
+              )}
               <div className="overflow-x-auto">
                 <table
                   className="min-w-full bg-white border border-gray-200"
@@ -851,7 +862,7 @@ export default function SeatDistribution() {
                           {item.constituency}
                         </td>
                         <td className="py-3 px-4 border-b text-sm text-gray-600">
-                          {item.most_worthful_party}
+                          {item.most_popular_party}
                         </td>
                       </tr>
                     ))}

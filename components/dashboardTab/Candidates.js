@@ -576,108 +576,111 @@ export default function Candidates() {
     }
   };
 
-  const fetchAdditionalData = useCallback(async (candidate) => {
-    if (!token || !candidate) {
-      return;
-    }
-    try {
-      setAdditionalLoading(true);
-      const queryParams = buildQueryParams();
-      queryParams.append("প্রার্থী", candidate);
-
-      const response = await fetch(
-        `https://npsbd.xyz/api/dashboard/candidates/q4_q7?${queryParams}`,
-        {
-          method: "GET",
-          headers: {
-            accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+  const fetchAdditionalData = useCallback(
+    async (candidate) => {
+      if (!token || !candidate) {
+        return;
       }
+      try {
+        setAdditionalLoading(true);
+        const queryParams = buildQueryParams();
+        queryParams.append("প্রার্থী", candidate);
 
-      const apiData = await response.json();
-
-      const totalCountKeyMap = {
-        q4_how_recognize_candidate: "q4_total_counts",
-        q5_candidate_qualities: "q5_total_counts",
-        q6_candidate_contributions: "q6_total_counts",
-        q7_candidate_flaws: "q7_total_counts",
-      };
-
-      let transformedAdditional = Object.entries(apiData)
-        .filter(([key, value]) => Object.keys(value).length > 0)
-        .filter(([key]) => key !== "q7_candidate_flaws")
-        .slice(0, 3)
-        .map(([key, value], index) => {
-          let question;
-          switch (key) {
-            case "q5_candidate_qualities":
-              question = "প্রার্থীর যোগ্যতার মাপকাঠি কি কি?";
-              break;
-            case "q4_how_recognize_candidate":
-              question = "আপনি কিভাবে এই প্রার্থীকে চিনেন?";
-              break;
-            case "q6_candidate_contributions":
-              question = "সাধারণ মানুষের জন্য এই ব্যাক্তি কি কি করেছেন?";
-              break;
-            default:
-              question = key;
-          }
-          return {
-            id: `additional-chart-${index}`,
-            question,
-            responses: Object.entries(value).map(([label, perc]) => ({
-              label,
-              percentage: `${perc}%`,
-              total: apiData[totalCountKeyMap[key]]?.[label] || 0,
-            })),
-            chartType: "pie",
-          };
-        });
-
-      if (
-        apiData.q7_candidate_flaws &&
-        Object.keys(apiData.q7_candidate_flaws).length > 0
-      ) {
-        transformedAdditional.push({
-          id: `additional-chart-3`,
-          question: "প্রার্থীর ত্রুটি",
-          responses: Object.entries(apiData.q7_candidate_flaws).map(
-            ([label, perc]) => ({
-              label,
-              percentage: `${perc}%`,
-              total: apiData.q7_total_counts?.[label] || 0,
-            })
-          ),
-          chartType: "pie",
-        });
-      } else {
-        transformedAdditional.push({
-          id: `additional-chart-3`,
-          question: "প্রার্থীর ত্রুটি",
-          responses: [
-            {
-              label: "কোনো ত্রুটি নেই",
-              percentage: "100%",
-              total: 1,
+        const response = await fetch(
+          `https://npsbd.xyz/api/dashboard/candidates/q4_q7?${queryParams}`,
+          {
+            method: "GET",
+            headers: {
+              accept: "application/json",
+              Authorization: `Bearer ${token}`,
             },
-          ],
-          chartType: "pie",
-        });
-      }
+          }
+        );
 
-      setAdditionalData({ charts: transformedAdditional });
-    } catch (error) {
-      console.error("Error fetching additional data:", error);
-    } finally {
-      setAdditionalLoading(false);
-    }
-  }, [token, buildQueryParams]);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const apiData = await response.json();
+
+        const totalCountKeyMap = {
+          q4_how_recognize_candidate: "q4_total_counts",
+          q5_candidate_qualities: "q5_total_counts",
+          q6_candidate_contributions: "q6_total_counts",
+          q7_candidate_flaws: "q7_total_counts",
+        };
+
+        let transformedAdditional = Object.entries(apiData)
+          .filter(([key, value]) => Object.keys(value).length > 0)
+          .filter(([key]) => key !== "q7_candidate_flaws")
+          .slice(0, 3)
+          .map(([key, value], index) => {
+            let question;
+            switch (key) {
+              case "q5_candidate_qualities":
+                question = "প্রার্থীর যোগ্যতার মাপকাঠি কি কি?";
+                break;
+              case "q4_how_recognize_candidate":
+                question = "আপনি কিভাবে এই প্রার্থীকে চিনেন?";
+                break;
+              case "q6_candidate_contributions":
+                question = "সাধারণ মানুষের জন্য এই ব্যাক্তি কি কি করেছেন?";
+                break;
+              default:
+                question = key;
+            }
+            return {
+              id: `additional-chart-${index}`,
+              question,
+              responses: Object.entries(value).map(([label, perc]) => ({
+                label,
+                percentage: `${perc}%`,
+                total: apiData[totalCountKeyMap[key]]?.[label] || 0,
+              })),
+              chartType: "pie",
+            };
+          });
+
+        if (
+          apiData.q7_candidate_flaws &&
+          Object.keys(apiData.q7_candidate_flaws).length > 0
+        ) {
+          transformedAdditional.push({
+            id: `additional-chart-3`,
+            question: "প্রার্থীর ত্রুটি",
+            responses: Object.entries(apiData.q7_candidate_flaws).map(
+              ([label, perc]) => ({
+                label,
+                percentage: `${perc}%`,
+                total: apiData.q7_total_counts?.[label] || 0,
+              })
+            ),
+            chartType: "pie",
+          });
+        } else {
+          transformedAdditional.push({
+            id: `additional-chart-3`,
+            question: "প্রার্থীর ত্রুটি",
+            responses: [
+              {
+                label: "কোনো ত্রুটি নেই",
+                percentage: "100%",
+                total: 1,
+              },
+            ],
+            chartType: "pie",
+          });
+        }
+
+        setAdditionalData({ charts: transformedAdditional });
+      } catch (error) {
+        console.error("Error fetching additional data:", error);
+      } finally {
+        setAdditionalLoading(false);
+      }
+    },
+    [token, buildQueryParams]
+  );
 
   const handleReset = () => {
     dispatch(resetFilters());
