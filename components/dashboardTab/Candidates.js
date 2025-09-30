@@ -7,8 +7,10 @@ import {
   Cell,
   ResponsiveContainer,
   Tooltip,
-  RadialBarChart,
-  RadialBar,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
   Legend,
 } from "recharts";
 import { useAuth } from "@/hooks/useAuth";
@@ -49,7 +51,7 @@ const CandidateCard = memo(({ candidateCard, index }) => {
       >
         {candidateCard.title}
       </h3>
-      <ul className='space-y-3 px-4 py-2'>
+      <ul className='space-y-3 px-4 py-2 max-h-64 overflow-y-auto'>
         {candidateCard.candidates.map((candidate, candidateIndex) => (
           <motion.li
             key={candidateIndex}
@@ -73,24 +75,22 @@ const CandidateCard = memo(({ candidateCard, index }) => {
 });
 CandidateCard.displayName = "CandidateCard";
 
-// Memoized RadialBarChartComponent
-const RadialBarChartComponent = memo(({ chart, index, userType }) => {
+// Memoized BarChartComponent for long lists
+const BarChartComponent = memo(({ chart, index, userType }) => {
   const chartData = chart.responses.map((item, idx) => ({
     name: item.label,
-    uv: parseFloat(item.percentage.replace("%", "")),
+    value: parseFloat(item.percentage.replace("%", "")),
     displayValue: item.percentage,
     total: item.total || 0,
     fill: COLORS[idx % COLORS.length],
   }));
 
   const legendStyle = {
-    top: "10%",
-    right: 10,
-    lineHeight: "18px",
-    fontSize: "11px",
-    maxWidth: "40%",
+    maxHeight: "200px",
     overflowY: "auto",
     padding: "10px",
+    fontSize: "11px",
+    lineHeight: "18px",
   };
 
   return (
@@ -103,35 +103,31 @@ const RadialBarChartComponent = memo(({ chart, index, userType }) => {
       </h2>
       <div className='h-[450px]'>
         <ResponsiveContainer width='100%' height='100%'>
-          <RadialBarChart
-            cx='50%'
-            cy='50%'
-            innerRadius='20%'
-            outerRadius='90%'
-            barSize={8}
+          <BarChart
             data={chartData}
-            startAngle={90}
-            endAngle={-270}
+            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
           >
-            <RadialBar
-              minAngle={10}
-              label={{
-                position: "outside",
-                fill: "#333",
-                fontSize: 9,
-                formatter: (value) => (value > 5 ? `${value}%` : ""),
+            <XAxis
+              dataKey='name'
+              tick={{ fontSize: 10, fontFamily: "Tiro Bangla, serif" }}
+              angle={-45}
+              textAnchor='end'
+              height={100}
+            />
+            <YAxis
+              tickFormatter={(value) => `${value}%`}
+              tick={{ fontSize: 10, fontFamily: "Tiro Bangla, serif" }}
+            />
+            <Tooltip
+              formatter={(value, name, props) => {
+                if (userType === "duser") {
+                  return [`${value.toFixed(1)}%`, name];
+                }
+                return [`Total: ${props.payload.total || 0}`, name];
               }}
-              background={{ fill: "#eee" }}
-              clockWise={false}
-              dataKey='uv'
-            >
-              {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.fill} />
-              ))}
-            </RadialBar>
+              labelStyle={{ fontFamily: "Tiro Bangla, serif" }}
+            />
             <Legend
-              layout='vertical'
-              verticalAlign='top'
               wrapperStyle={{
                 ...legendStyle,
                 fontFamily: "Tiro Bangla, serif",
@@ -142,29 +138,27 @@ const RadialBarChartComponent = memo(({ chart, index, userType }) => {
                 }`
               }
             />
-            <Tooltip
-              formatter={(value, name, props) => {
-                if (userType === "duser") {
-                  return [`${value.toFixed(1)}%`, name];
-                }
-                return [`Total: ${props.payload.total || 0}`, name];
-              }}
-            />
-          </RadialBarChart>
+            <Bar dataKey='value' fill='#8884d8'>
+              {chartData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.fill} />
+              ))}
+            </Bar>
+          </BarChart>
         </ResponsiveContainer>
       </div>
     </div>
   );
 });
-RadialBarChartComponent.displayName = "RadialBarChartComponent";
+BarChartComponent.displayName = "BarChartComponent";
 
 // Memoized PieChartComponent
 const PieChartComponent = memo(({ chart, index, userType }) => {
-  const chartData = chart.responses.map((item) => ({
+  const chartData = chart.responses.map((item, idx) => ({
     name: item.label,
     value: parseFloat(item.percentage.replace("%", "")),
     displayValue: item.percentage,
     total: item.total || 0,
+    fill: COLORS[idx % COLORS.length],
   }));
 
   return (
@@ -176,7 +170,7 @@ const PieChartComponent = memo(({ chart, index, userType }) => {
         {chart.question}
       </h2>
       <div className='h-80 flex'>
-        <div className='w-1/2 flex flex-col justify-center space-y-2 pr-4'>
+        <div className='w-1/2 flex flex-col justify-center space-y-2 pr-4 max-h-64 overflow-y-auto'>
           {chartData.map((entry, entryIndex) => (
             <div key={entry.name} className='flex items-center'>
               <div
@@ -222,6 +216,7 @@ const PieChartComponent = memo(({ chart, index, userType }) => {
                   }
                   return [`Total: ${props.payload.total || 0}`, name];
                 }}
+                labelStyle={{ fontFamily: "Tiro Bangla, serif" }}
               />
             </PieChart>
           </ResponsiveContainer>
@@ -876,13 +871,13 @@ export default function Candidates() {
               </h2>
               <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
                 {data.charts.map((chart, index) => {
-                  const shouldUseRadialChart =
+                  const shouldUseBarChart =
                     chart.id === "candidate-qualifications" ||
-                    chart.chartType === "radial" ||
+                    chart.chartType === "bar" ||
                     (chart.responses && chart.responses.length > 8);
 
-                  return shouldUseRadialChart ? (
-                    <RadialBarChartComponent
+                  return shouldUseBarChart ? (
+                    <BarChartComponent
                       key={chart.id}
                       chart={chart}
                       index={index}
@@ -916,13 +911,13 @@ export default function Candidates() {
                 if (!chart.responses || chart.responses.length === 0)
                   return null;
 
-                const shouldUseRadialChart =
+                const shouldUseBarChart =
                   chart.id === "candidate-qualifications" ||
-                  chart.chartType === "radial" ||
+                  chart.chartType === "bar" ||
                   (chart.responses && chart.responses.length > 8);
 
-                return shouldUseRadialChart ? (
-                  <RadialBarChartComponent
+                return shouldUseBarChart ? (
+                  <BarChartComponent
                     key={chart.id}
                     chart={chart}
                     index={index}
@@ -997,12 +992,12 @@ export default function Candidates() {
                       if (!chart.responses || chart.responses.length === 0)
                         return null;
 
-                      const shouldUseRadialChart =
-                        chart.chartType === "radial" ||
+                      const shouldUseBarChart =
+                        chart.chartType === "bar" ||
                         (chart.responses && chart.responses.length > 8);
 
-                      return shouldUseRadialChart ? (
-                        <RadialBarChartComponent
+                      return shouldUseBarChart ? (
+                        <BarChartComponent
                           key={chart.id}
                           chart={chart}
                           index={index}
