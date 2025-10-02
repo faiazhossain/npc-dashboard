@@ -345,9 +345,9 @@ export default function SeatDistribution() {
       setCurrentPage(1); // Reset to first page when filters change
 
       const queryParams = buildQueryParams();
-      const baseUrl = "https://npsbd.xyz/api/dashboard/party/popularity";
+      const baseUrl = `https://npsbd.xyz/api/dashboard/party/popular?page=${currentPage}&page_size=${pageSize}`;
       const url = queryParams.toString()
-        ? `${baseUrl}?${queryParams.toString()}`
+        ? `${baseUrl}&${queryParams.toString()}`
         : baseUrl;
 
       const response = await fetch(url, {
@@ -362,29 +362,10 @@ export default function SeatDistribution() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const popularityData = await response.json();
-      setData(popularityData);
-
-      const worthfulBaseUrl = `https://npsbd.xyz/api/dashboard/party/popular?page=${currentPage}&page_size=${pageSize}`;
-      const worthfulUrl = queryParams.toString()
-        ? `${worthfulBaseUrl}&${queryParams.toString()}`
-        : worthfulBaseUrl;
-
-      const worthfulResponse = await fetch(worthfulUrl, {
-        method: "GET",
-        headers: {
-          accept: "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!worthfulResponse.ok) {
-        throw new Error(`HTTP error! status: ${worthfulResponse.status}`);
-      }
-
-      const worthfulResult = await worthfulResponse.json();
-      setWorthfulData(worthfulResult.data);
-      setTotalCount(worthfulResult.total_count);
+      const result = await response.json();
+      setData(result);
+      setWorthfulData(result.data);
+      setTotalCount(result.total_count);
     } catch (error) {
       console.error("Error fetching data:", error);
       setError(error.message);
@@ -737,14 +718,6 @@ export default function SeatDistribution() {
           >
             দলের জনপ্রিয়তা
           </h2>
-          {userType !== "duser" && (
-            <div
-              className="text-lg text-gray-600 mb-4"
-              style={{ fontFamily: "Tiro Bangla, serif" }}
-            >
-              মোট প্রতিক্রিয়া: {data.total_responses}
-            </div>
-          )}
           <div className="h-96">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
@@ -769,6 +742,8 @@ export default function SeatDistribution() {
                 <YAxis
                   dataKey={userType === "duser" ? "value" : "total"}
                   domain={userType === "duser" ? [0, 100] : [0, "auto"]}
+                  allowDecimals={false}
+                  tickCount={Math.ceil(data?.total_count / 5) + 1 || 5}
                   label={{
                     value:
                       userType !== "duser" ? "আসন সংখ্যা" : "আসন শতাংশ (%)",
