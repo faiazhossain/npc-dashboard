@@ -33,6 +33,7 @@ export default function SurveyContent() {
     "আপনার এলাকায় কোন দলের কাকে প্রার্থী করা উচিৎ বলে আপনি মনে করেন?",
     "এদের মধ্যে কাকে বেশী যোগ্য বলে মনে হয়?",
     "আপনার মতে, রাজনৈতিক দল হিসেবে কোন দল আপনার এলাকায় সবচেয়ে জনপ্রিয়?",
+    "আপনার এলাকার সম্ভাব্য প্রার্থীদের নামসমূহ?",
   ];
 
   const [question1Selected, setQuestion1Selected] = useState([
@@ -204,6 +205,10 @@ export default function SurveyContent() {
                 "selected_candidate_details.এই প্রার্থীর যোগ্যতার মাপকাঠি কি কি?",
               type: "multiselect",
             },
+            "আপনার এলাকার সম্ভাব্য প্রার্থীদের নামসমূহ?": {
+              field: "avail_party_details.দল",
+              type: "array",
+            },
           };
 
           const mapping = questionToFieldMap[questionText];
@@ -258,7 +263,24 @@ export default function SurveyContent() {
               return results;
             }
             return ["N/A"];
+          } else if (mapping.type === "array") {
+            if (questionText === "আপনার এলাকার সম্ভাব্য প্রার্থীদের নামসমূহ?") {
+              const partyDetails = survey.avail_party_details?.দল;
+
+              if (!partyDetails || !Array.isArray(partyDetails)) {
+                return ["N/A"];
+              }
+
+              // Convert [{party: [candidates]}...] -> ["party: candidate1, candidate2"]
+              return partyDetails.map((partyObj) => {
+                const partyName = Object.keys(partyObj)[0];
+                const candidates = partyObj[partyName].join(", ");
+                return `${partyName}: ${candidates}`;
+              });
+            }
+            return ["N/A"];
           }
+
           return ["N/A"];
         };
 
@@ -668,7 +690,6 @@ export default function SurveyContent() {
         onReset={handleReset}
         multiSelectKeys={["প্রশ্ন ১", "প্রশ্ন ২"]}
       />
-      {/* Compact Total Survey Count Display */}
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
