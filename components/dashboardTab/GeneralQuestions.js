@@ -420,10 +420,10 @@ export default function GeneralQuestions() {
 
     if (localFilters.age) {
       const ageMap = {
-        "18-25": "25",
-        "26-35": "35",
-        "36-45": "45",
-        "46+": "60",
+        "18-34": "18-34",
+        "35-45": "35-45",
+        "46-60": "46-60",
+        "60+": "60+",
       };
       queryParams.append("বয়স", ageMap[localFilters.age] || localFilters.age);
     }
@@ -768,10 +768,10 @@ export default function GeneralQuestions() {
               whileHover={{ scale: 1.02 }}
             >
               <option value="">নির্বাচন করুন</option>
-              <option value="18-25">১৮-২৫</option>
-              <option value="26-35">২৬-৩৫</option>
-              <option value="36-45">৩৬-৪৫</option>
-              <option value="46+">৪৬+</option>
+              <option value="18-34">১৮-৩৪</option>
+              <option value="35-45">৩৫-৪৫</option>
+              <option value="46-60">৪৬-৬০</option>
+              <option value="60+">৬১+</option>
             </motion.select>
           </div>
 
