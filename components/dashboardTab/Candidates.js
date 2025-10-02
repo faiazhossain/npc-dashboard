@@ -516,13 +516,16 @@ export default function Candidates() {
       console.log("API Response (q1_q3):", apiData);
 
       const transformedData = {
-        candidateCards: Object.entries(apiData.q1_parties_candidates).map(
-          ([party, candidates], index) => ({
+        candidateCards: Object.entries(apiData.q1_parties_candidates)
+          .map(([party, candidates], index) => ({
             id: `card-${index}`,
             title: party,
-            candidates,
-          })
-        ),
+            // Filter out empty strings from candidates array
+            candidates: candidates.filter(
+              (candidate) => candidate.trim() !== ""
+            ),
+          }))
+          .filter((card) => card.candidates.length > 0), // Optionally filter out parties with no valid candidates
         charts: Object.entries(apiData.q2_best_candidate_percent_by_party).map(
           ([party, candidates], index) => ({
             id: `chart-${index}`,
