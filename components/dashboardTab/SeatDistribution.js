@@ -741,9 +741,17 @@ export default function SeatDistribution() {
                 />
                 <YAxis
                   dataKey={userType === "duser" ? "value" : "total"}
-                  domain={userType === "duser" ? [0, 100] : [0, "auto"]}
+                  domain={
+                    userType === "duser"
+                      ? [0, 100]
+                      : [0, data?.total_count || "auto"]
+                  }
                   allowDecimals={false}
-                  tickCount={Math.ceil(data?.total_count / 5) + 1 || 5}
+                  tickCount={
+                    userType === "duser"
+                      ? 5 // Fixed ticks for percentage (e.g., 0, 25, 50, 75, 100)
+                      : Math.ceil((data?.total_count || 10) / 5) + 1 // Dynamic ticks based on total_count
+                  }
                   label={{
                     value:
                       userType !== "duser" ? "আসন সংখ্যা" : "আসন শতাংশ (%)",
@@ -753,14 +761,15 @@ export default function SeatDistribution() {
                   }}
                   style={{ fontFamily: "Tiro Bangla, serif" }}
                   tickFormatter={
-                    userType === "duser" ? (tick) => `${tick}%` : undefined
+                    userType === "duser" ? (tick) => `${tick}%` : (tick) => tick
                   }
                 />
                 <Tooltip
-                  formatter={(value, name, props) => [
-                    `${props.payload.value}%`,
-                    "জনপ্রিয়তা",
-                  ]}
+                  formatter={(value, name, props) =>
+                    userType === "duser"
+                      ? [`${props.payload.value}%`, "জনপ্রিয়তা"]
+                      : [props.payload.total, "আসন সংখ্যা"]
+                  }
                   labelStyle={{ fontFamily: "Tiro Bangla, serif" }}
                   contentStyle={{ fontFamily: "Tiro Bangla, serif" }}
                 />
