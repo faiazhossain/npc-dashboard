@@ -814,7 +814,7 @@ export default function SeatDistribution() {
                   className="text-lg text-gray-600 mb-4"
                   style={{ fontFamily: "Tiro Bangla, serif" }}
                 >
-                  মোট ডেটা: {totalCount}
+                  মোট আসন: {totalCount}
                 </div>
               )}
               <div className="overflow-x-auto">
