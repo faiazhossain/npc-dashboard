@@ -64,15 +64,6 @@ export default function SeatDistribution() {
 
   // Load initial dropdown data on mount and fetch data if filters are pre-selected
   useEffect(() => {
-    // Log Redux state for debugging
-    console.log("SeatDistribution - Redux State on Mount:", {
-      division,
-      district,
-      constituency,
-      divisionsCount: divisions.length,
-      districtsCount: districts.length,
-      constituenciesCount: constituencies.length,
-    });
     if (!token) {
       setError("Authentication token is missing");
       return;
@@ -176,24 +167,13 @@ export default function SeatDistribution() {
   // Special effect to load constituency data if we have district and constituencies but no constituency selected
   useEffect(() => {
     if (district && constituencies.length > 0 && !constituency) {
-      console.log(
-        "SeatDistribution.js - Trying to restore constituency from localStorage"
-      );
       const savedConstituency = localStorage.getItem("savedConstituency");
       if (savedConstituency) {
-        console.log(
-          "SeatDistribution.js - Restoring constituency:",
-          savedConstituency
-        );
         dispatch(setConstituency(savedConstituency));
       }
     }
     // When constituency is set, save it for future restoration
     if (constituency) {
-      console.log(
-        "SeatDistribution.js - Saving constituency to localStorage:",
-        constituency
-      );
       localStorage.setItem("savedConstituency", constituency);
     }
   }, [district, constituencies.length, constituency, dispatch]);
@@ -317,13 +297,8 @@ export default function SeatDistribution() {
     if (division) queryParams.append("বিভাগ", division.trim());
     if (district) queryParams.append("জেলা", district.trim());
     if (constituency) {
-      console.log(
-        "SeatDistribution.js - buildQueryParams - constituency:",
-        constituency
-      );
       queryParams.append("আসন", constituency.trim());
     }
-    console.log("SeatDistribution.js - queryParams:", queryParams.toString());
     return queryParams;
   };
 
@@ -332,12 +307,6 @@ export default function SeatDistribution() {
       setError("Authentication token is missing");
       return;
     }
-
-    // Debug: Log the constituency value
-    console.log(
-      "SeatDistribution.js - handleView - constituency:",
-      constituency
-    );
 
     try {
       setLoading(true);

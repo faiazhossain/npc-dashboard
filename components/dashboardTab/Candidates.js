@@ -198,22 +198,12 @@ export default function Candidates() {
     districts,
     constituencies,
   } = useSelector((state) => state.filter);
-  console.log("🚀 ~ Candidates ~ constituency:", constituency);
 
   const token =
     typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
 
   // Load initial dropdown data on mount (divisions, and conditionally districts/constituencies if pre-selected)
   useEffect(() => {
-    // Log Redux state for debugging
-    console.log("Candidates - Redux State on Mount:", {
-      division,
-      district,
-      constituency,
-      divisionsCount: divisions.length,
-      districtsCount: districts.length,
-      constituenciesCount: constituencies.length,
-    });
     if (!token) {
       setError("Authentication token is missing");
       return;
@@ -318,24 +308,13 @@ export default function Candidates() {
   // Special effect to load constituency data if we have district and constituencies but no constituency selected
   useEffect(() => {
     if (district && constituencies.length > 0 && !constituency) {
-      console.log(
-        "Candidates.js - Trying to restore constituency from localStorage"
-      );
       const savedConstituency = localStorage.getItem("savedConstituency");
       if (savedConstituency) {
-        console.log(
-          "Candidates.js - Restoring constituency:",
-          savedConstituency
-        );
         dispatch(setConstituency(savedConstituency));
       }
     }
     // When constituency is set, save it for future restoration
     if (constituency) {
-      console.log(
-        "Candidates.js - Saving constituency to localStorage:",
-        constituency
-      );
       localStorage.setItem("savedConstituency", constituency);
     }
   }, [district, constituencies.length, constituency, dispatch]);
@@ -493,11 +472,7 @@ export default function Candidates() {
       setSelectedCandidate("");
       setQualifiedCandidates([]);
 
-      // Debug: Log the constituency value
-      console.log("Candidates.js - handleView - constituency:", constituency);
-
       const queryParams = buildQueryParams();
-      console.log("Candidates.js - API Query Params:", queryParams.toString());
 
       const response = await fetch(
         `https://npsbd.xyz/api/dashboard/candidates/q1_q3?${queryParams}`,
@@ -513,7 +488,6 @@ export default function Candidates() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const apiData = await response.json();
-      console.log("API Response (q1_q3):", apiData);
 
       const transformedData = {
         candidateCards: Object.entries(apiData.q1_parties_candidates)
@@ -554,7 +528,6 @@ export default function Candidates() {
         ],
       };
 
-      console.log("Transformed Data:", transformedData);
       setData(transformedData);
 
       if (

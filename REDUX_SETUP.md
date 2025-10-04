@@ -24,21 +24,17 @@ This setup stores complete user information from your API response in Redux stat
 ### 1. Using useSelector directly in any component:
 
 ```javascript
-import { useSelector } from 'react-redux';
+import { useSelector } from "react-redux";
 import {
   selectUser,
   selectUserId,
   selectUserType,
-} from '../store/slices/userSlice';
+} from "../store/slices/userSlice";
 
 function MyComponent() {
   const userData = useSelector(selectUser);
   const userId = useSelector(selectUserId);
   const userType = useSelector(selectUserType);
-
-  console.log('User ID:', userId);
-  console.log('User Type:', userType);
-  console.log('Complete user data:', userData);
 
   return <div>User: {userData?.name}</div>;
 }
@@ -47,15 +43,11 @@ function MyComponent() {
 ### 2. Using the custom hook (Recommended):
 
 ```javascript
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from "../hooks/useAuth";
 
 function MyComponent() {
   const { userData, userId, userType, isSuperAdmin, isAdmin, isAuthenticated } =
     useAuth();
-
-  console.log('User ID:', userId);
-  console.log('User Type:', userType);
-  console.log('Is Super Admin:', isSuperAdmin);
 
   if (!isAuthenticated) {
     return <div>Please log in</div>;
@@ -68,12 +60,12 @@ function MyComponent() {
 ### 3. Dispatching actions:
 
 ```javascript
-import { useDispatch } from 'react-redux';
+import { useDispatch } from "react-redux";
 import {
   setUserData,
   clearUserData,
   updateUserData,
-} from '../store/slices/userSlice';
+} from "../store/slices/userSlice";
 
 function MyComponent() {
   const dispatch = useDispatch();

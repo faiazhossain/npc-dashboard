@@ -147,7 +147,6 @@ filterOptions={{
 
 ```javascript
 const handleSearch = () => {
-  console.log('Applying filters:', currentFilters);
   setCurrentPage(1);
   setSelectedSurveys([]);
   loadSurveys(1, currentFilters); // Apply filters to API call

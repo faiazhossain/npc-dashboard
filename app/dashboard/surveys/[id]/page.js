@@ -165,7 +165,6 @@ export default function SurveyDetails({ params }) {
 
       if (response.ok) {
         setSurvey((prev) => ({ ...prev, status: "approved" }));
-        console.log("Survey approved successfully");
       } else {
         const errorData = await response.json();
         setError(errorData.message || "Failed to approve survey.");
@@ -198,7 +197,6 @@ export default function SurveyDetails({ params }) {
 
       if (response.ok) {
         setSurvey((prev) => ({ ...prev, status: "rejected" }));
-        console.log("Survey rejected successfully");
       } else {
         const errorData = await response.json();
         setError(errorData.message || "Failed to reject survey.");

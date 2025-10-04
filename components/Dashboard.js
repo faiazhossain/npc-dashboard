@@ -99,11 +99,6 @@ export default function Dashboard({ onLogout, children }) {
           // Store the complete user data in Redux (including id and user_type)
           dispatch(setUserData(data));
 
-          console.log("Complete API Response:", data);
-          console.log("Stored in Redux - User ID:", data.id);
-          console.log("Stored in Redux - User Type:", data.user_type);
-          console.log("All user data available in Redux store");
-
           // Check if duser is trying to access restricted pages
           if (data.user_type === "duser") {
             if (
@@ -140,11 +135,6 @@ export default function Dashboard({ onLogout, children }) {
           router.push("/dashboard/general-questions");
         }
       }
-
-      // Console log existing data from Redux
-      console.log("User data loaded from Redux/localStorage:", userData);
-      console.log("User ID from Redux:", userData.id);
-      console.log("User Type from Redux:", userData.user_type);
     }
   }, [router, userData, isAuthenticated, dispatch, pathname]);
 

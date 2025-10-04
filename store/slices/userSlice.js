@@ -1,20 +1,20 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
 // Helper functions for localStorage
 const saveUserToLocalStorage = (userData) => {
   try {
-    localStorage.setItem('userData', JSON.stringify(userData));
+    localStorage.setItem("userData", JSON.stringify(userData));
   } catch (error) {
-    console.error('Error saving user data to localStorage:', error);
+    console.error("Error saving user data to localStorage:", error);
   }
 };
 
 const loadUserFromLocalStorage = () => {
   try {
-    const userData = localStorage.getItem('userData');
+    const userData = localStorage.getItem("userData");
     return userData ? JSON.parse(userData) : null;
   } catch (error) {
-    console.error('Error loading user data from localStorage:', error);
+    console.error("Error loading user data from localStorage:", error);
     return null;
   }
 };
@@ -26,7 +26,7 @@ const initialState = {
 };
 
 const userSlice = createSlice({
-  name: 'user',
+  name: "user",
   initialState,
   reducers: {
     setUserData: (state, action) => {
@@ -35,11 +35,6 @@ const userSlice = createSlice({
 
       // Save to localStorage for persistence
       saveUserToLocalStorage(action.payload);
-
-      // Console log the stored information as requested
-      console.log('User data stored in Redux:', action.payload);
-      console.log('User ID:', action.payload.id);
-      console.log('User Type:', action.payload.user_type);
     },
     clearUserData: (state) => {
       state.userData = null;
@@ -47,12 +42,10 @@ const userSlice = createSlice({
 
       // Remove from localStorage
       try {
-        localStorage.removeItem('userData');
+        localStorage.removeItem("userData");
       } catch (error) {
-        console.error('Error removing user data from localStorage:', error);
+        console.error("Error removing user data from localStorage:", error);
       }
-
-      console.log('User data cleared from Redux and localStorage');
     },
     updateUserData: (state, action) => {
       if (state.userData) {
@@ -60,8 +53,6 @@ const userSlice = createSlice({
 
         // Update localStorage
         saveUserToLocalStorage(state.userData);
-
-        console.log('User data updated in Redux:', state.userData);
       }
     },
   },

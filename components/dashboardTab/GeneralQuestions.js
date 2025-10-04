@@ -117,7 +117,13 @@ export default function GeneralQuestions() {
         .catch((error) => console.error("Error fetching divisions:", error));
     }
 
-    fetch("https://npsbd.xyz/api/dashboard/questions/stats", {
+    // For duser type, always include status=accepted in initial API call
+    const initialApiUrl =
+      userType === "duser"
+        ? "https://npsbd.xyz/api/dashboard/questions/stats?status=accepted"
+        : "https://npsbd.xyz/api/dashboard/questions/stats";
+
+    fetch(initialApiUrl, {
       method: "GET",
       headers: { accept: "application/json", Authorization: `Bearer ${token}` },
     })
@@ -150,7 +156,7 @@ export default function GeneralQuestions() {
         setFilteredChartData(formattedData);
       })
       .catch((error) => console.error("Error loading initial data:", error));
-  }, [token, divisions.length, dispatch]);
+  }, [token, divisions.length, dispatch, userType]);
 
   useEffect(() => {
     if (!token) return;
@@ -383,7 +389,6 @@ export default function GeneralQuestions() {
   }, [district, localFilters.thana, districts, thanas, token]);
 
   const handleSharedFilterChange = (key, value) => {
-    console.log(`Shared filter changed: ${key} = ${value}`);
     if (key === "division") {
       dispatch(setDivision(value));
     } else if (key === "district") {
@@ -400,7 +405,6 @@ export default function GeneralQuestions() {
   };
 
   const handleLocalFilterChange = (key, value) => {
-    console.log(`Local filter changed: ${key} = ${value}`);
     setLocalFilters((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -410,12 +414,6 @@ export default function GeneralQuestions() {
       return;
     }
 
-    console.log("Filters applied:", {
-      division,
-      district,
-      constituency,
-      ...localFilters,
-    });
     const queryParams = new URLSearchParams();
 
     if (localFilters.age) {
@@ -456,7 +454,14 @@ export default function GeneralQuestions() {
       const ward = wards.find((w) => w.id == localFilters.ward);
       if (ward) queryParams.append("ওয়ার্ড", encodeURIComponent(ward.bn_name));
     }
-    if (localFilters.status) queryParams.append("status", localFilters.status);
+
+    // For duser type, always set status to "accepted" regardless of selection
+    if (userType === "duser") {
+      queryParams.append("status", "accepted");
+    } else if (localFilters.status) {
+      queryParams.append("status", localFilters.status);
+    }
+
     if (localFilters.profession && localFilters.profession.trim()) {
       queryParams.append("পেশা", localFilters.profession.trim());
     }
@@ -477,7 +482,6 @@ export default function GeneralQuestions() {
         return response.json();
       })
       .then((apiData) => {
-        console.log("Filtered API Response:", apiData);
         const formattedData = {
           voterStatistics: {
             totalVoters: "234",
@@ -496,7 +500,6 @@ export default function GeneralQuestions() {
             hasInnerRadius: item.question.includes("প্রধান চাওয়া"),
           })),
         };
-        console.log("Formatted Filtered Data:", formattedData);
         setFilteredChartData(formattedData);
       })
       .catch((error) => console.error("Error fetching filtered data:", error));
@@ -775,13 +778,13 @@ export default function GeneralQuestions() {
             </motion.select>
           </div>
 
-          {userType === "admin" && (
+          {userType !== "duser" && (
             <div className="flex flex-col">
               <label
                 className="block text-xs font-medium text-gray-600 mb-1"
                 style={{ fontFamily: "Tiro Bangla, serif" }}
               >
-                অবস্থা
+                স্ট্যাটাস
               </label>
               <motion.select
                 value={localFilters.status}
