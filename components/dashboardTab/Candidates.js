@@ -455,8 +455,12 @@ export default function Candidates() {
     if (division) queryParams.append("বিভাগ", division.trim());
     if (district) queryParams.append("জেলা", district.trim());
     if (constituency) queryParams.append("আসন", constituency.trim());
+    // For duser type, always set status to "accepted"
+    if (userType === "duser") {
+      queryParams.append("status", "accepted");
+    }
     return queryParams;
-  }, [division, district, constituency]);
+  }, [division, district, constituency, userType]);
 
   const handleView = async () => {
     if (!token) {

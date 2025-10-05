@@ -41,6 +41,7 @@ const COLORS = [
 
 export default function SeatDistribution() {
   const { userType } = useAuth();
+  console.log("🚀 ~ SeatDistribution ~ userType:", userType);
   const [data, setData] = useState(null);
   const [popularityData, setPopularityData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -303,8 +304,12 @@ export default function SeatDistribution() {
     if (constituency) {
       queryParams.append("আসন", constituency.trim());
     }
+    // For duser type, always set status to "accepted"
+    if (userType === "duser") {
+      queryParams.append("status", "accepted");
+    }
     return queryParams;
-  }, [division, district, constituency]);
+  }, [division, district, constituency, userType]);
 
   const handleView = async () => {
     if (!token) {
