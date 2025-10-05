@@ -88,6 +88,34 @@ CandidateCard.displayName = "CandidateCard";
 
 // Memoized PieChartComponent
 const PieChartComponent = memo(({ chart, index, userType }) => {
+  // If this is a flaw list (special case), render a list view instead of a chart
+  if (chart.chartType === "list" && chart.isFlaw) {
+    return (
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <h2
+          className="text-xl font-medium text-gray-900 mb-6"
+          style={{ fontFamily: "Tiro Bangla, serif" }}
+        >
+          {chart.question}
+        </h2>
+        <div className="p-4">
+          <ul className="list-disc pl-5 space-y-3">
+            {chart.responses.map((item, idx) => (
+              <li
+                key={idx}
+                className="text-base text-gray-700"
+                style={{ fontFamily: "Tiro Bangla, serif" }}
+              >
+                {item.label}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    );
+  }
+
+  // Regular pie chart for other cases
   const chartData = chart.responses.map((item, idx) => ({
     name: item.label,
     value: parseFloat(item.percentage.replace("%", "")),
@@ -621,34 +649,56 @@ export default function Candidates() {
             };
           });
 
+        // Special handling for candidate flaws (প্রার্থীর ত্রুটি)
         if (
           apiData.q7_candidate_flaws &&
           Object.keys(apiData.q7_candidate_flaws).length > 0
         ) {
-          transformedAdditional.push({
-            id: `additional-chart-3`,
-            question: "প্রার্থীর ত্রুটি",
-            responses: Object.entries(apiData.q7_candidate_flaws).map(
-              ([label, perc]) => ({
+          // Get all flaws
+          const flaws = Object.keys(apiData.q7_candidate_flaws);
+
+          // If only "না" exists in the flaws
+          if (flaws.length === 1 && flaws[0] === "না") {
+            transformedAdditional.push({
+              id: `additional-chart-3`,
+              question: "প্রার্থীর ত্রুটি",
+              responses: [
+                {
+                  label: "কোন দোষ পাওয়া যায়নি",
+                  percentage: "100%",
+                  total: 1,
+                },
+              ],
+              chartType: "list", // Changed to list type
+              isFlaw: true, // Special flag for flaws section
+            });
+          } else {
+            // Filter out "না" from the flaws list if other flaws exist
+            const filteredFlaws = flaws.filter((flaw) => flaw !== "না");
+            const flawsToShow =
+              filteredFlaws.length > 0 ? filteredFlaws : flaws;
+
+            transformedAdditional.push({
+              id: `additional-chart-3`,
+              question: "প্রার্থীর ত্রুটি",
+              responses: flawsToShow.map((label) => ({
                 label,
-                percentage: `${perc}%`,
+                percentage: "", // Empty percentage, won't be shown
                 total: apiData.q7_total_counts?.[label] || 0,
-              })
-            ),
-            chartType: "pie",
-          });
+              })),
+              chartType: "list", // Changed to list type
+              isFlaw: true, // Special flag for flaws section
+            });
+          }
         } else {
           transformedAdditional.push({
             id: `additional-chart-3`,
             question: "প্রার্থীর ত্রুটি",
             responses: [
-              {
-                label: "কোনো ত্রুটি নেই",
-                percentage: "100%",
-                total: 1,
-              },
+              { label: "কোন দোষ পাওয়া যায়নি", percentage: "", total: 1 },
             ],
-            chartType: "pie",
+            chartType: "list", // Changed to list type
+            isFlaw: true, // Special flag for flaws section
           });
         }
 
