@@ -796,12 +796,12 @@ export default function SeatDistribution() {
           </div>
 
           {popularityData && (
-            <div className='mt-8'>
+            <div>
               <h2
                 className='text-2xl font-semibold text-gray-800 mb-6'
                 style={{ fontFamily: "Tiro Bangla, serif" }}
               >
-                দলের জনপ্রিয়তা (প্রতিক্রিয়া ভিত্তিক)
+                দলের জনপ্রিয়তা (ভোটের শতাংশ)
               </h2>
               <div className='h-96'>
                 <ResponsiveContainer width='100%' height='100%'>
@@ -829,7 +829,7 @@ export default function SeatDistribution() {
                       allowDecimals={false}
                       tickCount={5}
                       label={{
-                        value: "শতাংশ (%)",
+                        value: "ভোটের শতাংশ (%)",
                         angle: -90,
                         position: "insideBottomLeft",
                         style: { fontFamily: "Tiro Bangla, serif" },
