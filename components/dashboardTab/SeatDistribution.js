@@ -42,6 +42,7 @@ const COLORS = [
 export default function SeatDistribution() {
   const { userType } = useAuth();
   const [data, setData] = useState(null);
+  const [popularityData, setPopularityData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [worthfulData, setWorthfulData] = useState([]);
@@ -161,6 +162,7 @@ export default function SeatDistribution() {
   // Clear data when any filter changes (to avoid showing stale data)
   useEffect(() => {
     setData(null);
+    setPopularityData(null);
     setWorthfulData([]);
     setTotalCount(0);
     setCurrentPage(1);
@@ -337,6 +339,31 @@ export default function SeatDistribution() {
       setData(result);
       setWorthfulData(result.data);
       setTotalCount(result.total_count);
+
+      // Fetch popularity data for duser only when no constituency selected
+      if (userType === "duser" && !constituency) {
+        const popBaseUrl = "https://npsbd.xyz/api/dashboard/party/popularity";
+        const popUrl = queryParams.toString()
+          ? `${popBaseUrl}?${queryParams.toString()}`
+          : popBaseUrl;
+
+        const popResponse = await fetch(popUrl, {
+          method: "GET",
+          headers: {
+            accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (popResponse.ok) {
+          const popResult = await popResponse.json();
+          setPopularityData(popResult);
+        } else {
+          setPopularityData(null);
+        }
+      } else {
+        setPopularityData(null);
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
       setError(error.message);
@@ -387,6 +414,7 @@ export default function SeatDistribution() {
   const handleReset = () => {
     dispatch(resetFilters());
     setData(null);
+    setPopularityData(null);
     setWorthfulData([]);
     setTotalCount(0);
     setCurrentPage(1);
@@ -766,6 +794,77 @@ export default function SeatDistribution() {
               </BarChart>
             </ResponsiveContainer>
           </div>
+
+          {popularityData && (
+            <div className='mt-8'>
+              <h2
+                className='text-2xl font-semibold text-gray-800 mb-6'
+                style={{ fontFamily: "Tiro Bangla, serif" }}
+              >
+                দলের জনপ্রিয়তা (প্রতিক্রিয়া ভিত্তিক)
+              </h2>
+              <div className='h-96'>
+                <ResponsiveContainer width='100%' height='100%'>
+                  <BarChart
+                    data={
+                      popularityData.party_popularity?.map((item, index) => ({
+                        label: item.label,
+                        value: item.value,
+                        fill: COLORS[index % COLORS.length],
+                      })) || []
+                    }
+                    margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
+                  >
+                    <CartesianGrid strokeDasharray='3 3' />
+                    <XAxis
+                      dataKey='label'
+                      angle={-45}
+                      textAnchor='end'
+                      height={100}
+                      style={{ fontFamily: "Tiro Bangla, serif", fontSize: 12 }}
+                    />
+                    <YAxis
+                      dataKey='value'
+                      domain={[0, 100]}
+                      allowDecimals={false}
+                      tickCount={5}
+                      label={{
+                        value: "শতাংশ (%)",
+                        angle: -90,
+                        position: "insideBottomLeft",
+                        style: { fontFamily: "Tiro Bangla, serif" },
+                      }}
+                      style={{ fontFamily: "Tiro Bangla, serif" }}
+                      tickFormatter={(tick) => `${tick}%`}
+                    />
+                    <Tooltip
+                      formatter={(value) => [`${value}%`, "জনপ্রিয়তা"]}
+                      labelStyle={{ fontFamily: "Tiro Bangla, serif" }}
+                      contentStyle={{ fontFamily: "Tiro Bangla, serif" }}
+                    />
+                    <Bar dataKey='value' radius={[4, 4, 0, 0]} barSize={80}>
+                      {popularityData.party_popularity?.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
+                      ))}
+                      <LabelList
+                        dataKey='value'
+                        position='top'
+                        style={{
+                          fontFamily: "Tiro Bangla, serif",
+                          fontSize: 12,
+                          fill: "#333",
+                        }}
+                        formatter={(value) => `${value}%`}
+                      />
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
 
           {worthfulData.length > 0 && userType && (
             <div className='mt-8'>
