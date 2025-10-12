@@ -447,12 +447,11 @@ export default function GeneralQuestions() {
 
     if (localFilters.union) {
       const union = unions.find((u) => u.id == localFilters.union);
-      if (union)
-        queryParams.append("ইউনিয়ন", encodeURIComponent(union.bn_name));
+      if (union) queryParams.append("ইউনিয়ন", union.bn_name);
     }
     if (localFilters.ward) {
       const ward = wards.find((w) => w.id == localFilters.ward);
-      if (ward) queryParams.append("ওয়ার্ড", encodeURIComponent(ward.bn_name));
+      if (ward) queryParams.append("ওয়ার্ড", ward.bn_name);
     }
 
     // For duser type, always set status to "accepted" regardless of selection
