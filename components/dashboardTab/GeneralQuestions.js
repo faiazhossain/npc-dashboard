@@ -492,14 +492,27 @@ export default function GeneralQuestions() {
         return response.json();
       })
       .then((apiData) => {
+        // Separate voter statistics from chart data for filtered results
+        const voterStats = apiData.find(
+          (item) => item.total_voters !== undefined
+        );
+        const chartData = apiData.filter((item) => item.question !== undefined);
+
         const formattedData = {
-          voterStatistics: {
-            totalVoters: "234",
-            maleVoters: "122",
-            femaleVoters: "100",
-            thirdGenderVoters: "12",
-          },
-          charts: apiData.map((item) => ({
+          voterStatistics: voterStats
+            ? {
+                totalVoters: voterStats.total_voters.toString(),
+                maleVoters: voterStats.male.toString(),
+                femaleVoters: voterStats.female.toString(),
+                thirdGenderVoters: voterStats.others.toString(),
+              }
+            : {
+                totalVoters: "0",
+                maleVoters: "0",
+                femaleVoters: "0",
+                thirdGenderVoters: "0",
+              },
+          charts: chartData.map((item) => ({
             id: item.question,
             question: item.question,
             responses: item.stats.map((stat) => ({
