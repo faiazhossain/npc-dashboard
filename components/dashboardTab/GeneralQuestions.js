@@ -327,11 +327,13 @@ export default function GeneralQuestions() {
     if (district && localFilters.thana) {
       const selectedDistrict = districts.find((d) => d.bn_name === district);
       const selectedThana = thanas.find((t) => t.id == localFilters.thana);
+      const selectedSeat = thanas.find((t) => t.id == localFilters.thana);
 
-      if (selectedDistrict && selectedThana) {
+      if (selectedDistrict && selectedThana && constituency) {
         const districtBnName = encodeURIComponent(selectedDistrict.bn_name);
         const thanaBnName = encodeURIComponent(selectedThana.bn_name);
-        const wardApiUrl = `https://npsbd.xyz/api/users/${districtBnName}/${thanaBnName}/unions_wards`;
+        const seatBnName = encodeURIComponent(constituency);
+        const wardApiUrl = `https://npsbd.xyz/api/users/${districtBnName}/${seatBnName}/${thanaBnName}/unions_wards`;
 
         fetch(wardApiUrl, {
           method: "GET",
